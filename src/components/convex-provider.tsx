@@ -1,7 +1,7 @@
 "use client";
 
 import { ConvexReactClient } from "convex/react";
-import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ReactNode, useMemo } from "react";
 import dynamic from "next/dynamic";
 
@@ -17,9 +17,9 @@ function ConvexClientProviderInner({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ConvexAuthNextjsProvider client={client}>
+    <ConvexAuthProvider client={client}>
       {children}
-    </ConvexAuthNextjsProvider>
+    </ConvexAuthProvider>
   );
 }
 
