@@ -1,13 +1,176 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+}
+
+// ─── Bible Data ───
+
+model Translation {
+  id           String  @id @default(cuid())
+  abbreviation String  @unique // KJV, WEB, ASV
+  name         String  // King James Version
+  language     String  @default("en")
+  isDefault    Boolean @default(false)
+  verses       Verse[]
+
+  @@map("translations")
+}
+
+model Book {
+  id           String    @id @default(cuid())
+  name         String    // Genesis, Exodus, etc.
+  slug         String    @unique // genesis, exodus
+  abbreviation String    // Gen, Exo
+  testament    Testament
+  position     Int       // 1-66 ordering
+  chapters     Int       // total chapter count
+  verses       Verse[]
+
+  @@map("books")
+}
+
+model Verse {
+  id            String      @id @default(cuid())
+  book          Book        @relation(fields: [bookId], references: [id])
+  bookId        String
+  chapter       Int
+  verseNumber   Int
+  text          String
+  translation   Translation @relation(fields: [translationId], references: [id])
+  translationId String
+  highlights    Highlight[]
+  bookmarks     Bookmark[]
+  notes         Note[]
+
+  @@unique([bookId, chapter, verseNumber, translationId])
+  @@index([bookId, chapter])
+  @@index([translationId])
+  @@map("verses")
+}
+
+model CrossReference {
+  id            String @id @default(cuid())
+  sourceBook    String
+  sourceChapter Int
+  sourceVerse   Int
+  targetBook    String
+  targetChapter Int
+  targetVerse   Int
+
+  @@index([sourceBook, sourceChapter, sourceVerse])
+  @@map("cross_references")
+}
+
+enum Testament {
+  OLD
+  NEW
+}
+
+// ─── User Features ───
+
+model Profile {
+  id         String            @id // matches Supabase auth.users.id
+  email      String            @unique
+  name       String?
+  avatarUrl  String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  bookmarks  Bookmark[]
+  highlights Highlight[]
+  notes      Note[]
+  progress   ReadingProgress[]
+  plans      UserReadingPlan[]
+
+  @@map("profiles")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  verseId   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, verseId])
+  @@map("bookmarks")
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  verseId   String
+  color     String   @default("#e8c96a")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, verseId])
+  @@map("highlights")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  verse     Verse    @relation(fields: [verseId], references: [id])
+  verseId   String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notes")
+}
+
+model ReadingProgress {
+  id        String   @id @default(cuid())
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  bookSlug  String
+  chapter   Int
+  completed Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookSlug, chapter])
+  @@map("reading_progress")
+}
+
+model ReadingPlan {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  description String
+  days        Int
+  entries     ReadingPlanEntry[]
+  users       UserReadingPlan[]
+
+  @@map("reading_plans")
+}
+
+model ReadingPlanEntry {
+  id       String      @id @default(cuid())
+  plan     ReadingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId   String
+  day      Int
+  bookSlug String
+  chapter  Int
+
+  @@unique([planId, day, bookSlug, chapter])
+  @@map("reading_plan_entries")
+}
+
+model UserReadingPlan {
+  id         String      @id @default(cuid())
+  user       Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  plan       ReadingPlan @relation(fields: [planId], references: [id])
+  planId     String
+  startedAt  DateTime    @default(now())
+  currentDay Int         @default(1)
+
+  @@unique([userId, planId])
+  @@map("user_reading_plans")
 }
