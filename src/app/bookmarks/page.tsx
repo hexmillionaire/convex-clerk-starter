@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { useConvexAuth } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Lock, Trash2, Loader2 } from "lucide-react";

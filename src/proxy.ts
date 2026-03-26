@@ -1,2 +1,5 @@
-// DEPRECATED — Supabase middleware replaced by Convex. Delete this file.
-export {};
+import { NextResponse, type NextRequest } from "next/server";
+
+export function proxy(request: NextRequest) {
+  return NextResponse.next();
+}
