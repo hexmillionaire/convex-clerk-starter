@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // TODO: Once DB is seeded, use Prisma full-text search:
-  // const results = await prisma.$queryRaw`SELECT ... WHERE to_tsvector('english', text) @@ plainto_tsquery('english', ${query})`
-
-  // Fallback: use Bolls.life search API
+  // Use Bolls.life search API
   try {
     const res = await fetch(
       `https://bolls.life/search/KJV/${encodeURIComponent(query)}/`,

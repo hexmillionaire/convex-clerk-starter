@@ -1,71 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { useConvexAuth } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PenLine, Plus, BookOpen, Lock } from "lucide-react";
+import { PenLine, Plus, BookOpen, Lock, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import type { User } from "@supabase/supabase-js";
-
-type JournalEntry = {
-  id: string;
-  title: string;
-  content: string;
-  passage: string;
-  createdAt: string;
-};
 
 export default function JournalPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const entries = useQuery(api.journal.list);
+  const createEntry = useMutation(api.journal.create);
+  const removeEntry = useMutation(api.journal.remove);
+
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [passage, setPassage] = useState("");
   const [content, setContent] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const supabase = createClient();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      setLoading(false);
-    };
-    getUser();
-  }, [supabase.auth]);
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim() || !content.trim()) return;
+    setSaving(true);
 
-    const entry: JournalEntry = {
-      id: crypto.randomUUID(),
+    await createEntry({
       title: title.trim(),
-      content: content.trim(),
       passage: passage.trim(),
-      createdAt: new Date().toISOString(),
-    };
+      content: content.trim(),
+    });
 
-    setEntries((prev) => [entry, ...prev]);
     setTitle("");
     setPassage("");
     setContent("");
     setShowForm(false);
+    setSaving(false);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container max-w-3xl mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
       </div>
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div className="container max-w-md mx-auto px-4 py-20 text-center">
         <Lock className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
@@ -95,10 +79,7 @@ export default function JournalPage() {
             Your private reflections on scripture
           </p>
         </div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="gap-2"
-        >
+        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
           <Plus className="h-4 w-4" />
           New Entry
         </Button>
@@ -137,20 +118,24 @@ export default function JournalPage() {
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setShowForm(false)}
-              >
+              <Button variant="outline" onClick={() => setShowForm(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>Save Entry</Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Entry
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Entries */}
-      {entries.length === 0 && !showForm && (
+      {entries === undefined ? (
+        <div className="text-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+        </div>
+      ) : entries.length === 0 && !showForm ? (
         <div className="text-center py-16">
           <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
           <p className="text-muted-foreground italic">
@@ -160,30 +145,40 @@ export default function JournalPage() {
             Record what God is teaching you through His Word
           </p>
         </div>
-      )}
-
-      <div className="space-y-4">
-        {entries.map((entry) => (
-          <Card key={entry.id}>
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-heading font-semibold">{entry.title}</h3>
-                <span className="text-xs text-muted-foreground font-mono">
-                  {new Date(entry.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              {entry.passage && (
-                <p className="text-xs text-primary font-mono mb-2">
-                  📖 {entry.passage}
+      ) : (
+        <div className="space-y-4">
+          {entries.map((entry) => (
+            <Card key={entry._id}>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-heading font-semibold">{entry.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {new Date(entry._creationTime).toLocaleDateString()}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => removeEntry({ id: entry._id })}
+                    >
+                      <Trash2 className="h-3 w-3 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </div>
+                {entry.passage && (
+                  <p className="text-xs text-primary font-mono mb-2">
+                    📖 {entry.passage}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {entry.content}
                 </p>
-              )}
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {entry.content}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

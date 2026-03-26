@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,24 +19,48 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
-  const supabase = createClient();
+  const { signIn, signOut } = useAuthActions();
+  const { isAuthenticated } = useConvexAuth();
+
+  // Already signed in
+  if (isAuthenticated) {
+    return (
+      <div className="container max-w-md mx-auto px-4 py-16 text-center">
+        <CheckCircle className="h-12 w-12 mx-auto text-green-600 mb-4" />
+        <h1 className="text-2xl font-heading font-semibold mb-2">
+          You&apos;re signed in
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          Your bookmarks, highlights, and journal are synced.
+        </p>
+        <div className="flex flex-col gap-3">
+          <Link href="/bible/genesis/1">
+            <Button className="w-full">Continue Reading</Button>
+          </Link>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => void signOut()}
+          >
+            Sign Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
+    try {
+      await signIn("password", { email, password, flow: "signIn" });
       router.push("/");
-      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,38 +69,26 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setMessage("Check your email for a confirmation link.");
+    try {
+      await signIn("password", { email, password, flow: "signUp" });
+      setMessage("Account created! You are now signed in.");
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    await signIn("google");
   };
 
   return (
     <div className="container max-w-md mx-auto px-4 py-16">
       <div className="text-center mb-8">
         <p className="text-primary text-lg mb-2">✦</p>
-        <h1 className="text-2xl font-heading font-semibold mb-1">
-          Welcome
-        </h1>
+        <h1 className="text-2xl font-heading font-semibold mb-1">Welcome</h1>
         <p className="text-sm text-muted-foreground italic">
           Sign in to save bookmarks, highlights, and notes
         </p>
@@ -116,11 +129,7 @@ export default function LoginPage() {
                 {error && (
                   <p className="text-sm text-destructive">{error}</p>
                 )}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
+                <Button type="submit" className="w-full" disabled={loading}>
                   {loading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -160,11 +169,7 @@ export default function LoginPage() {
                 {message && (
                   <p className="text-sm text-green-600">{message}</p>
                 )}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
+                <Button type="submit" className="w-full" disabled={loading}>
                   {loading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}

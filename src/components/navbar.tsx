@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Book, Search, BookMarked, Menu, User, Home } from "lucide-react";
+import { Book, Search, BookMarked, Menu, User, LogOut, Home } from "lucide-react";
+import { useConvexAuth } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FontSizeControl } from "@/components/font-size-control";
@@ -23,6 +25,8 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { isAuthenticated } = useConvexAuth();
+  const { signOut } = useAuthActions();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -68,12 +72,24 @@ export function Navbar() {
             <FontSizeControl />
           </div>
           <ThemeToggle />
-          <Link href="/login">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <User className="h-4 w-4" />
-              <span className="sr-only">Sign in</span>
+          {isAuthenticated ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => void signOut()}
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Sign out</span>
             </Button>
-          </Link>
+          ) : (
+            <Link href="/login">
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <User className="h-4 w-4" />
+                <span className="sr-only">Sign in</span>
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile menu */}
           <Sheet>

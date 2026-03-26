@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
+import { useQuery, useMutation } from "convex/react";
+import { useConvexAuth } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 type Props = {
   bookSlug: string;
@@ -11,73 +13,30 @@ type Props = {
   totalChapters: number;
 };
 
-type Progress = Record<number, boolean>;
-
 export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [progress, setProgress] = useState<Progress>({});
-  const [saving, setSaving] = useState(false);
-  const supabase = createClient();
+  const { isAuthenticated } = useConvexAuth();
+  const progress = useQuery(
+    api.readingProgress.getForBook,
+    isAuthenticated ? { bookSlug } : "skip"
+  );
+  const markRead = useMutation(api.readingProgress.markRead);
+  const markUnread = useMutation(api.readingProgress.markUnread);
 
-  const isRead = progress[chapter] ?? false;
-
-  useEffect(() => {
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      setUserId(user.id);
-
-      // Load progress for this book from reading_progress table
-      const { data } = await supabase
-        .from("reading_progress")
-        .select("chapter")
-        .eq("userId", user.id)
-        .eq("bookSlug", bookSlug);
-
-      if (data) {
-        const map: Progress = {};
-        for (const row of data) {
-          map[row.chapter] = true;
-        }
-        setProgress(map);
-      }
-    };
-    load();
-  }, [supabase, bookSlug]);
+  const isRead = progress?.[chapter] ?? false;
 
   const toggleRead = useCallback(async () => {
-    if (!userId) return;
-    setSaving(true);
-
     if (isRead) {
-      await supabase
-        .from("reading_progress")
-        .delete()
-        .eq("userId", userId)
-        .eq("bookSlug", bookSlug)
-        .eq("chapter", chapter);
-
-      setProgress((prev) => {
-        const next = { ...prev };
-        delete next[chapter];
-        return next;
-      });
+      await markUnread({ bookSlug, chapter });
     } else {
-      await supabase.from("reading_progress").upsert(
-        { userId, bookSlug, chapter, completed: true },
-        { onConflict: "userId,bookSlug,chapter" }
-      );
-
-      setProgress((prev) => ({ ...prev, [chapter]: true }));
+      await markRead({ bookSlug, chapter });
     }
+  }, [isRead, markRead, markUnread, bookSlug, chapter]);
 
-    setSaving(false);
-  }, [userId, isRead, supabase, bookSlug, chapter]);
+  const readCount = progress ? Object.keys(progress).length : 0;
+  const pct =
+    totalChapters > 0 ? Math.round((readCount / totalChapters) * 100) : 0;
 
-  const readCount = Object.keys(progress).length;
-  const pct = totalChapters > 0 ? Math.round((readCount / totalChapters) * 100) : 0;
-
-  if (!userId) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <div className="flex items-center gap-3">
@@ -86,7 +45,6 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
         size="sm"
         className="gap-2 text-xs"
         onClick={toggleRead}
-        disabled={saving}
       >
         <CheckCircle
           className={`h-3.5 w-3.5 ${isRead ? "text-green-600" : "text-muted-foreground"}`}

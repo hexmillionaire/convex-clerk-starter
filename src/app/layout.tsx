@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Mono, Cinzel } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ConvexClientProvider } from "@/components/convex-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -76,19 +77,21 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-full flex flex-col font-serif">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          themes={["light", "dark", "sepia"]}
-          enableSystem={false}
-        >
-          <TooltipProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </TooltipProvider>
-          <ServiceWorkerRegister />
-        </ThemeProvider>
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            themes={["light", "dark", "sepia"]}
+            enableSystem={false}
+          >
+            <TooltipProvider>
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </TooltipProvider>
+            <ServiceWorkerRegister />
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

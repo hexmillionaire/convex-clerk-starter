@@ -20,11 +20,7 @@ export async function GET(_request: Request, { params }: Props) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // TODO: Once DB is seeded, query Prisma first:
-  // const dbVerses = await prisma.verse.findMany({ where: { ... } });
-  // if (dbVerses.length > 0) return NextResponse.json({ verses: dbVerses });
-
-  // Fallback: fetch from Bolls.life free API (no key needed)
+  // Fetch from Bolls.life free API (no key needed)
   const bookId = getBookId(bookSlug);
   if (!bookId) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
