@@ -1,4 +1,4 @@
-import { BIBLE_BOOKS, type BookInfo } from "./bible-data";
+import { BIBLE_BOOKS } from "./bible-data";
 
 export type DayReading = {
   label: string; // e.g. "Psalms 1-5"
