@@ -61,7 +61,7 @@ export default async function BibleIndexPage({ searchParams }: Props) {
           {OLD_TESTAMENT.map((book) => {
             const details = BOOK_DETAILS[book.slug];
             return (
-            <Link key={book.slug} href={`/bible/${book.slug}/1`}>
+            <Link key={book.slug} href={`/bible/${book.slug}`}>
               <Card className="transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-1">
@@ -104,7 +104,7 @@ export default async function BibleIndexPage({ searchParams }: Props) {
           {NEW_TESTAMENT.map((book) => {
             const details = BOOK_DETAILS[book.slug];
             return (
-            <Link key={book.slug} href={`/bible/${book.slug}/1`}>
+            <Link key={book.slug} href={`/bible/${book.slug}`}>
               <Card className="transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-1">

@@ -12,11 +12,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/plans`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   ];
 
+  const bookPages: MetadataRoute.Sitemap = [];
   const chapterPages: MetadataRoute.Sitemap = [];
   const versePages: MetadataRoute.Sitemap = [];
 
   for (const book of BIBLE_BOOKS) {
     const verseCounts = VERSE_COUNTS[book.slug];
+
+    // Book overview page
+    bookPages.push({
+      url: `${baseUrl}/bible/${book.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
 
     for (let ch = 1; ch <= book.chapters; ch++) {
       chapterPages.push({
@@ -38,5 +47,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  return [...staticPages, ...chapterPages, ...versePages];
+  return [...staticPages, ...bookPages, ...chapterPages, ...versePages];
 }

@@ -38,6 +38,7 @@ type Props = {
 export function ChapterReader({ book, chapter }: Props) {
   const { isAuthenticated } = useConvexAuth();
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [translation, setTranslation] = useState<Translation>("KJV");
   const [apiVerses, setApiVerses] = useState<
     { verse: number; text: string }[] | null
@@ -304,28 +305,30 @@ export function ChapterReader({ book, chapter }: Props) {
             {verses.map((v) => {
               const highlightColor = highlights?.[v.verse];
               const isMarked = bookmarkedVerses.has(v.verse);
+              const isSelected = selectedVerse === v.verse;
 
               return (
                 <div
                   key={v.verse}
                   id={`v${v.verse}`}
-                  className="group flex gap-3 py-1.5 px-2 -mx-2 rounded-sm hover:bg-muted/50 transition-colors"
+                  className="group flex gap-3 py-1.5 px-2 -mx-2 rounded-sm hover:bg-muted/50 transition-colors cursor-pointer"
                   style={
                     highlightColor
                       ? { backgroundColor: highlightColor + "30" }
                       : undefined
                   }
+                  onClick={() => setSelectedVerse(isSelected ? null : v.verse)}
                 >
                   <span className="text-xs text-primary/60 font-mono mt-1.5 min-w-6 text-right select-none">
                     {v.verse}
                   </span>
                   <p className="verse-text flex-1">{cleanVerseText(v.text)}</p>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-0.5 pt-1">
+                  <div className={`flex items-start gap-0.5 pt-1 transition-opacity ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => copyVerse(v.verse, v.text)}
+                      onClick={(e) => { e.stopPropagation(); copyVerse(v.verse, v.text); }}
                     >
                       {copiedVerse === v.verse ? (
                         <Check className="h-3 w-3 text-green-600" />
@@ -346,7 +349,7 @@ export function ChapterReader({ book, chapter }: Props) {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          onClick={() => handleBookmark(v.verse, v.text)}
+                          onClick={(e) => { e.stopPropagation(); handleBookmark(v.verse, v.text); }}
                         >
                           {isMarked ? (
                             <BookmarkCheck className="h-3 w-3 text-primary" />
@@ -360,7 +363,7 @@ export function ChapterReader({ book, chapter }: Props) {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => shareVerse(v.verse, v.text)}
+                      onClick={(e) => { e.stopPropagation(); shareVerse(v.verse, v.text); }}
                     >
                       <Share2 className="h-3 w-3" />
                     </Button>

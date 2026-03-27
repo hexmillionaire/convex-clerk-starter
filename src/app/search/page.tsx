@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
+const RESULTS_PER_PAGE = 20;
 
 type SearchResult = {
   bookName: string;
@@ -15,11 +17,33 @@ type SearchResult = {
   text: string;
 };
 
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <>{text}</>;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [page, setPage] = useState(1);
+  const [searchedQuery, setSearchedQuery] = useState("");
 
   const handleSearch = useCallback(async () => {
     const trimmed = query.trim();
@@ -27,6 +51,8 @@ export default function SearchPage() {
 
     setLoading(true);
     setSearched(true);
+    setPage(1);
+    setSearchedQuery(trimmed);
 
     try {
       const res = await fetch(
@@ -35,15 +61,24 @@ export default function SearchPage() {
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);
+        setTotal(data.total || 0);
       } else {
         setResults([]);
+        setTotal(0);
       }
     } catch {
       setResults([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   }, [query]);
+
+  const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE);
+  const paginatedResults = useMemo(
+    () => results.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE),
+    [results, page]
+  );
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
@@ -90,7 +125,7 @@ export default function SearchPage() {
       {!loading && searched && results.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground italic">
-            No results found for &ldquo;{query}&rdquo;
+            No results found for &ldquo;{searchedQuery}&rdquo;
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             Try a different word or phrase
@@ -101,13 +136,14 @@ export default function SearchPage() {
       {!loading && results.length > 0 && (
         <div>
           <p className="text-sm text-muted-foreground mb-4 font-mono">
-            {results.length} result{results.length !== 1 ? "s" : ""} found
+            {results.length} of {total} result{total !== 1 ? "s" : ""}
+            {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
           </p>
           <div className="space-y-3">
-            {results.map((r, i) => (
+            {paginatedResults.map((r, i) => (
               <Link
-                key={i}
-                href={`/bible/${r.bookSlug}/${r.chapter}#v${r.verse}`}
+                key={`${r.bookSlug}-${r.chapter}-${r.verse}-${i}`}
+                href={`/bible/${r.bookSlug}/${r.chapter}/${r.verse}`}
               >
                 <Card className="transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
                   <CardContent className="p-4">
@@ -115,13 +151,40 @@ export default function SearchPage() {
                       {r.bookName} {r.chapter}:{r.verse}
                     </p>
                     <p className="text-sm leading-relaxed line-clamp-2">
-                      {r.text}
+                      <HighlightedText text={r.text} query={searchedQuery} />
                     </p>
                   </CardContent>
                 </Card>
               </Link>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => { setPage((p) => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground font-mono px-3">
+                {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === totalPages}
+                onClick={() => { setPage((p) => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
