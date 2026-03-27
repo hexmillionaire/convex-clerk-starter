@@ -6,6 +6,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ServiceWorkerRegister } from "@/components/sw-register";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -113,6 +114,7 @@ export default function RootLayout({
             <ServiceWorkerRegister />
           </ThemeProvider>
         </ConvexClientProvider>
+        <Analytics />
       </body>
     </html>
   );

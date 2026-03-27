@@ -36,13 +36,13 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 font-heading">
           <Image
             src="/icons/favicon_pack/favicon-32x32.png"
-            alt="The Word"
+            alt="Divine Word"
             width={28}
             height={28}
             className="rounded-sm"
           />
           <span className="font-semibold tracking-tight text-lg hidden sm:inline">
-            The Word
+            Divine Word
           </span>
         </Link>
 
@@ -108,12 +108,12 @@ export function Navbar() {
               <SheetTitle className="font-heading text-lg mb-6 flex items-center gap-2">
                 <Image
                   src="/icons/favicon_pack/favicon-32x32.png"
-                  alt="The Word"
+                  alt="Divine Word"
                   width={24}
                   height={24}
                   className="rounded-sm"
                 />
-                The Word
+                Divine Word
               </SheetTitle>
               <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => {
