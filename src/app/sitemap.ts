@@ -1,25 +1,42 @@
 import type { MetadataRoute } from "next";
 import { BIBLE_BOOKS } from "@/lib/bible-data";
+import { VERSE_COUNTS } from "@/lib/verse-counts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://theword.app";
+  const baseUrl = "https://www.divineword.app";
 
-  const staticPages = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: "daily" as const, priority: 1 },
-    { url: `${baseUrl}/bible`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${baseUrl}/plans`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 },
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
+    { url: `${baseUrl}/bible`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/plans`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   ];
 
-  // Generate URLs for every chapter of every book
-  const chapterPages = BIBLE_BOOKS.flatMap((book) =>
-    Array.from({ length: book.chapters }, (_, i) => ({
-      url: `${baseUrl}/bible/${book.slug}/${i + 1}`,
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 0.6,
-    }))
-  );
+  const chapterPages: MetadataRoute.Sitemap = [];
+  const versePages: MetadataRoute.Sitemap = [];
 
-  return [...staticPages, ...chapterPages];
+  for (const book of BIBLE_BOOKS) {
+    const verseCounts = VERSE_COUNTS[book.slug];
+
+    for (let ch = 1; ch <= book.chapters; ch++) {
+      chapterPages.push({
+        url: `${baseUrl}/bible/${book.slug}/${ch}`,
+        lastModified: new Date(),
+        changeFrequency: "yearly",
+        priority: 0.6,
+      });
+
+      // Add individual verse pages
+      const numVerses = verseCounts?.[ch - 1] ?? 0;
+      for (let v = 1; v <= numVerses; v++) {
+        versePages.push({
+          url: `${baseUrl}/bible/${book.slug}/${ch}/${v}`,
+          changeFrequency: "yearly",
+          priority: 0.5,
+        });
+      }
+    }
+  }
+
+  return [...staticPages, ...chapterPages, ...versePages];
 }

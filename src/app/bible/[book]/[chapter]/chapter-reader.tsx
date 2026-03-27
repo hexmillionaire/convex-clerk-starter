@@ -158,31 +158,27 @@ export function ChapterReader({ book, chapter }: Props) {
     ]
   );
 
-  const prevChapter =
-    chapter > 1
-      ? `/bible/${book.slug}/${chapter - 1}`
-      : book.position > 1
-        ? (() => {
-            const prevBook = BIBLE_BOOKS.find(
-              (b) => b.position === book.position - 1
-            );
-            return prevBook
-              ? `/bible/${prevBook.slug}/${prevBook.chapters}`
-              : null;
-          })()
-        : null;
+  const prevChapterInfo = (() => {
+    if (chapter > 1) {
+      return { href: `/bible/${book.slug}/${chapter - 1}`, label: `${book.name} ${chapter - 1}` };
+    }
+    if (book.position > 1) {
+      const prevBook = BIBLE_BOOKS.find((b) => b.position === book.position - 1);
+      if (prevBook) return { href: `/bible/${prevBook.slug}/${prevBook.chapters}`, label: `${prevBook.name} ${prevBook.chapters}` };
+    }
+    return null;
+  })();
 
-  const nextChapter =
-    chapter < book.chapters
-      ? `/bible/${book.slug}/${chapter + 1}`
-      : book.position < 66
-        ? (() => {
-            const nextBook = BIBLE_BOOKS.find(
-              (b) => b.position === book.position + 1
-            );
-            return nextBook ? `/bible/${nextBook.slug}/1` : null;
-          })()
-        : null;
+  const nextChapterInfo = (() => {
+    if (chapter < book.chapters) {
+      return { href: `/bible/${book.slug}/${chapter + 1}`, label: `${book.name} ${chapter + 1}` };
+    }
+    if (book.position < 66) {
+      const nextBook = BIBLE_BOOKS.find((b) => b.position === book.position + 1);
+      if (nextBook) return { href: `/bible/${nextBook.slug}/1`, label: `${nextBook.name} 1` };
+    }
+    return null;
+  })();
 
   const copyVerse = async (verseNum: number, text: string) => {
     const clean = cleanVerseText(text);
@@ -384,11 +380,12 @@ export function ChapterReader({ book, chapter }: Props) {
 
       {/* Navigation */}
       <div className="flex items-center justify-between border-t pt-6">
-        {prevChapter ? (
-          <Link href={prevChapter}>
+        {prevChapterInfo ? (
+          <Link href={prevChapterInfo.href}>
             <Button variant="outline" className="gap-2">
               <ChevronLeft className="h-4 w-4" />
-              Previous
+              <span className="hidden sm:inline">{prevChapterInfo.label}</span>
+              <span className="sm:hidden">Previous</span>
             </Button>
           </Link>
         ) : (
@@ -399,10 +396,11 @@ export function ChapterReader({ book, chapter }: Props) {
           {book.abbreviation} {chapter}
         </span>
 
-        {nextChapter ? (
-          <Link href={nextChapter}>
+        {nextChapterInfo ? (
+          <Link href={nextChapterInfo.href}>
             <Button variant="outline" className="gap-2">
-              Next
+              <span className="hidden sm:inline">{nextChapterInfo.label}</span>
+              <span className="sm:hidden">Next</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>

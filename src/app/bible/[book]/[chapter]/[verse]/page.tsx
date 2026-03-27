@@ -1,15 +1,31 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getBookBySlug, cleanVerseText } from "@/lib/bible-data";
+import { getBookBySlug, cleanVerseText, BIBLE_BOOKS } from "@/lib/bible-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { VerseActions } from "./verse-actions";
 
 type Props = {
   params: Promise<{ book: string; chapter: string; verse: string }>;
 };
+
+async function fetchChapterVerses(bookSlug: string, chapter: number) {
+  const book = BIBLE_BOOKS.find((b) => b.slug === bookSlug);
+  if (!book) return [];
+  try {
+    const res = await fetch(
+      `https://bolls.life/get-text/KJV/${book.position}/${chapter}/`,
+      { next: { revalidate: 86400 } }
+    );
+    if (!res.ok) return [];
+    const data: { verse: number; text: string }[] = await res.json();
+    return data.map((v) => ({ verse: v.verse, text: cleanVerseText(v.text) }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { book: bookSlug, chapter: chapterStr, verse: verseStr } = await params;
@@ -21,12 +37,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not Found" };
   }
 
+  const verses = await fetchChapterVerses(bookSlug, chapter);
+  const found = verses.find((v) => v.verse === verse);
+  const verseText = found?.text || "";
+  const ref = `${book.name} ${chapter}:${verse}`;
+
   return {
-    title: `${book.name} ${chapter}:${verse}`,
-    description: `Read ${book.name} ${chapter}:${verse} in the King James Version (KJV). Free online Bible.`,
+    title: `${ref} KJV — Divine Word`,
+    description: verseText
+      ? `${verseText.slice(0, 150)} — ${ref} King James Version on Divine Word.`
+      : `Read ${ref} in the King James Version (KJV). Free online Bible.`,
     openGraph: {
-      title: `${book.name} ${chapter}:${verse} — KJV`,
-      description: `Read ${book.name} ${chapter}:${verse} in the King James Version.`,
+      title: `${ref} — Divine Word`,
+      description: verseText ? verseText.slice(0, 200) : `Read ${ref} in the KJV.`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `https://www.divineword.app/bible/${bookSlug}/${chapter}/${verse}`,
     },
   };
 }
@@ -41,34 +68,62 @@ export default async function VersePage({ params }: Props) {
     notFound();
   }
 
-  // Fetch the specific verse
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  let verseText = "";
+  const verses = await fetchChapterVerses(bookSlug, chapter);
+  const currentVerse = verses.find((v) => v.verse === verseNum);
+  const verseText = currentVerse?.text || "";
+  const reference = `${book.name} ${chapter}:${verseNum}`;
 
-  try {
-    const res = await fetch(
-      `${baseUrl}/api/bible/${bookSlug}/${chapter}`,
-      { next: { revalidate: 86400 } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const found = data.verses?.find((v: { verse: number }) => v.verse === verseNum);
-      if (found) verseText = found.text;
-    }
-  } catch {
-    // proceed with empty text
+  if (verses.length > 0 && !currentVerse) {
+    notFound();
   }
 
-  const reference = `${book.name} ${chapter}:${verseNum}`;
+  // Surrounding context (3 verses before/after)
+  const contextVerses = verses.filter(
+    (v) => v.verse >= verseNum - 3 && v.verse <= verseNum + 3
+  );
+
+  // Prev/next verse nav
+  const totalVerses = verses.length;
+  const prevVerse =
+    verseNum > 1
+      ? `/bible/${bookSlug}/${chapter}/${verseNum - 1}`
+      : null;
+  const nextVerse =
+    verseNum < totalVerses
+      ? `/bible/${bookSlug}/${chapter}/${verseNum + 1}`
+      : null;
+
+  // JSON-LD structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    name: `${reference} KJV`,
+    headline: reference,
+    text: verseText,
+    isPartOf: {
+      "@type": "Book",
+      name: "The Holy Bible, King James Version",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Divine Word",
+      url: "https://www.divineword.app",
+    },
+  };
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Link
         href={`/bible/${bookSlug}/${chapter}#v${verseNum}`}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to {book.name} {chapter}
+        <ChevronLeft className="h-3.5 w-3.5" />
+        {book.name} {chapter}
       </Link>
 
       <div className="text-center mb-8">
@@ -81,15 +136,16 @@ export default async function VersePage({ params }: Props) {
         </p>
       </div>
 
+      {/* Featured verse */}
       <Card className="border-primary/20 shadow-lg mb-8">
         <CardContent className="p-8 md:p-12 text-center">
           {verseText ? (
             <blockquote className="text-xl md:text-2xl leading-relaxed italic">
-              &ldquo;{cleanVerseText(verseText)}&rdquo;
+              &ldquo;{verseText}&rdquo;
             </blockquote>
           ) : (
             <p className="text-muted-foreground italic">
-              Connect your database to load this verse.
+              Unable to load this verse. Please try again later.
             </p>
           )}
           <p className="text-primary font-heading font-semibold mt-6 tracking-wide">
@@ -98,13 +154,68 @@ export default async function VersePage({ params }: Props) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-center gap-3">
-        <VerseActions reference={reference} text={verseText ? cleanVerseText(verseText) : ""} />
+      {/* Actions */}
+      <div className="flex justify-center gap-3 mb-12">
+        <VerseActions reference={reference} text={verseText} />
         <Link href={`/bible/${bookSlug}/${chapter}`}>
           <Button variant="secondary" className="gap-2">
             Read Full Chapter
           </Button>
         </Link>
+      </div>
+
+      {/* Surrounding context */}
+      {contextVerses.length > 1 && (
+        <section className="mb-12">
+          <h2 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-4">
+            Context
+          </h2>
+          <div className="space-y-1">
+            {contextVerses.map((v) => (
+              <Link
+                key={v.verse}
+                href={`/bible/${bookSlug}/${chapter}/${v.verse}`}
+                className={`flex gap-3 py-2 px-3 -mx-3 rounded-sm transition-colors ${
+                  v.verse === verseNum
+                    ? "bg-primary/10 font-medium"
+                    : "hover:bg-muted/50"
+                }`}
+              >
+                <span className="text-xs text-primary/60 font-mono mt-1 min-w-6 text-right select-none">
+                  {v.verse}
+                </span>
+                <span className="flex-1 text-sm leading-relaxed">{v.text}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Prev / Next verse navigation */}
+      <div className="flex items-center justify-between border-t pt-6">
+        {prevVerse ? (
+          <Link href={prevVerse}>
+            <Button variant="outline" size="sm" className="gap-1">
+              <ChevronLeft className="h-4 w-4" />
+              Verse {verseNum - 1}
+            </Button>
+          </Link>
+        ) : (
+          <div />
+        )}
+        <span className="text-xs text-muted-foreground font-mono">
+          {book.abbreviation} {chapter}:{verseNum}
+        </span>
+        {nextVerse ? (
+          <Link href={nextVerse}>
+            <Button variant="outline" size="sm" className="gap-1">
+              Verse {verseNum + 1}
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
   );

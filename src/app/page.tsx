@@ -1,8 +1,24 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Book, Search, BookMarked, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible-data";
+
+export const metadata: Metadata = {
+  title: "Divine Word — Free Online Bible (KJV)",
+  description:
+    "Free, beautiful, distraction-free Bible. Read the King James Version online. Verse of the Day, reading plans, and scripture search.",
+  openGraph: {
+    title: "Divine Word — Free Online Bible (KJV)",
+    description:
+      "Read the King James Version online for free. Beautiful, distraction-free Bible with reading plans, search, and study tools.",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://www.divineword.app",
+  },
+};
 
 const FEATURED_VERSES = [
   { ref: "John 3:16", text: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.", book: "john", chapter: 3, verse: 16 },
@@ -30,8 +46,28 @@ function getVerseOfTheDay() {
 export default function HomePage() {
   const votd = getVerseOfTheDay();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Divine Word",
+    url: "https://www.divineword.app",
+    description: "Free, beautiful, distraction-free Bible. Read the King James Version online.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://www.divineword.app/search?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="min-h-[80vh]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent" />
@@ -183,6 +219,72 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Verses */}
+      <section className="py-12 md:py-16 bg-muted/30">
+        <div className="container max-w-4xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <p className="font-heading text-sm uppercase tracking-[0.15em] text-primary mb-2">
+              Most Loved
+            </p>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">
+              Popular Verses
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {FEATURED_VERSES.map((v) => (
+              <Link
+                key={v.ref}
+                href={`/bible/${v.book}/${v.chapter}/${v.verse}`}
+                className="group"
+              >
+                <Card className="h-full transition-all hover:shadow-md hover:-translate-y-0.5">
+                  <CardContent className="p-5">
+                    <p className="text-xs text-primary font-mono font-semibold mb-2">
+                      {v.ref}
+                    </p>
+                    <p className="text-sm leading-relaxed line-clamp-3 italic text-muted-foreground group-hover:text-foreground transition-colors">
+                      &ldquo;{v.text}&rdquo;
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About / SEO Content */}
+      <section className="py-12 md:py-16">
+        <div className="container max-w-3xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">
+              About Divine Word
+            </h2>
+          </div>
+          <div className="prose prose-neutral dark:prose-invert mx-auto text-sm leading-relaxed space-y-4 text-muted-foreground">
+            <p>
+              Divine Word is a free online Bible designed for focused, distraction-free
+              scripture reading. Read the complete King James Version (KJV) — all 66 books,
+              1,189 chapters, and 31,102 verses — in a clean, beautiful interface that puts
+              God&apos;s Word first.
+            </p>
+            <p>
+              Whether you&apos;re looking up a specific verse, studying a chapter in depth,
+              or following a structured reading plan, Divine Word makes it easy to engage with
+              scripture every day. Features include full-text search across the entire Bible,
+              verse bookmarking, text highlighting, a personal journal, and guided reading
+              plans from 30-day devotionals to reading the Bible in a year.
+            </p>
+            <p>
+              The King James Version is in the public domain and remains one of the most
+              widely read English translations of the Bible. Divine Word is built with love
+              for the glory of God and is free for everyone — no ads, no distractions, just
+              the Word.
+            </p>
           </div>
         </div>
       </section>

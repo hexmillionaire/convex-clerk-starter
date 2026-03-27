@@ -16,12 +16,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not Found" };
   }
 
+  const title = `${book.name} ${chapter} KJV — Divine Word`;
+  const description = `Read ${book.name} Chapter ${chapter} in the King James Version. Free online Bible at Divine Word.`;
+
   return {
-    title: `${book.name} ${chapter}`,
-    description: `Read ${book.name} chapter ${chapter} in the King James Version (KJV). Free online Bible reading.`,
+    title,
+    description,
     openGraph: {
-      title: `${book.name} ${chapter} — KJV`,
-      description: `Read ${book.name} chapter ${chapter} in the King James Version.`,
+      title: `${book.name} ${chapter} — Divine Word`,
+      description,
+      type: "article",
+    },
+    alternates: {
+      canonical: `https://www.divineword.app/bible/${bookSlug}/${chapter}`,
     },
   };
 }
@@ -35,10 +42,28 @@ export default async function ChapterPage({ params }: Props) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Chapter",
+    name: `${book.name} ${chapter}`,
+    isPartOf: {
+      "@type": "Book",
+      name: book.name,
+      isPartOf: {
+        "@type": "Book",
+        name: "The Holy Bible, King James Version",
+      },
+    },
+    position: chapter,
+  };
+
   return (
-    <ChapterReader
-      book={book}
-      chapter={chapter}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ChapterReader book={book} chapter={chapter} />
+    </>
   );
 }
