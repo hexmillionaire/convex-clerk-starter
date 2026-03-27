@@ -41,7 +41,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-heading">
           <Image
-            src="/icons/favicon_pack/favicon-32x32.png"
+            src="/icons/icon-192.png"
             alt="Divine Word"
             width={28}
             height={28}
@@ -130,7 +130,7 @@ export function Navbar() {
             <SheetContent side="right" className="w-72">
               <SheetTitle className="font-heading text-lg mb-6 flex items-center gap-2">
                 <Image
-                  src="/icons/favicon_pack/favicon-32x32.png"
+                  src="/icons/icon-192.png"
                   alt="Divine Word"
                   width={24}
                   height={24}
