@@ -34,7 +34,7 @@ export default function HomePage() {
     <div className="min-h-[80vh]">
       {/* Hero */}
       <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent" />
         <div className="container max-w-4xl mx-auto px-4 text-center relative">
           <p className="text-primary text-2xl mb-4 tracking-[0.3em]">✦ ✦ ✦</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-semibold tracking-tight leading-[1.1] mb-6">

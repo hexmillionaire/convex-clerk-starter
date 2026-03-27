@@ -320,7 +320,7 @@ export function ChapterReader({ book, chapter }: Props) {
                       : undefined
                   }
                 >
-                  <span className="text-xs text-primary/60 font-mono mt-1.5 min-w-[1.5rem] text-right select-none">
+                  <span className="text-xs text-primary/60 font-mono mt-1.5 min-w-6 text-right select-none">
                     {v.verse}
                   </span>
                   <p className="verse-text flex-1">{cleanVerseText(v.text)}</p>
