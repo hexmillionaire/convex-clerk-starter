@@ -1,10 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
-import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  ...authTables,
-
   // ─── Bible verses (seeded data) ───
   verses: defineTable({
     bookId: v.number(), // 1-66
@@ -21,7 +18,7 @@ export default defineSchema({
 
   // ─── User bookmarks ───
   bookmarks: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     bookSlug: v.string(),
     chapter: v.number(),
     verseNumber: v.number(),
@@ -33,7 +30,7 @@ export default defineSchema({
 
   // ─── User highlights ───
   highlights: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     bookSlug: v.string(),
     chapter: v.number(),
     verseNumber: v.number(),
@@ -44,7 +41,7 @@ export default defineSchema({
 
   // ─── Devotional journal ───
   journal: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     title: v.string(),
     passage: v.string(),
     content: v.string(),
@@ -52,7 +49,7 @@ export default defineSchema({
 
   // ─── Reading progress ───
   readingProgress: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     bookSlug: v.string(),
     chapter: v.number(),
   })
@@ -61,7 +58,7 @@ export default defineSchema({
 
   // ─── Reading plan progress ───
   userReadingPlans: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     planSlug: v.string(),
     currentDay: v.number(),
     startedAt: v.number(), // timestamp

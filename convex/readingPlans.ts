@@ -1,11 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getUserPlans = query({
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.tokenIdentifier;
 
     return await ctx.db
       .query("userReadingPlans")
@@ -17,8 +17,9 @@ export const getUserPlans = query({
 export const startPlan = mutation({
   args: { planSlug: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     // Check if already started
     const existing = await ctx.db
@@ -42,8 +43,9 @@ export const startPlan = mutation({
 export const advanceDay = mutation({
   args: { planSlug: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     const plan = await ctx.db
       .query("userReadingPlans")
@@ -61,8 +63,9 @@ export const advanceDay = mutation({
 export const resetPlan = mutation({
   args: { planSlug: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     const plan = await ctx.db
       .query("userReadingPlans")

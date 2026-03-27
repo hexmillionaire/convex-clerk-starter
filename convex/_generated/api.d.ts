@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
 import type * as bible from "../bible.js";
 import type * as bookmarks from "../bookmarks.js";
 import type * as highlights from "../highlights.js";
@@ -25,7 +24,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
   bible: typeof bible;
   bookmarks: typeof bookmarks;
   highlights: typeof highlights;

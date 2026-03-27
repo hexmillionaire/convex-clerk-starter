@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Book, Search, BookMarked, Menu, User, LogOut, Home } from "lucide-react";
 import { useConvexAuth } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FontSizeControl } from "@/components/font-size-control";
@@ -27,7 +27,7 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated } = useConvexAuth();
-  const { signOut } = useAuthActions();
+  const { signOut } = useClerk();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

@@ -1,11 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const list = query({
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.tokenIdentifier;
 
     return await ctx.db
       .query("bookmarks")
@@ -24,8 +24,9 @@ export const add = mutation({
     text: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     // Check if already bookmarked
     const existing = await ctx.db
@@ -51,8 +52,9 @@ export const add = mutation({
 export const remove = mutation({
   args: { id: v.id("bookmarks") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     const bookmark = await ctx.db.get(args.id);
     if (!bookmark || bookmark.userId !== userId) {
@@ -70,8 +72,9 @@ export const isBookmarked = query({
     verseNumber: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return false;
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return false;
+    const userId = identity.tokenIdentifier;
 
     const existing = await ctx.db
       .query("bookmarks")

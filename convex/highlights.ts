@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getForChapter = query({
   args: {
@@ -8,8 +7,9 @@ export const getForChapter = query({
     chapter: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return {};
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return {};
+    const userId = identity.tokenIdentifier;
 
     const highlights = await ctx.db
       .query("highlights")
@@ -37,8 +37,9 @@ export const set = mutation({
     color: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     // Find existing highlight for this verse
     const existing = await ctx.db
@@ -75,8 +76,9 @@ export const remove = mutation({
     verseNumber: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     const highlights = await ctx.db
       .query("highlights")

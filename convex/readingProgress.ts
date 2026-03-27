@@ -1,12 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getForBook = query({
   args: { bookSlug: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return {};
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return {};
+    const userId = identity.tokenIdentifier;
 
     const progress = await ctx.db
       .query("readingProgress")
@@ -25,8 +25,9 @@ export const getForBook = query({
 
 export const getAllProgress = query({
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.tokenIdentifier;
 
     return await ctx.db
       .query("readingProgress")
@@ -41,8 +42,9 @@ export const markRead = mutation({
     chapter: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     // Check if already marked
     const existing = await ctx.db
@@ -69,8 +71,9 @@ export const markUnread = mutation({
     chapter: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
 
     const existing = await ctx.db
       .query("readingProgress")
