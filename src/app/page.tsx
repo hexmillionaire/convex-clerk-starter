@@ -4,6 +4,7 @@ import { Book, Search, BookMarked, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible-data";
+import { DashboardSection } from "@/components/dashboard-section";
 
 export const metadata: Metadata = {
   title: "Divine Word — Free Online Bible (KJV)",
@@ -122,6 +123,9 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
+
+      {/* Personalized Dashboard (signed-in users) */}
+      <DashboardSection />
 
       {/* Quick Links */}
       <section className="py-12 md:py-16 bg-muted/30">

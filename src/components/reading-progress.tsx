@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "convex/react";
@@ -23,6 +23,26 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
   const markUnread = useMutation(api.readingProgress.markUnread);
 
   const isRead = progress?.[chapter] ?? false;
+  const autoMarkedRef = useRef(false);
+
+  // Auto-mark as read when user scrolls to bottom
+  useEffect(() => {
+    if (!isAuthenticated || isRead) return;
+    autoMarkedRef.current = false;
+
+    const handleScroll = () => {
+      if (autoMarkedRef.current) return;
+      const scrolled = window.innerHeight + window.scrollY;
+      const threshold = document.documentElement.scrollHeight - 200;
+      if (scrolled >= threshold) {
+        autoMarkedRef.current = true;
+        markRead({ bookSlug, chapter });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isAuthenticated, isRead, markRead, bookSlug, chapter]);
 
   const toggleRead = useCallback(async () => {
     if (isRead) {

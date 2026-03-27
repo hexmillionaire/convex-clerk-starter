@@ -12,20 +12,23 @@ import "./globals.css";
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["300", "400", "600"],
+  weight: ["400", "600"],
   style: ["normal", "italic"],
+  display: "swap",
 });
 
 const dmMono = DM_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["300", "400"],
+  weight: ["400"],
+  display: "swap",
 });
 
 const cinzel = Cinzel({
   variable: "--font-heading",
   subsets: ["latin"],
   weight: ["400", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

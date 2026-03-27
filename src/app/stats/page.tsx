@@ -177,7 +177,7 @@ export default function StatsPage() {
               return (
                 <div key={entry.slug} className="flex items-center gap-3">
                   <Link
-                    href={`/bible/${entry.slug}/1`}
+                    href={`/bible/${entry.slug}`}
                     className="text-sm font-medium w-32 truncate hover:text-primary transition-colors"
                   >
                     {entry.name}
