@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { SignIn, useUser } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
@@ -35,9 +36,30 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="flex justify-center">
-        <SignIn routing="hash" />
-      </div>
+      <Card>
+        <CardContent className="p-6 flex flex-col gap-4">
+          <SignInButton mode="redirect" forceRedirectUrl="/">
+            <Button className="w-full" size="lg">
+              Sign In
+            </Button>
+          </SignInButton>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+
+          <SignUpButton mode="redirect" forceRedirectUrl="/">
+            <Button variant="outline" className="w-full" size="lg">
+              Create Account
+            </Button>
+          </SignUpButton>
+        </CardContent>
+      </Card>
 
       <p className="text-center text-xs text-muted-foreground mt-6">
         You can read the Bible without an account.{" "}
