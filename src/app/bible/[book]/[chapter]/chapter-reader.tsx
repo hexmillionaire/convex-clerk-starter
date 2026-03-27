@@ -26,7 +26,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { type BookInfo, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
-import { TranslationSwitcher } from "@/components/translation-switcher";
+import { TranslationSwitcher, type Translation } from "@/components/translation-switcher";
 import { HighlightPicker } from "@/components/highlight-picker";
 import { ReadingProgress } from "@/components/reading-progress";
 
@@ -38,6 +38,7 @@ type Props = {
 export function ChapterReader({ book, chapter }: Props) {
   const { isAuthenticated } = useConvexAuth();
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
+  const [translation, setTranslation] = useState<Translation>("KJV");
   const [apiVerses, setApiVerses] = useState<
     { verse: number; text: string }[] | null
   >(null);
@@ -47,6 +48,7 @@ export function ChapterReader({ book, chapter }: Props) {
   const convexVerses = useQuery(api.bible.getChapter, {
     bookSlug: book.slug,
     chapter,
+    translation,
   });
   const highlights = useQuery(api.highlights.getForChapter, {
     bookSlug: book.slug,
@@ -70,18 +72,19 @@ export function ChapterReader({ book, chapter }: Props) {
         bookSlug: book.slug,
         bookId: book.position,
         chapter,
+        translation,
       })
         .then((data) => setApiVerses(data))
         .catch(() => setApiVerses([]))
         .finally(() => setLoadingApi(false));
     }
-  }, [convexVerses, apiVerses, loadingApi, fetchFromAPI, book.slug, book.position, chapter]);
+  }, [convexVerses, apiVerses, loadingApi, fetchFromAPI, book.slug, book.position, chapter, translation]);
 
-  // Reset API verses when navigating
+  // Reset API verses when navigating or changing translation
   useEffect(() => {
     setApiVerses(null);
     setLoadingApi(false);
-  }, [book.slug, chapter]);
+  }, [book.slug, chapter, translation]);
 
   // Determine which verses to display
   const verses =
@@ -183,7 +186,7 @@ export function ChapterReader({ book, chapter }: Props) {
 
   const copyVerse = async (verseNum: number, text: string) => {
     const clean = cleanVerseText(text);
-    const citation = `${book.name} ${chapter}:${verseNum} (KJV)\n"${clean}"`;
+    const citation = `${book.name} ${chapter}:${verseNum} (${translation})\n"${clean}"`;
     await navigator.clipboard.writeText(citation);
     setCopiedVerse(verseNum);
     setTimeout(() => setCopiedVerse(null), 2000);
@@ -193,7 +196,7 @@ export function ChapterReader({ book, chapter }: Props) {
     const clean = cleanVerseText(text);
     const shareData = {
       title: `${book.name} ${chapter}:${verseNum}`,
-      text: `"${clean}" — ${book.name} ${chapter}:${verseNum} (KJV)`,
+      text: `"${clean}" — ${book.name} ${chapter}:${verseNum} (${translation})`,
     };
     if (navigator.share) {
       await navigator.share(shareData);
@@ -220,7 +223,7 @@ export function ChapterReader({ book, chapter }: Props) {
             <span className="text-primary">{chapter}</span>
           </h1>
           <div className="flex items-center gap-2 mt-1">
-            <TranslationSwitcher />
+            <TranslationSwitcher value={translation} onChange={setTranslation} />
             <span className="text-sm text-muted-foreground font-mono">
               · {book.testament === "OLD" ? "Old" : "New"} Testament
             </span>

@@ -16,6 +16,7 @@ import type * as journal from "../journal.js";
 import type * as readingPlans from "../readingPlans.js";
 import type * as readingProgress from "../readingProgress.js";
 import type * as seed from "../seed.js";
+import type * as stats from "../stats.js";
 
 import type {
   ApiFromModules,
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   readingPlans: typeof readingPlans;
   readingProgress: typeof readingProgress;
   seed: typeof seed;
+  stats: typeof stats;
 }>;
 
 /**

@@ -9,26 +9,29 @@ import {
 } from "@/components/ui/select";
 
 const TRANSLATIONS = [
-  { value: "KJV", label: "KJV", available: true },
-  { value: "WEB", label: "WEB", available: false },
-  { value: "ASV", label: "ASV", available: false },
+  { value: "KJV", label: "KJV" },
+  { value: "WEB", label: "WEB" },
+  { value: "ASV", label: "ASV" },
 ] as const;
 
-export function TranslationSwitcher() {
+export type Translation = (typeof TRANSLATIONS)[number]["value"];
+
+export function TranslationSwitcher({
+  value = "KJV",
+  onChange,
+}: {
+  value?: Translation;
+  onChange?: (t: Translation) => void;
+}) {
   return (
-    <Select defaultValue="KJV">
+    <Select value={value} onValueChange={(v) => onChange?.(v as Translation)}>
       <SelectTrigger size="sm" className="w-auto gap-1.5 text-xs font-mono">
         <SelectValue />
       </SelectTrigger>
       <SelectContent align="end">
         {TRANSLATIONS.map((t) => (
-          <SelectItem key={t.value} value={t.value} disabled={!t.available}>
+          <SelectItem key={t.value} value={t.value}>
             {t.label}
-            {!t.available && (
-              <span className="ml-1 text-muted-foreground text-[10px]">
-                soon
-              </span>
-            )}
           </SelectItem>
         ))}
       </SelectContent>

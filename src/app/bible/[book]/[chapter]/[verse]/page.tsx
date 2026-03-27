@@ -1,10 +1,11 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getBookBySlug } from "@/lib/bible-data";
+import { getBookBySlug, cleanVerseText } from "@/lib/bible-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Copy, Share2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { VerseActions } from "./verse-actions";
 
 type Props = {
   params: Promise<{ book: string; chapter: string; verse: string }>;
@@ -84,7 +85,7 @@ export default async function VersePage({ params }: Props) {
         <CardContent className="p-8 md:p-12 text-center">
           {verseText ? (
             <blockquote className="text-xl md:text-2xl leading-relaxed italic">
-              &ldquo;{verseText}&rdquo;
+              &ldquo;{cleanVerseText(verseText)}&rdquo;
             </blockquote>
           ) : (
             <p className="text-muted-foreground italic">
@@ -98,14 +99,7 @@ export default async function VersePage({ params }: Props) {
       </Card>
 
       <div className="flex justify-center gap-3">
-        <Button variant="outline" className="gap-2">
-          <Copy className="h-4 w-4" />
-          Copy
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Share2 className="h-4 w-4" />
-          Share
-        </Button>
+        <VerseActions reference={reference} text={verseText ? cleanVerseText(verseText) : ""} />
         <Link href={`/bible/${bookSlug}/${chapter}`}>
           <Button variant="secondary" className="gap-2">
             Read Full Chapter

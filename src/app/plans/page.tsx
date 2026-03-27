@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Loader2,
 } from "lucide-react";
+import { getTodayReading } from "@/lib/plan-schedules";
 
 const PLANS = [
   {
@@ -178,24 +179,41 @@ export default function PlansPage() {
                     </Button>
                   </div>
                 ) : userPlan ? (
-                  <div className="flex gap-2">
-                    <Link href={plan.firstReading} className="flex-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 w-full"
-                      >
-                        <BookOpen className="h-3.5 w-3.5" />
-                        Continue
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => advanceDay({ planSlug: plan.slug })}
-                    >
-                      +1 Day
-                    </Button>
+                  <div className="space-y-2">
+                    {(() => {
+                      const todayReading = getTodayReading(plan.slug, userPlan.currentDay);
+                      const readingLink = todayReading?.chapters[0]
+                        ? `/bible/${todayReading.chapters[0].bookSlug}/${todayReading.chapters[0].chapter}`
+                        : plan.firstReading;
+                      return (
+                        <>
+                          {todayReading && (
+                            <p className="text-xs text-muted-foreground">
+                              Today: <span className="text-foreground font-medium">{todayReading.label}</span>
+                            </p>
+                          )}
+                          <div className="flex gap-2">
+                            <Link href={readingLink} className="flex-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2 w-full"
+                              >
+                                <BookOpen className="h-3.5 w-3.5" />
+                                Continue
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => advanceDay({ planSlug: plan.slug })}
+                            >
+                              +1 Day
+                            </Button>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 ) : userPlans === undefined ? (
                   <Button

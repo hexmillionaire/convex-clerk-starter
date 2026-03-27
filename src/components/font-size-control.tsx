@@ -1,35 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const FONT_SIZES = [14, 16, 18, 20, 22, 24];
 const DEFAULT_INDEX = 2; // 18px
+const STORAGE_KEY = "dw-font-size-index";
 
 export function FontSizeControl() {
   const [sizeIndex, setSizeIndex] = useState(DEFAULT_INDEX);
 
-  const decrease = () => {
-    if (sizeIndex > 0) {
-      const newIndex = sizeIndex - 1;
-      setSizeIndex(newIndex);
-      document.documentElement.style.setProperty(
-        "--reading-font-size",
-        `${FONT_SIZES[newIndex]}px`
-      );
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) {
+      const idx = parseInt(saved, 10);
+      if (idx >= 0 && idx < FONT_SIZES.length) {
+        setSizeIndex(idx);
+        document.documentElement.style.setProperty(
+          "--reading-font-size",
+          `${FONT_SIZES[idx]}px`
+        );
+      }
     }
+  }, []);
+
+  const applySize = (newIndex: number) => {
+    setSizeIndex(newIndex);
+    localStorage.setItem(STORAGE_KEY, String(newIndex));
+    document.documentElement.style.setProperty(
+      "--reading-font-size",
+      `${FONT_SIZES[newIndex]}px`
+    );
+  };
+
+  const decrease = () => {
+    if (sizeIndex > 0) applySize(sizeIndex - 1);
   };
 
   const increase = () => {
-    if (sizeIndex < FONT_SIZES.length - 1) {
-      const newIndex = sizeIndex + 1;
-      setSizeIndex(newIndex);
-      document.documentElement.style.setProperty(
-        "--reading-font-size",
-        `${FONT_SIZES[newIndex]}px`
-      );
-    }
+    if (sizeIndex < FONT_SIZES.length - 1) applySize(sizeIndex + 1);
   };
 
   return (

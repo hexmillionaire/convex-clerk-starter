@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   description: "Browse all 66 books of the Bible — Old Testament and New Testament.",
 };
 
-export default function BibleIndexPage() {
+type Props = {
+  searchParams: Promise<{ testament?: string }>;
+};
+
+export default async function BibleIndexPage({ searchParams }: Props) {
+  const { testament } = await searchParams;
+  const showOT = !testament || testament === "old";
+  const showNT = !testament || testament === "new";
+
   return (
     <div className="container max-w-5xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -20,9 +28,18 @@ export default function BibleIndexPage() {
         <p className="text-muted-foreground italic">
           King James Version — 66 Books
         </p>
+        {testament && (
+          <Link
+            href="/bible"
+            className="text-sm text-primary hover:underline mt-2 inline-block"
+          >
+            Show All Books
+          </Link>
+        )}
       </div>
 
       {/* Old Testament */}
+      {showOT && (
       <section className="mb-12">
         <div className="flex items-center gap-3 mb-6">
           <h2 className="font-heading font-semibold text-xl">Old Testament</h2>
@@ -52,8 +69,10 @@ export default function BibleIndexPage() {
           ))}
         </div>
       </section>
+      )}
 
       {/* New Testament */}
+      {showNT && (
       <section>
         <div className="flex items-center gap-3 mb-6">
           <h2 className="font-heading font-semibold text-xl">New Testament</h2>
@@ -83,6 +102,7 @@ export default function BibleIndexPage() {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }

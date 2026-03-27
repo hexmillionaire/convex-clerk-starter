@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Book, Search, BookMarked, Menu, User, LogOut, Home } from "lucide-react";
+import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine } from "lucide-react";
 import { useConvexAuth } from "convex/react";
 import { useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,12 @@ const navLinks = [
   { href: "/bible/genesis/1", label: "Read", icon: Book },
   { href: "/search", label: "Search", icon: Search },
   { href: "/plans", label: "Plans", icon: BookMarked },
+];
+
+const authLinks = [
+  { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
+  { href: "/journal", label: "Journal", icon: PenLine },
+  { href: "/stats", label: "Stats", icon: BarChart3 },
 ];
 
 export function Navbar() {
@@ -69,6 +75,23 @@ export function Navbar() {
               </Link>
             );
           })}
+          {isAuthenticated &&
+            authLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <Link key={link.href} href={link.href}>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn("gap-2 text-sm", isActive && "font-medium")}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {link.label}
+                  </Button>
+                </Link>
+              );
+            })}
         </nav>
 
         {/* Right side controls */}
@@ -133,6 +156,22 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+                {isAuthenticated &&
+                  authLinks.map((link) => {
+                    const Icon = link.icon;
+                    const isActive = pathname.startsWith(link.href);
+                    return (
+                      <Link key={link.href} href={link.href}>
+                        <Button
+                          variant={isActive ? "secondary" : "ghost"}
+                          className="w-full justify-start gap-3"
+                        >
+                          <Icon className="h-4 w-4" />
+                          {link.label}
+                        </Button>
+                      </Link>
+                    );
+                  })}
               </nav>
               <div className="mt-6 pt-6 border-t">
                 <p className="text-xs text-muted-foreground mb-2">Font Size</p>
