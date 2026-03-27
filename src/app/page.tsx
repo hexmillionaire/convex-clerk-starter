@@ -38,7 +38,7 @@ export default function HomePage() {
         <div className="container max-w-4xl mx-auto px-4 text-center relative">
           <p className="text-primary text-2xl mb-4 tracking-[0.3em]">✦ ✦ ✦</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-semibold tracking-tight leading-[1.1] mb-6">
-            The Word
+            Divine Word
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground italic max-w-xl mx-auto mb-8 leading-relaxed">
             A free, beautiful, distraction-free Bible

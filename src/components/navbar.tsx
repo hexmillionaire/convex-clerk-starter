@@ -37,7 +37,7 @@ export function Navbar() {
             ✦
           </span>
           <span className="font-semibold tracking-tight text-lg hidden sm:inline">
-            The Word
+            Divine Word
           </span>
         </Link>
 
@@ -101,7 +101,7 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <SheetTitle className="font-heading text-lg mb-6">
-                ✦ The Word
+                ✦ Divine Word
               </SheetTitle>
               <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => {

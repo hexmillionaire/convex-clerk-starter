@@ -29,8 +29,8 @@ const cinzel = Cinzel({
 
 export const metadata: Metadata = {
   title: {
-    default: "The Word — Free Online Bible",
-    template: "%s | The Word",
+    default: "Divine Word — Free Online Bible",
+    template: "%s | Divine Word",
   },
   description:
     "A free, beautiful, distraction-free Bible website. Read scripture in KJV, WEB, and ASV with study tools, bookmarks, and reading plans.",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
-    title: "The Word — Free Online Bible",
+    title: "Divine Word — Free Online Bible",
     description:
       "Read the Bible in a beautiful, distraction-free experience. KJV, WEB, ASV translations.",
     type: "website",
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Word — Free Online Bible",
+    title: "Divine Word — Free Online Bible",
     description:
       "Read the Bible in a beautiful, distraction-free experience.",
   },
@@ -90,7 +90,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#c9972b" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="The Word" />
+        <meta name="apple-mobile-web-app-title" content="Divine Word" />
         <meta name="msapplication-TileColor" content="#c9972b" />
         <meta name="msapplication-TileImage" content="/icons/favicon_pack/mstile-150x150.png" />
         <meta name="msapplication-square70x70logo" content="/icons/favicon_pack/mstile-70x70.png" />

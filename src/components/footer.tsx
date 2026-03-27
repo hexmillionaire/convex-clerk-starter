@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <p className="font-heading font-semibold mb-2">✦ The Word</p>
+            <p className="font-heading font-semibold mb-2">✦ Divine Word</p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               A free, beautiful, distraction-free Bible for everyone.
               Read scripture the way it was meant to be read.
