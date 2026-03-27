@@ -43,6 +43,23 @@ export const metadata: Metadata = {
     "Bible reading",
     "verse of the day",
   ],
+  icons: {
+    icon: [
+      { url: "/icons/favicon_pack/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon_pack/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon_pack/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/favicon_pack/favicon-64x64.png", sizes: "64x64", type: "image/png" },
+      { url: "/icons/favicon_pack/favicon-128x128.png", sizes: "128x128", type: "image/png" },
+      { url: "/icons/favicon_pack/favicon-256x256.png", sizes: "256x256", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/favicon_pack/apple-touch-icon-120x120.png", sizes: "120x120" },
+      { url: "/icons/favicon_pack/apple-touch-icon-152x152.png", sizes: "152x152" },
+      { url: "/icons/favicon_pack/apple-touch-icon-167x167.png", sizes: "167x167" },
+      { url: "/icons/favicon_pack/apple-touch-icon-180x180.png", sizes: "180x180" },
+    ],
+  },
+  manifest: "/manifest.json",
   openGraph: {
     title: "The Word — Free Online Bible",
     description:
@@ -70,11 +87,15 @@ export default function RootLayout({
       className={`${cormorant.variable} ${dmMono.variable} ${cinzel.variable} h-full antialiased`}
     >
       <head>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#c9972b" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="apple-mobile-web-app-title" content="The Word" />
+        <meta name="msapplication-TileColor" content="#c9972b" />
+        <meta name="msapplication-TileImage" content="/icons/favicon_pack/mstile-150x150.png" />
+        <meta name="msapplication-square70x70logo" content="/icons/favicon_pack/mstile-70x70.png" />
+        <meta name="msapplication-square150x150logo" content="/icons/favicon_pack/mstile-150x150.png" />
+        <meta name="msapplication-square310x310logo" content="/icons/favicon_pack/mstile-310x310.png" />
       </head>
       <body className="min-h-full flex flex-col font-serif">
         <ConvexClientProvider>
