@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BIBLE_BOOKS } from "@/lib/bible-data";
+import { BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -26,18 +26,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data: { bookid: number; chapter: number; verse: number; text: string }[] =
+    const data: { pk: number; translation: string; book: number; chapter: number; verse: number; text: string }[] =
       await res.json();
 
-    // Map bookid (1-66) back to our book data
+    // Map book (1-66) back to our book data
     const results = data.slice(0, 50).map((item) => {
-      const book = BIBLE_BOOKS.find((b) => b.position === item.bookid);
+      const book = BIBLE_BOOKS.find((b) => b.position === item.book);
       return {
         bookName: book?.name || "Unknown",
         bookSlug: book?.slug || "",
         chapter: item.chapter,
         verse: item.verse,
-        text: item.text.trim(),
+        text: cleanVerseText(item.text),
       };
     });
 
