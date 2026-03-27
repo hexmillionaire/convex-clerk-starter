@@ -57,8 +57,10 @@ export const seedBook = action({
         chapter,
         verseNumber: v.verse,
         text: v.text
+          // Strip Strong's concordance tags <S>1234</S> BEFORE removing other HTML
+          .replace(/<S>\d+<\/S>/gi, "")
           .replace(/<[^>]*>/g, "")
-          .replace(/\s+/g, " ")
+          .replace(/\s{2,}/g, " ")
           .trim(),
         translation,
       }));

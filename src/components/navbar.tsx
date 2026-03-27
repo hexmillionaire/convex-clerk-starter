@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Book, Search, BookMarked, Menu, User, LogOut, Home } from "lucide-react";
 import { useConvexAuth } from "convex/react";
@@ -33,11 +34,15 @@ export function Navbar() {
       <div className="container flex h-14 items-center justify-between px-4 mx-auto max-w-6xl">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-heading">
-          <span className="text-lg text-primary" style={{ fontFamily: "var(--font-heading)" }}>
-            ✦
-          </span>
+          <Image
+            src="/icons/favicon_pack/favicon-32x32.png"
+            alt="The Word"
+            width={28}
+            height={28}
+            className="rounded-sm"
+          />
           <span className="font-semibold tracking-tight text-lg hidden sm:inline">
-            Divine Word
+            The Word
           </span>
         </Link>
 
@@ -100,8 +105,15 @@ export function Navbar() {
               <span className="sr-only">Menu</span>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <SheetTitle className="font-heading text-lg mb-6">
-                ✦ Divine Word
+              <SheetTitle className="font-heading text-lg mb-6 flex items-center gap-2">
+                <Image
+                  src="/icons/favicon_pack/favicon-32x32.png"
+                  alt="The Word"
+                  width={24}
+                  height={24}
+                  className="rounded-sm"
+                />
+                The Word
               </SheetTitle>
               <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => {

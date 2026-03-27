@@ -107,6 +107,10 @@ export function cleanVerseText(raw: string): string {
   text = text.replace(/<sup>(.*?)<\/sup>/g, "($1)");
   // Remove any other HTML tags that may appear
   text = text.replace(/<\/?[^>]+(>|$)/g, "");
+  // Strip bare Strong's numbers already baked into text (e.g. "God430" → "God")
+  text = text.replace(/([a-zA-Z'])\d{1,5}\b/g, "$1");
+  // Strip standalone Strong's numbers for Hebrew particles (e.g. " 853 ")
+  text = text.replace(/\s\d{1,5}(?=\s|[.,;:!?]|$)/g, "");
   // Collapse multiple spaces left after stripping
   text = text.replace(/\s{2,}/g, " ");
   return text.trim();
