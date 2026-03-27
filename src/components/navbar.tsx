@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine } from "lucide-react";
+import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine, Sparkles } from "lucide-react";
 import { useConvexAuth } from "convex/react";
 import { useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bible/genesis/1", label: "Read", icon: Book },
+  { href: "/verse-of-the-day", label: "Daily Verse", icon: Sparkles },
   { href: "/search", label: "Search", icon: Search },
   { href: "/plans", label: "Plans", icon: BookMarked },
 ];

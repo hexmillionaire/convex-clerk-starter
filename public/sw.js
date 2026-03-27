@@ -1,9 +1,10 @@
-const CACHE_NAME = "the-word-v1";
+const CACHE_NAME = "divine-word-v2";
 
 const PRECACHE_URLS = [
   "/",
   "/bible",
   "/search",
+  "/verse-of-the-day",
   "/manifest.json",
 ];
 
