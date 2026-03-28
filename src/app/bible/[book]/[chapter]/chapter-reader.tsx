@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useQuery, useMutation, useAction } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,8 @@ type Props = {
 };
 
 export function ChapterReader({ book, chapter }: Props) {
-  const { isAuthenticated } = useConvexAuth();
+  const { isSignedIn } = useUser();
+  const isAuthenticated = !!isSignedIn;
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [translation, setTranslation] = useState<Translation>("KJV");

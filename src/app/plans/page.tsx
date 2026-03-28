@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useConvexAuth, useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,10 +75,10 @@ const PLANS = [
 ];
 
 export default function PlansPage() {
-  const { isAuthenticated } = useConvexAuth();
+  const { isSignedIn } = useUser();
   const userPlans = useQuery(
     api.readingPlans.getUserPlans,
-    isAuthenticated ? {} : "skip"
+    isSignedIn ? {} : "skip"
   );
   const startPlan = useMutation(api.readingPlans.startPlan);
   const advanceDay = useMutation(api.readingPlans.advanceDay);
@@ -147,7 +148,7 @@ export default function PlansPage() {
                   </div>
                 )}
 
-                {!isAuthenticated ? (
+                {!isSignedIn ? (
                   <Link href={plan.firstReading}>
                     <Button
                       variant="outline"
