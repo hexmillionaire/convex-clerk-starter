@@ -21,6 +21,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -63,44 +68,58 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav — scrollable when tight */}
-        <nav className="hidden md:flex items-center gap-0.5 flex-1 min-w-0 justify-center">
+        {/* Desktop nav — icon-only with tooltips */}
+        <nav className="hidden md:flex items-center gap-1 flex-1 min-w-0 justify-center">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive =
               pathname === link.href ||
               (link.href !== "/" && pathname.startsWith(link.href));
             return (
-              <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
-                <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "gap-1.5 text-sm px-2.5",
-                    isActive && "font-medium"
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="hidden lg:inline">{link.label}</span>
-                </Button>
-              </Link>
+              <Tooltip key={link.href}>
+                <TooltipTrigger
+                  render={
+                    <Link href={link.href} aria-current={isActive ? "page" : undefined} aria-label={link.label}>
+                      <Button
+                        variant={isActive ? "secondary" : "ghost"}
+                        size="icon"
+                        className={cn("h-9 w-9", isActive && "font-medium")}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  }
+                />
+                <TooltipContent side="bottom">{link.label}</TooltipContent>
+              </Tooltip>
             );
           })}
+
+          {isAuthenticated && (
+            <div className="mx-1 h-5 w-px bg-border" />
+          )}
+
           {isAuthenticated &&
             authLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname.startsWith(link.href);
               return (
-                <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    size="sm"
-                    className={cn("gap-1.5 text-sm px-2.5", isActive && "font-medium")}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span className="hidden lg:inline">{link.label}</span>
-                  </Button>
-                </Link>
+                <Tooltip key={link.href}>
+                  <TooltipTrigger
+                    render={
+                      <Link href={link.href} aria-current={isActive ? "page" : undefined} aria-label={link.label}>
+                        <Button
+                          variant={isActive ? "secondary" : "ghost"}
+                          size="icon"
+                          className={cn("h-9 w-9", isActive && "font-medium")}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    }
+                  />
+                  <TooltipContent side="bottom">{link.label}</TooltipContent>
+                </Tooltip>
               );
             })}
         </nav>
