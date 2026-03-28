@@ -104,15 +104,12 @@ export function Navbar() {
           </div>
           <ThemeToggle />
           {isAuthenticated ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 hidden md:flex"
-              onClick={() => void signOut()}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
+            <Link href="/dashboard">
+              <Button variant="ghost" size="icon" className="h-9 w-9 hidden md:flex">
+                <User className="h-4 w-4" />
+                <span className="sr-only">Dashboard</span>
+              </Button>
+            </Link>
           ) : (
             <Link href="/login">
               <Button variant="ghost" size="icon" className="h-9 w-9">

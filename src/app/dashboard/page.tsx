@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Calendar,
   ArrowRight,
+  ArrowLeft,
   LogOut,
   Loader2,
   Lock,
@@ -218,6 +219,13 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
