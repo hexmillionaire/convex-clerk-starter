@@ -83,7 +83,7 @@ export default function HomePage() {
             for the glory of God
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/bible/genesis/1">
+            <Link href="/bible">
               <Button size="lg" className="gap-2 text-base px-8">
                 <Book className="h-4 w-4" />
                 Start Reading

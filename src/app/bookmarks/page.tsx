@@ -61,7 +61,7 @@ export default function BookmarksPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Tap the bookmark icon on any verse while reading to save it here
           </p>
-          <Link href="/bible/genesis/1" className="mt-4 inline-block">
+          <Link href="/bible" className="mt-4 inline-block">
             <Button variant="outline" className="gap-2">
               Start Reading
             </Button>
@@ -85,6 +85,7 @@ export default function BookmarksPage() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 shrink-0"
+                  aria-label="Remove bookmark"
                   onClick={() => removeBookmark({ id: bm._id })}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />

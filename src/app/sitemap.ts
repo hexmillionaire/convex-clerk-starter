@@ -4,12 +4,13 @@ import { VERSE_COUNTS } from "@/lib/verse-counts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.divineword.app";
+  const staticDate = new Date("2025-01-01");
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
-    { url: `${baseUrl}/bible`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/plans`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/bible`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/search`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/plans`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/verse-of-the-day`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
   ];
 
@@ -23,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Book overview page
     bookPages.push({
       url: `${baseUrl}/bible/${book.slug}`,
-      lastModified: new Date(),
+      lastModified: staticDate,
       changeFrequency: "monthly",
       priority: 0.7,
     });
@@ -31,7 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (let ch = 1; ch <= book.chapters; ch++) {
       chapterPages.push({
         url: `${baseUrl}/bible/${book.slug}/${ch}`,
-        lastModified: new Date(),
+        lastModified: staticDate,
         changeFrequency: "yearly",
         priority: 0.6,
       });

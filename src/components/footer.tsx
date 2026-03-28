@@ -21,7 +21,7 @@ export function Footer() {
             </p>
             <nav className="flex flex-col gap-1.5">
               <Link
-                href="/bible/genesis/1"
+                href="/bible"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Start Reading

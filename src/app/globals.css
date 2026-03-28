@@ -167,3 +167,45 @@
   line-height: 1.8;
   letter-spacing: 0.01em;
 }
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  a {
+    color: black !important;
+    text-decoration: underline;
+  }
+
+  .verse-text {
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+}

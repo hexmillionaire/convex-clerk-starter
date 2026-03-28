@@ -131,7 +131,7 @@ export default function SearchPage() {
 
       {!loading && results.length > 0 && (
         <div>
-          <p className="text-sm text-muted-foreground mb-4 font-mono">
+          <p className="text-sm text-muted-foreground mb-4 font-mono" aria-live="polite">
             {results.length} result{results.length !== 1 ? "s" : ""}
             {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
           </p>

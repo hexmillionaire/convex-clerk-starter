@@ -70,6 +70,14 @@ export const metadata: Metadata = {
       "Read the Bible in a beautiful, distraction-free experience. KJV, WEB, ASV translations.",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "https://www.divineword.app/icons/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "Divine Word",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -102,6 +110,12 @@ export default function RootLayout({
         <meta name="msapplication-square310x310logo" content="/icons/favicon_pack/mstile-310x310.png" />
       </head>
       <body className="min-h-full flex flex-col font-serif">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:text-sm focus:font-medium"
+        >
+          Skip to content
+        </a>
         <ConvexClientProvider>
           <ThemeProvider
             attribute="class"
@@ -111,7 +125,7 @@ export default function RootLayout({
           >
             <TooltipProvider>
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main id="main-content" className="flex-1">{children}</main>
               <Footer />
             </TooltipProvider>
             <ServiceWorkerRegister />

@@ -111,11 +111,46 @@ export default async function VersePage({ params }: Props) {
     },
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Bible",
+        item: "https://www.divineword.app/bible",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: book.name,
+        item: `https://www.divineword.app/bible/${bookSlug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `Chapter ${chapter}`,
+        item: `https://www.divineword.app/bible/${bookSlug}/${chapter}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: `Verse ${verseNum}`,
+        item: `https://www.divineword.app/bible/${bookSlug}/${chapter}/${verseNum}`,
+      },
+    ],
+  };
+
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, '\\u003c') }}
       />
 
       <Link

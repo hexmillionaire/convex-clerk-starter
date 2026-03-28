@@ -46,13 +46,20 @@ export async function GET(_request: Request, { params }: Props) {
       text: cleanVerseText(v.text),
     }));
 
-    return NextResponse.json({
-      book: book.name,
-      bookSlug: book.slug,
-      chapter,
-      translation: "KJV",
-      verses,
-    });
+    return NextResponse.json(
+      {
+        book: book.name,
+        bookSlug: book.slug,
+        chapter,
+        translation: "KJV",
+        verses,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+        },
+      }
+    );
   } catch {
     return NextResponse.json(
       { error: "External API unavailable" },

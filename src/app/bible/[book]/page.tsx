@@ -63,11 +63,34 @@ export default async function BookOverviewPage({ params }: Props) {
     url: `https://www.divineword.app/bible/${bookSlug}`,
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Bible",
+        item: "https://www.divineword.app/bible",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: book.name,
+        item: `https://www.divineword.app/bible/${bookSlug}`,
+      },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, '\\u003c') }}
       />
       <div className="container max-w-4xl mx-auto px-4 py-8">
         {/* Breadcrumb */}

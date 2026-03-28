@@ -19,7 +19,7 @@ export default function LoginPage() {
         <p className="text-sm text-muted-foreground mb-6">
           Your bookmarks, highlights, and journal are synced.
         </p>
-        <Link href="/bible/genesis/1">
+        <Link href="/bible">
           <Button className="w-full">Continue Reading</Button>
         </Link>
       </div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
       <p className="text-center text-xs text-muted-foreground mt-6">
         You can read the Bible without an account.{" "}
         <Link
-          href="/bible/genesis/1"
+          href="/bible"
           className="text-primary hover:underline"
         >
           Start reading &rarr;

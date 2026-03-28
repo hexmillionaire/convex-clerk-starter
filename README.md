@@ -18,6 +18,7 @@ A free, beautiful, distraction-free Bible web app. Read scripture the way it was
 ## Features
 
 ### Core
+
 - Full KJV Bible — all 66 books, 1,189 chapters
 - Chapter reader with verse numbers and clean typography
 - Scripture search (full-text, 50+ results)
@@ -29,6 +30,7 @@ A free, beautiful, distraction-free Bible web app. Read scripture the way it was
 - Mobile-responsive with bottom sheet navigation
 
 ### Auth-Gated (Clerk)
+
 - Bookmark verses across devices
 - Highlight verses with 6 colors (Gold, Rose, Sage, Sky, Lavender, Peach)
 - Devotional journal — create, edit, delete entries
@@ -36,6 +38,7 @@ A free, beautiful, distraction-free Bible web app. Read scripture the way it was
 - 6 reading plans (30-Day Psalms, Gospels, NT in 90, Bible in a Year, etc.)
 
 ### Infrastructure
+
 - Convex real-time database with full-text search index
 - Fallback data strategy: Convex DB → Bolls.life API
 - PWA installable on mobile/desktop
@@ -75,6 +78,7 @@ convex/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - A [Convex](https://convex.dev) account
 - A [Clerk](https://clerk.com) account with the Convex integration enabled
@@ -109,6 +113,7 @@ CONVEX_DEPLOYMENT=dev:your-deployment
 ```
 
 Set on Convex dashboard (or via CLI):
+
 ```
 CLERK_JWT_ISSUER_DOMAIN=https://your-clerk-frontend-api-url
 ```

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/bible/genesis/1", label: "Read", icon: Book },
+  { href: "/bible", label: "Read", icon: Book },
   { href: "/verse-of-the-day", label: "Daily Verse", icon: Sparkles },
   { href: "/search", label: "Search", icon: Search },
   { href: "/plans", label: "Plans", icon: BookMarked },
@@ -61,7 +61,7 @@ export function Navbar() {
               pathname === link.href ||
               (link.href !== "/" && pathname.startsWith(link.href));
             return (
-              <Link key={link.href} href={link.href}>
+              <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   size="sm"
@@ -81,7 +81,7 @@ export function Navbar() {
               const Icon = link.icon;
               const isActive = pathname.startsWith(link.href);
               return (
-                <Link key={link.href} href={link.href}>
+                <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
                     size="sm"
@@ -146,7 +146,7 @@ export function Navbar() {
                     pathname === link.href ||
                     (link.href !== "/" && pathname.startsWith(link.href));
                   return (
-                    <Link key={link.href} href={link.href}>
+                    <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
                       <Button
                         variant={isActive ? "secondary" : "ghost"}
                         className="w-full justify-start gap-3"
@@ -162,7 +162,7 @@ export function Navbar() {
                     const Icon = link.icon;
                     const isActive = pathname.startsWith(link.href);
                     return (
-                      <Link key={link.href} href={link.href}>
+                      <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
                         <Button
                           variant={isActive ? "secondary" : "ghost"}
                           className="w-full justify-start gap-3"
