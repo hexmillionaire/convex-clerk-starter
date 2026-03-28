@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -43,12 +44,13 @@ export function Navbar() {
   const { signOut } = useClerk();
   const { isSignedIn } = useUser();
   const isAuthenticated = !!isSignedIn;
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4 mx-auto max-w-6xl">
+      <div className="container flex h-14 items-center px-4 mx-auto max-w-6xl gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-heading">
+        <Link href="/" className="flex items-center gap-2 font-heading shrink-0">
           <Image
             src="/icons/icon-192.png"
             alt="Divine Word"
@@ -56,13 +58,13 @@ export function Navbar() {
             height={28}
             className="rounded-sm"
           />
-          <span className="font-semibold tracking-tight text-lg hidden sm:inline">
+          <span className="font-semibold tracking-tight text-lg hidden sm:inline whitespace-nowrap">
             Divine Word
           </span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        {/* Desktop nav — scrollable when tight */}
+        <nav className="hidden md:flex items-center gap-0.5 flex-1 min-w-0 justify-center">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive =
@@ -74,12 +76,12 @@ export function Navbar() {
                   variant={isActive ? "secondary" : "ghost"}
                   size="sm"
                   className={cn(
-                    "gap-2 text-sm",
+                    "gap-1.5 text-sm px-2.5",
                     isActive && "font-medium"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
-                  {link.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden lg:inline">{link.label}</span>
                 </Button>
               </Link>
             );
@@ -93,10 +95,10 @@ export function Navbar() {
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
                     size="sm"
-                    className={cn("gap-2 text-sm", isActive && "font-medium")}
+                    className={cn("gap-1.5 text-sm px-2.5", isActive && "font-medium")}
                   >
-                    <Icon className="h-4 w-4" />
-                    {link.label}
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="hidden lg:inline">{link.label}</span>
                   </Button>
                 </Link>
               );
@@ -104,8 +106,8 @@ export function Navbar() {
         </nav>
 
         {/* Right side controls */}
-        <div className="flex items-center gap-1">
-          <div className="hidden sm:flex">
+        <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+          <div className="hidden lg:flex">
             <FontSizeControl />
           </div>
           <ThemeToggle />
@@ -135,7 +137,7 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login">
+            <Link href="/login" className="hidden md:flex">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <User className="h-4 w-4" />
                 <span className="sr-only">Sign in</span>
@@ -144,15 +146,15 @@ export function Navbar() {
           )}
 
           {/* Mobile menu */}
-          <Sheet>
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger
               render={<Button variant="ghost" size="icon" className="h-9 w-9 md:hidden" />}
             >
               <Menu className="h-4 w-4" />
               <span className="sr-only">Menu</span>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <SheetTitle className="font-heading text-lg mb-6 flex items-center gap-2">
+            <SheetContent side="right" className="w-72 flex flex-col">
+              <SheetTitle className="font-heading text-lg mb-4 flex items-center gap-2">
                 <Image
                   src="/icons/icon-192.png"
                   alt="Divine Word"
@@ -162,14 +164,21 @@ export function Navbar() {
                 />
                 Divine Word
               </SheetTitle>
-              <nav className="flex flex-col gap-2">
+
+              {/* Mobile nav links */}
+              <nav className="flex flex-col gap-1 flex-1 overflow-y-auto">
                 {navLinks.map((link) => {
                   const Icon = link.icon;
                   const isActive =
                     pathname === link.href ||
                     (link.href !== "/" && pathname.startsWith(link.href));
                   return (
-                    <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setSheetOpen(false)}
+                      aria-current={isActive ? "page" : undefined}
+                    >
                       <Button
                         variant={isActive ? "secondary" : "ghost"}
                         className="w-full justify-start gap-3"
@@ -180,38 +189,73 @@ export function Navbar() {
                     </Link>
                   );
                 })}
-                {isAuthenticated &&
-                  authLinks.map((link) => {
-                    const Icon = link.icon;
-                    const isActive = pathname.startsWith(link.href);
-                    return (
-                      <Link key={link.href} href={link.href} aria-current={isActive ? "page" : undefined}>
-                        <Button
-                          variant={isActive ? "secondary" : "ghost"}
-                          className="w-full justify-start gap-3"
+
+                {/* Auth-gated links with separator */}
+                {isAuthenticated && (
+                  <>
+                    <div className="my-2 border-t" />
+                    <p className="text-xs text-muted-foreground px-3 mb-1 uppercase tracking-wider">
+                      My Study
+                    </p>
+                    {authLinks.map((link) => {
+                      const Icon = link.icon;
+                      const isActive = pathname.startsWith(link.href);
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setSheetOpen(false)}
+                          aria-current={isActive ? "page" : undefined}
                         >
-                          <Icon className="h-4 w-4" />
-                          {link.label}
-                        </Button>
-                      </Link>
-                    );
-                  })}
+                          <Button
+                            variant={isActive ? "secondary" : "ghost"}
+                            className="w-full justify-start gap-3"
+                          >
+                            <Icon className="h-4 w-4" />
+                            {link.label}
+                          </Button>
+                        </Link>
+                      );
+                    })}
+                  </>
+                )}
               </nav>
-              {isAuthenticated && (
-                <div className="mt-4 pt-4 border-t">
+
+              {/* Bottom controls */}
+              <div className="mt-auto border-t pt-4 space-y-4">
+                {/* Theme */}
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Theme</p>
+                  <ThemeToggle />
+                </div>
+
+                {/* Font size */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Font Size</p>
+                  <FontSizeControl />
+                </div>
+
+                {/* Auth action */}
+                {isAuthenticated ? (
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-red-600"
-                    onClick={() => void signOut()}
+                    onClick={() => {
+                      setSheetOpen(false);
+                      void signOut();
+                    }}
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
-                </div>
-              )}
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-xs text-muted-foreground mb-2">Font Size</p>
-                <FontSizeControl />
+                ) : (
+                  <Link href="/login" onClick={() => setSheetOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start gap-3">
+                      <User className="h-4 w-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>
