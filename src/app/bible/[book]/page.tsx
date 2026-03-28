@@ -67,7 +67,7 @@ export default async function BookOverviewPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <div className="container max-w-4xl mx-auto px-4 py-8">
         {/* Breadcrumb */}

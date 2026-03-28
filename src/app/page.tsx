@@ -67,7 +67,7 @@ export default function HomePage() {
     <div className="min-h-[80vh]">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       {/* Hero */}
       <section className="relative py-20 md:py-32 overflow-hidden">

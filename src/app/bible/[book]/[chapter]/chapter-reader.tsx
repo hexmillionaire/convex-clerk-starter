@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -28,7 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { type BookInfo, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
 import { TranslationSwitcher, type Translation } from "@/components/translation-switcher";
 import { HighlightPicker } from "@/components/highlight-picker";
+import { VerseImageShare } from "@/components/verse-image-share";
 import { ReadingProgress } from "@/components/reading-progress";
+import { AudioPlayer } from "@/components/audio-player";
 
 type Props = {
   book: BookInfo;
@@ -97,10 +99,13 @@ export function ChapterReader({ book, chapter }: Props) {
     convexVerses === undefined || (convexVerses.length === 0 && loadingApi);
 
   // Build a set of bookmarked verse numbers for this chapter
-  const bookmarkedVerses = new Set(
-    (bookmarks ?? [])
-      .filter((b) => b.bookSlug === book.slug && b.chapter === chapter)
-      .map((b) => b.verseNumber)
+  const bookmarkedVerses = useMemo(
+    () => new Set(
+      (bookmarks ?? [])
+        .filter((b) => b.bookSlug === book.slug && b.chapter === chapter)
+        .map((b) => b.verseNumber)
+    ),
+    [bookmarks, book.slug, chapter]
   );
 
   const handleHighlight = useCallback(
@@ -291,6 +296,18 @@ export function ChapterReader({ book, chapter }: Props) {
         />
       </div>
 
+      {/* Audio player */}
+      {!isLoading && verses.length > 0 && (
+        <div className="mb-6">
+          <AudioPlayer
+            verses={verses.map((v) => ({ verse: v.verse, text: cleanVerseText(v.text) }))}
+            bookName={book.name}
+            chapter={chapter}
+            onVerseChange={(verse) => setSelectedVerse(verse || null)}
+          />
+        </div>
+      )}
+
       {/* Verse content */}
       <article className="mb-12">
         {isLoading ? (
@@ -367,6 +384,10 @@ export function ChapterReader({ book, chapter }: Props) {
                     >
                       <Share2 className="h-3 w-3" />
                     </Button>
+                    <VerseImageShare
+                      reference={`${book.name} ${chapter}:${v.verse}`}
+                      text={cleanVerseText(v.text)}
+                    />
                   </div>
                 </div>
               );

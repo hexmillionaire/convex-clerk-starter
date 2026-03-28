@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { VotdShareButton } from "./votd-share-button";
+import { VerseImageShare } from "@/components/verse-image-share";
 
 export const metadata: Metadata = {
   title: "Verse of the Day — Divine Word",
@@ -90,7 +91,7 @@ export default function VerseOfTheDayPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <div className="container max-w-3xl mx-auto px-4 py-12">
         {/* Today's Verse */}
@@ -120,6 +121,7 @@ export default function VerseOfTheDayPage() {
                 </Button>
               </Link>
               <VotdShareButton reference={todayVerse.ref} text={todayVerse.text} />
+              <VerseImageShare reference={todayVerse.ref} text={todayVerse.text} variant="button" />
             </div>
           </CardContent>
         </Card>

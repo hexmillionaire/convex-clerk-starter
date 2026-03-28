@@ -39,14 +39,13 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [page, setPage] = useState(1);
   const [searchedQuery, setSearchedQuery] = useState("");
 
-  const handleSearch = useCallback(async () => {
-    const trimmed = query.trim();
+  const handleSearch = useCallback(async (overrideQuery?: string) => {
+    const trimmed = (overrideQuery ?? query).trim();
     if (!trimmed) return;
 
     setLoading(true);
@@ -61,14 +60,11 @@ export default function SearchPage() {
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);
-        setTotal(data.total || 0);
       } else {
         setResults([]);
-        setTotal(0);
       }
     } catch {
       setResults([]);
-      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -104,7 +100,7 @@ export default function SearchPage() {
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
-        <Button onClick={handleSearch} disabled={loading} className="gap-2">
+        <Button onClick={() => handleSearch()} disabled={loading} className="gap-2">
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -136,7 +132,7 @@ export default function SearchPage() {
       {!loading && results.length > 0 && (
         <div>
           <p className="text-sm text-muted-foreground mb-4 font-mono">
-            {results.length} of {total} result{total !== 1 ? "s" : ""}
+            {results.length} result{results.length !== 1 ? "s" : ""}
             {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
           </p>
           <div className="space-y-3">
@@ -216,9 +212,7 @@ export default function SearchPage() {
                 className="text-xs"
                 onClick={() => {
                   setQuery(term);
-                  setTimeout(() => {
-                    handleSearch();
-                  }, 0);
+                  handleSearch(term);
                 }}
               >
                 {term}

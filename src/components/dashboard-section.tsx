@@ -32,7 +32,7 @@ export function DashboardSection() {
 
   // Find the most recently read book/chapter to suggest "Continue Reading"
   const lastRead = allProgress
-    ?.sort((a, b) => b._creationTime - a._creationTime)
+    ?.toSorted((a, b) => b._creationTime - a._creationTime)
     ?.[0];
 
   const lastBook = lastRead

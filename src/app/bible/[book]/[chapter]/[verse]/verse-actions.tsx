@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VerseImageShare } from "@/components/verse-image-share";
 
 export function VerseActions({
   reference,
@@ -16,9 +17,13 @@ export function VerseActions({
   const citation = `${reference} (KJV)\n"${text}"`;
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(citation);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(citation);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard permission denied
+    }
   };
 
   const handleShare = async () => {
@@ -26,12 +31,16 @@ export function VerseActions({
       title: reference,
       text: `"${text}" — ${reference} (KJV)`,
     };
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      await navigator.clipboard.writeText(shareData.text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      // User cancelled share
     }
   };
 
@@ -45,6 +54,7 @@ export function VerseActions({
         <Share2 className="h-4 w-4" />
         Share
       </Button>
+      <VerseImageShare reference={reference} text={text} variant="button" />
     </>
   );
 }

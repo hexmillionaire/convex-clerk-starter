@@ -10,10 +10,14 @@ export function VotdShareButton({ reference, text }: { reference: string; text: 
       className="gap-2"
       onClick={async () => {
         const shareText = `"${text}" — ${reference} (KJV)\n\nVia Divine Word: https://www.divineword.app/verse-of-the-day`;
-        if (navigator.share) {
-          await navigator.share({ title: `Verse of the Day: ${reference}`, text: shareText });
-        } else {
-          await navigator.clipboard.writeText(shareText);
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: `Verse of the Day: ${reference}`, text: shareText });
+          } else {
+            await navigator.clipboard.writeText(shareText);
+          }
+        } catch {
+          // User cancelled share or clipboard permission denied
         }
       }}
     >

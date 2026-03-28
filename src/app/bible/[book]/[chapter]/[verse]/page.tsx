@@ -83,13 +83,13 @@ export default async function VersePage({ params }: Props) {
   );
 
   // Prev/next verse nav
-  const totalVerses = verses.length;
+  const maxVerse = verses.length > 0 ? verses[verses.length - 1].verse : 0;
   const prevVerse =
     verseNum > 1
       ? `/bible/${bookSlug}/${chapter}/${verseNum - 1}`
       : null;
   const nextVerse =
-    verseNum < totalVerses
+    verseNum < maxVerse
       ? `/bible/${bookSlug}/${chapter}/${verseNum + 1}`
       : null;
 
@@ -115,7 +115,7 @@ export default async function VersePage({ params }: Props) {
     <div className="container max-w-3xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
 
       <Link
