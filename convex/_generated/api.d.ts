@@ -10,13 +10,17 @@
 
 import type * as bible from "../bible.js";
 import type * as bookmarks from "../bookmarks.js";
+import type * as dashboard from "../dashboard.js";
 import type * as highlights from "../highlights.js";
 import type * as http from "../http.js";
 import type * as journal from "../journal.js";
+import type * as milestones from "../milestones.js";
+import type * as prayerJournal from "../prayerJournal.js";
 import type * as readingPlans from "../readingPlans.js";
 import type * as readingProgress from "../readingProgress.js";
 import type * as seed from "../seed.js";
 import type * as stats from "../stats.js";
+import type * as userSettings from "../userSettings.js";
 
 import type {
   ApiFromModules,
@@ -27,13 +31,17 @@ import type {
 declare const fullApi: ApiFromModules<{
   bible: typeof bible;
   bookmarks: typeof bookmarks;
+  dashboard: typeof dashboard;
   highlights: typeof highlights;
   http: typeof http;
   journal: typeof journal;
+  milestones: typeof milestones;
+  prayerJournal: typeof prayerJournal;
   readingPlans: typeof readingPlans;
   readingProgress: typeof readingProgress;
   seed: typeof seed;
   stats: typeof stats;
+  userSettings: typeof userSettings;
 }>;
 
 /**

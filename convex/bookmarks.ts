@@ -22,6 +22,7 @@ export const add = mutation({
     verseNumber: v.number(),
     reference: v.string(),
     text: v.string(),
+    collection: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -88,5 +89,44 @@ export const isBookmarked = query({
       .first();
 
     return existing !== null;
+  },
+});
+
+export const updateCollection = mutation({
+  args: {
+    id: v.id("bookmarks"),
+    collection: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
+
+    const bookmark = await ctx.db.get(args.id);
+    if (!bookmark || bookmark.userId !== userId) {
+      throw new Error("Bookmark not found");
+    }
+
+    await ctx.db.patch(args.id, { collection: args.collection });
+  },
+});
+
+export const listCollections = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.tokenIdentifier;
+
+    const bookmarks = await ctx.db
+      .query("bookmarks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const collections = new Set<string>();
+    for (const bm of bookmarks) {
+      if (bm.collection) collections.add(bm.collection);
+    }
+    return Array.from(collections).sort();
   },
 });

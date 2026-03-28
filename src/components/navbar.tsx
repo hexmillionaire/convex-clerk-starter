@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine, Sparkles } from "lucide-react";
+import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine, Sparkles, LayoutDashboard, HandHeart } from "lucide-react";
 import { useConvexAuth } from "convex/react";
 import { useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,10 @@ const navLinks = [
 ];
 
 const authLinks = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/journal", label: "Journal", icon: PenLine },
+  { href: "/prayers", label: "Prayers", icon: HandHeart },
   { href: "/stats", label: "Stats", icon: BarChart3 },
 ];
 
@@ -104,12 +106,12 @@ export function Navbar() {
           {isAuthenticated ? (
             <Button
               variant="ghost"
-              size="icon"
-              className="h-9 w-9"
+              size="sm"
+              className="gap-2 hidden md:flex"
               onClick={() => void signOut()}
             >
               <LogOut className="h-4 w-4" />
-              <span className="sr-only">Sign out</span>
+              Sign Out
             </Button>
           ) : (
             <Link href="/login">
@@ -174,7 +176,19 @@ export function Navbar() {
                     );
                   })}
               </nav>
-              <div className="mt-6 pt-6 border-t">
+              {isAuthenticated && (
+                <div className="mt-4 pt-4 border-t">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 text-red-600"
+                    onClick={() => void signOut()}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </div>
+              )}
+              <div className="mt-4 pt-4 border-t">
                 <p className="text-xs text-muted-foreground mb-2">Font Size</p>
                 <FontSizeControl />
               </div>

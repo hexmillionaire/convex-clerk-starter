@@ -19,9 +19,14 @@ export default function LoginPage() {
         <p className="text-sm text-muted-foreground mb-6">
           Your bookmarks, highlights, and journal are synced.
         </p>
-        <Link href="/bible">
-          <Button className="w-full">Continue Reading</Button>
-        </Link>
+        <div className="flex flex-col gap-3">
+          <Link href="/dashboard">
+            <Button className="w-full">Go to Dashboard</Button>
+          </Link>
+          <Link href="/bible">
+            <Button variant="outline" className="w-full">Continue Reading</Button>
+          </Link>
+        </div>
       </div>
     );
   }

@@ -26,6 +26,7 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const verseIndexRef = useRef(0);
   const playingRef = useRef(false);
+  const speakVerseRef = useRef<(index: number) => void | null>(null);
 
   // Cleanup on unmount or chapter change
   useEffect(() => {
@@ -54,7 +55,7 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
           verseIndexRef.current = next;
           setCurrentVerse(next);
           onVerseChange?.(verses[next]?.verse ?? 0);
-          speakVerse(next);
+          speakVerseRef.current?.(next);
         }
       };
       utt.onerror = () => {
@@ -73,6 +74,10 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
     },
     [verses, rate, onVerseChange]
   );
+
+  useEffect(() => {
+    speakVerseRef.current = speakVerse;
+  }, [speakVerse]);
 
   const handlePlay = useCallback(() => {
     if (playing) {

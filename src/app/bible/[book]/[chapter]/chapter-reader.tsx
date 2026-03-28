@@ -320,7 +320,8 @@ export function ChapterReader({ book, chapter }: Props) {
         ) : verses.length > 0 ? (
           <div className="space-y-1">
             {verses.map((v) => {
-              const highlightColor = highlights?.[v.verse];
+              const highlightData = highlights?.[v.verse];
+              const highlightColor = highlightData?.color ?? null;
               const isMarked = bookmarkedVerses.has(v.verse);
               const isSelected = selectedVerse === v.verse;
 
@@ -357,7 +358,7 @@ export function ChapterReader({ book, chapter }: Props) {
                       <>
                         <HighlightPicker
                           verseId={`v${v.verse}`}
-                          currentColor={highlightColor ?? null}
+                          currentColor={highlightColor}
                           onHighlight={(_id, color) =>
                             handleHighlight(v.verse, color)
                           }

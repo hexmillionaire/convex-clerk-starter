@@ -21,9 +21,9 @@ export const getForChapter = query({
       )
       .collect();
 
-    const map: Record<number, string> = {};
+    const map: Record<number, { color: string; note?: string }> = {};
     for (const h of highlights) {
-      map[h.verseNumber] = h.color;
+      map[h.verseNumber] = { color: h.color, note: h.note };
     }
     return map;
   },
@@ -35,6 +35,7 @@ export const set = mutation({
     chapter: v.number(),
     verseNumber: v.number(),
     color: v.string(),
+    note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -55,7 +56,7 @@ export const set = mutation({
     const match = existing.find((h) => h.verseNumber === args.verseNumber);
 
     if (match) {
-      await ctx.db.patch(match._id, { color: args.color });
+      await ctx.db.patch(match._id, { color: args.color, note: args.note });
       return match._id;
     }
 
@@ -65,6 +66,7 @@ export const set = mutation({
       chapter: args.chapter,
       verseNumber: args.verseNumber,
       color: args.color,
+      note: args.note,
     });
   },
 });
@@ -93,6 +95,35 @@ export const remove = mutation({
     const match = highlights.find((h) => h.verseNumber === args.verseNumber);
     if (match) {
       await ctx.db.delete(match._id);
+    }
+  },
+});
+
+export const updateNote = mutation({
+  args: {
+    bookSlug: v.string(),
+    chapter: v.number(),
+    verseNumber: v.number(),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
+
+    const highlights = await ctx.db
+      .query("highlights")
+      .withIndex("by_user_chapter", (q) =>
+        q
+          .eq("userId", userId)
+          .eq("bookSlug", args.bookSlug)
+          .eq("chapter", args.chapter)
+      )
+      .collect();
+
+    const match = highlights.find((h) => h.verseNumber === args.verseNumber);
+    if (match) {
+      await ctx.db.patch(match._id, { note: args.note });
     }
   },
 });

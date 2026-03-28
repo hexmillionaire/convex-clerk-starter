@@ -464,15 +464,90 @@ const nextConfig: NextConfig = {
 
 ---
 
-## 11. Health Scores
+---
+
+## 11. Dashboard & New Features Security Review (March 2026 Update)
+
+Twelve new authenticated features were added in this update cycle. This section audits the security posture of all new backend functions, schema changes, and frontend pages.
+
+### 11.1 Schema Changes
+
+Three new tables added (total: 10 tables):
+
+| Table | Purpose | Auth Pattern | Indexes |
+|-------|---------|--------------|--------|
+| `userSettings` | Daily goal, reminder preferences | `by_user` — server-side `tokenIdentifier` | `by_user` |
+| `prayerJournal` | Prayer requests with categories | `by_user` — server-side `tokenIdentifier` | `by_user` |
+| `milestones` | Achievement tracking | `by_user` — server-side `tokenIdentifier` | `by_user`, `by_user_and_type` |
+
+Two existing tables modified:
+
+| Table | Change | Security Impact |
+|-------|--------|-----------------|
+| `bookmarks` | Added `collection: v.optional(v.string())` | None — optional field, validated by Convex |
+| `highlights` | Added `note: v.optional(v.string())` | None — optional field, validated by Convex |
+
+### 11.2 New Backend Functions — Auth Audit
+
+| Function | Type | Auth Check | Ownership Verification | Input Validation |
+|----------|------|------------|----------------------|------------------|
+| `prayerJournal.list` | Query | `getUserIdentity()` — returns `[]` if null | Filters by `userId` | No args needed |
+| `prayerJournal.add` | Mutation | Throws if not authenticated | Inserts with server `userId` | `v.string()` for request and category |
+| `prayerJournal.markAnswered` | Mutation | Throws if not authenticated | Verifies `prayer.userId === userId` | `v.id("prayerJournal")` |
+| `prayerJournal.remove` | Mutation | Throws if not authenticated | Verifies `prayer.userId === userId` | `v.id("prayerJournal")` |
+| `userSettings.get` | Query | `getUserIdentity()` — returns `null` if unauthenticated | Filters by `userId` | No args |
+| `userSettings.update` | Mutation | Throws if not authenticated | Queries by `userId`, upserts | `v.optional()` validators on all fields |
+| `milestones.list` | Query | `getUserIdentity()` — returns `[]` if null | Filters by `userId` | No args |
+| `milestones.checkAndAward` | Mutation | Throws if not authenticated | Queries by `userId` + type | `v.string()` type, `v.number()` value |
+| `milestones.celebrate` | Mutation | Throws if not authenticated | Verifies `milestone.userId === userId` | `v.id("milestones")` |
+| `bookmarks.updateCollection` | Mutation | Throws if not authenticated | Verifies `bookmark.userId === userId` | `v.id("bookmarks")`, `v.optional(v.string())` |
+| `bookmarks.listCollections` | Query | `getUserIdentity()` — returns `[]` if null | Filters by `userId` | No args |
+| `highlights.updateNote` | Mutation | Throws if not authenticated | Queries by `userId` + chapter | `v.optional(v.string())` |
+| `dashboard.get` | Query | `getUserIdentity()` — returns `null` if unauthenticated | All sub-queries filter by `userId` | No args |
+
+**Assessment: PASS** — All 13 new functions follow the established auth pattern:
+- No function accepts a `userId` as an argument (OWASP A01 compliant)
+- All mutations throw on unauthenticated access
+- All queries degrade gracefully (return `[]` or `null`)
+- All delete/update mutations verify document ownership before modifying
+- All inputs validated with Convex `v.*` validators (injection-safe)
+
+### 11.3 Frontend Security
+
+| Page | Auth Gate | Data Exposure | XSS Risk |
+|------|-----------|--------------|----------|
+| `/dashboard` | `useConvexAuth()` — redirects to login | User-only data via Convex subscription | None — React auto-escapes |
+| `/prayers` | `useConvexAuth()` — redirects to login | User-only data via Convex subscription | None — React auto-escapes |
+| `/bookmarks` (updated) | `useConvexAuth()` — redirects to login | User-only data via Convex subscription | None — React auto-escapes |
+
+**Clipboard API:** The share progress button uses `navigator.clipboard.writeText()` wrapped in try/catch for browser compatibility. No sensitive data is copied — only a summary string with chapter count, streak, and a link to the public site.
+
+**Inline styles:** Highlight colors are applied via React `style` objects (not `dangerouslySetInnerHTML`), so injected color values cannot escape into executable code.
+
+### 11.4 Data Privacy
+
+- Prayer journal content is private — only accessible by the owning user
+- No prayer data, journal entries, or personal settings are exposed in any public API
+- Dashboard data is fetched via Convex authenticated subscriptions — never sent as plain HTTP
+- The share progress feature only copies a generic summary ("I've read X chapters...") — no personal content
+
+### 11.5 Performance Impact
+
+**Dashboard query consolidation:** The dashboard query was optimized to avoid a redundant second `.collect()` on highlights. All highlights are fetched once, sliced for the recent 10, and counted from the same array.
+
+**Potential concern:** The dashboard query fetches all `readingProgress` documents for a user to compute the streak calendar and per-book progress. For heavy users (1,000+ chapters read), this could become expensive. Consider pagination or date-bounded queries in the future.
+
+---
+
+## 12. Health Scores
 
 | Category | Score | Grade | Notes |
 |----------|-------|-------|-------|
-| **Security** | **52/100** | D+ | Strong auth/authz, but headers are critically absent |
-| **Performance** | **82/100** | B+ | Fast TTFB, good caching, well-optimized assets; room for API caching |
+| **Security** | **52/100** | D+ | Strong auth/authz (now across 10 tables), but HTTP headers are critically absent |
+| **Performance** | **80/100** | B | Fast TTFB, good caching; dashboard query is heavier but consolidated |
 | **SEO** | **78/100** | B | Excellent sitemap/meta/structured data; missing OG images and breadcrumbs |
 | **Accessibility** | **65/100** | C+ | Good semantic HTML and focus states; missing skip link, aria-live, reduced-motion |
-| **Code Quality** | **88/100** | A- | Clean architecture, type-safe, modern stack; minor naming issues |
+| **Code Quality** | **90/100** | A | Clean architecture, type-safe, consistent auth patterns across all new features |
 | **Dependency Risk** | **92/100** | A | All deps current, zero third-party browser scripts; `bolls.life` is single external risk |
 | **Infrastructure** | **70/100** | B- | Vercel is excellent; header config is the gap |
-| **Overall** | **75/100** | **B** | Strong foundation, fixable gaps |
+| **Overall** | **75/100** | **B** | Strong foundation with comprehensive feature set, fixable header gaps |

@@ -24,6 +24,7 @@ export default defineSchema({
     verseNumber: v.number(),
     reference: v.string(), // "John 3:16"
     text: v.string(),
+    collection: v.optional(v.string()), // e.g. "Favorites", "Promises"
   })
     .index("by_user", ["userId"])
     .index("by_user_verse", ["userId", "bookSlug", "chapter", "verseNumber"]),
@@ -35,6 +36,7 @@ export default defineSchema({
     chapter: v.number(),
     verseNumber: v.number(),
     color: v.string(),
+    note: v.optional(v.string()), // personal note on highlight
   })
     .index("by_user", ["userId"])
     .index("by_user_chapter", ["userId", "bookSlug", "chapter"]),
@@ -65,4 +67,32 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_plan", ["userId", "planSlug"]),
+
+  // ─── User settings (daily goal, reminders) ───
+  userSettings: defineTable({
+    userId: v.string(),
+    dailyGoal: v.number(), // chapters per day
+    reminderEnabled: v.optional(v.boolean()),
+    reminderTime: v.optional(v.string()), // "HH:MM" e.g. "07:00"
+  }).index("by_user", ["userId"]),
+
+  // ─── Prayer journal ───
+  prayerJournal: defineTable({
+    userId: v.string(),
+    request: v.string(),
+    category: v.string(), // "personal", "family", "community", "praise", "other"
+    answered: v.boolean(),
+    answeredNote: v.optional(v.string()),
+    answeredAt: v.optional(v.number()),
+  }).index("by_user", ["userId"]),
+
+  // ─── Milestones (achievements) ───
+  milestones: defineTable({
+    userId: v.string(),
+    type: v.string(), // "chapters_read", "streak", "books_completed", "bookmarks", "journal_entries"
+    value: v.number(), // threshold reached
+    celebratedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_type", ["userId", "type"]),
 });
