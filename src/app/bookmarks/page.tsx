@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function BookmarksPage() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isSignedIn, isLoaded: clerkLoaded } = useUser();
   const bookmarks = useQuery(api.bookmarks.list);
   const collections = useQuery(api.bookmarks.listCollections);
   const removeBookmark = useMutation(api.bookmarks.remove);
@@ -31,7 +31,7 @@ export default function BookmarksPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newCollection, setNewCollection] = useState("");
 
-  if (isLoading) {
+  if (!clerkLoaded) {
     return (
       <div className="container max-w-3xl mx-auto px-4 py-16 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
@@ -39,7 +39,7 @@ export default function BookmarksPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return (
       <div className="container max-w-md mx-auto px-4 py-20 text-center">
         <Lock className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { BIBLE_BOOKS } from "@/lib/bible-data";
@@ -18,9 +19,18 @@ import { Button } from "@/components/ui/button";
 
 export default function StatsPage() {
   const { isAuthenticated } = useConvexAuth();
+  const { isSignedIn, isLoaded: clerkLoaded } = useUser();
   const stats = useQuery(api.stats.get, isAuthenticated ? {} : "skip");
 
-  if (!isAuthenticated) {
+  if (!clerkLoaded) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
     return (
       <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
         <p className="text-primary text-lg mb-2">✦</p>

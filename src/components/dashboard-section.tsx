@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export function DashboardSection() {
+  const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
   const stats = useQuery(api.stats.get, isAuthenticated ? {} : "skip");
   const bookmarks = useQuery(api.bookmarks.list, isAuthenticated ? {} : "skip");
@@ -23,7 +25,7 @@ export function DashboardSection() {
     isAuthenticated ? {} : "skip"
   );
 
-  if (!isAuthenticated || stats === undefined) return null;
+  if (!isSignedIn || stats === undefined) return null;
   if (!stats) return null;
 
   const overallPercent = Math.round(

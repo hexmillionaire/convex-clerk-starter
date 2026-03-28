@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,9 +115,10 @@ function highlightColorName(hex: string) {
 }
 
 export default function DashboardPage() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isAuthenticated } = useConvexAuth();
   const { signOut } = useClerk();
-  const { user } = useUser();
+  const { user, isLoaded: clerkLoaded, isSignedIn } = useUser();
+  const router = useRouter();
   const dashboard = useQuery(
     api.dashboard.get,
     isAuthenticated ? {} : "skip"
@@ -129,7 +131,7 @@ export default function DashboardPage() {
   const [reminderTime, setReminderTime] = useState("");
   const [reminderEnabled, setReminderEnabled] = useState(false);
 
-  if (isLoading) {
+  if (!clerkLoaded) {
     return (
       <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
@@ -137,7 +139,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return (
       <div className="container max-w-md mx-auto px-4 py-20 text-center">
         <Lock className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />

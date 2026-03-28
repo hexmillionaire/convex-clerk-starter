@@ -4,8 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Book, Search, BookMarked, Menu, User, LogOut, Home, BarChart3, Bookmark, PenLine, Sparkles, LayoutDashboard, HandHeart } from "lucide-react";
-import { useConvexAuth } from "convex/react";
-import { useClerk } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FontSizeControl } from "@/components/font-size-control";
@@ -41,8 +40,9 @@ const authLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { isAuthenticated } = useConvexAuth();
   const { signOut } = useClerk();
+  const { isSignedIn } = useUser();
+  const isAuthenticated = !!isSignedIn;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">

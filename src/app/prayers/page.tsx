@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ function categoryLabel(value: string) {
 }
 
 export default function PrayersPage() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isSignedIn, isLoaded: clerkLoaded } = useUser();
   const prayers = useQuery(api.prayerJournal.list);
   const addPrayer = useMutation(api.prayerJournal.add);
   const markAnswered = useMutation(api.prayerJournal.markAnswered);
@@ -65,7 +65,7 @@ export default function PrayersPage() {
     setSaving(false);
   };
 
-  if (isLoading) {
+  if (!clerkLoaded) {
     return (
       <div className="container max-w-3xl mx-auto px-4 py-16 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
@@ -73,7 +73,7 @@ export default function PrayersPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return (
       <div className="container max-w-md mx-auto px-4 py-20 text-center">
         <Lock className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
