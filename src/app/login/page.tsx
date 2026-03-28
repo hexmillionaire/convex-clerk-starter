@@ -1,34 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const { isSignedIn } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isSignedIn, router]);
 
   if (isSignedIn) {
-    return (
-      <div className="container max-w-md mx-auto px-4 py-16 text-center">
-        <CheckCircle className="h-12 w-12 mx-auto text-green-600 mb-4" />
-        <h1 className="text-2xl font-heading font-semibold mb-2">
-          You&apos;re signed in
-        </h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          Your bookmarks, highlights, and journal are synced.
-        </p>
-        <div className="flex flex-col gap-3">
-          <Link href="/dashboard">
-            <Button className="w-full">Go to Dashboard</Button>
-          </Link>
-          <Link href="/bible">
-            <Button variant="outline" className="w-full">Continue Reading</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -43,7 +33,7 @@ export default function LoginPage() {
 
       <Card>
         <CardContent className="p-6 flex flex-col gap-4">
-          <SignInButton mode="redirect" forceRedirectUrl="/">
+          <SignInButton mode="redirect" forceRedirectUrl="/dashboard">
             <Button className="w-full" size="lg">
               Sign In
             </Button>
@@ -58,7 +48,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <SignUpButton mode="redirect" forceRedirectUrl="/">
+          <SignUpButton mode="redirect" forceRedirectUrl="/dashboard">
             <Button variant="outline" className="w-full" size="lg">
               Create Account
             </Button>

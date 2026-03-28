@@ -15,6 +15,12 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -104,12 +110,30 @@ export function Navbar() {
           </div>
           <ThemeToggle />
           {isAuthenticated ? (
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon" className="h-9 w-9 hidden md:flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="ghost" size="icon" className="h-9 w-9 hidden md:flex" />}
+              >
                 <User className="h-4 w-4" />
-                <span className="sr-only">Dashboard</span>
-              </Button>
-            </Link>
+                <span className="sr-only">Account</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <Link href="/dashboard">
+                  <DropdownMenuItem className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem
+                  className="gap-2"
+                  variant="destructive"
+                  onClick={() => void signOut()}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link href="/login">
               <Button variant="ghost" size="icon" className="h-9 w-9">
