@@ -52,6 +52,11 @@ export default function StatsPage() {
       <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
         <p className="text-sm text-muted-foreground mt-2">Loading stats...</p>
+        {isSignedIn && !isAuthenticated && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Having trouble connecting? Try signing out and back in.
+          </p>
+        )}
       </div>
     );
   }

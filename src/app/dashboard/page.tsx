@@ -166,6 +166,28 @@ export default function DashboardPage() {
   }
 
   if (dashboard === undefined) {
+    if (isSignedIn && !isAuthenticated) {
+      return (
+        <div className="container max-w-md mx-auto px-4 py-20 text-center">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary mb-4" />
+          <p className="text-sm text-muted-foreground">
+            Connecting to your account...
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            If this takes more than a few seconds, try signing out and back in.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => signOut({ redirectUrl: "/login" })}
+          >
+            <LogOut className="h-3.5 w-3.5 mr-2" />
+            Sign Out & Retry
+          </Button>
+        </div>
+      );
+    }
     return (
       <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />

@@ -63,6 +63,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
   }, [isAuthenticated, isRead, markRead, bookSlug, chapter]);
 
   const toggleRead = useCallback(async () => {
+    if (!isAuthenticated) return;
     try {
       if (isRead) {
         await markUnread({ bookSlug, chapter });
@@ -72,7 +73,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
     } catch {
       // Auth may not be ready; silently ignore
     }
-  }, [isRead, markRead, markUnread, bookSlug, chapter]);
+  }, [isAuthenticated, isRead, markRead, markUnread, bookSlug, chapter]);
 
   const readCount = progress ? Object.keys(progress).length : 0;
   const pct =

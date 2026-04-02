@@ -128,6 +128,11 @@ export default function BookmarksPage() {
       {bookmarks === undefined ? (
         <div className="text-center py-16">
           <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          {isSignedIn && !isAuthenticated && (
+            <p className="text-xs text-muted-foreground mt-3">
+              Having trouble connecting? Try signing out and back in.
+            </p>
+          )}
         </div>
       ) : bookmarks.length === 0 ? (
         <div className="text-center py-16">
