@@ -14,8 +14,8 @@ type Props = {
 };
 
 export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
-  const { isSignedIn } = useUser();
-  const isAuthenticated = !!isSignedIn;
+  const { isSignedIn, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!isSignedIn;
   const progress = useQuery(
     api.readingProgress.getForBook,
     isAuthenticated ? { bookSlug } : "skip"
@@ -26,10 +26,14 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
   const isRead = progress?.[chapter] ?? false;
   const autoMarkedRef = useRef(false);
 
+  // Reset auto-mark flag when chapter changes
+  useEffect(() => {
+    autoMarkedRef.current = false;
+  }, [bookSlug, chapter]);
+
   // Auto-mark as read when user scrolls to bottom
   useEffect(() => {
     if (!isAuthenticated || isRead) return;
-    autoMarkedRef.current = false;
 
     const handleScroll = () => {
       if (autoMarkedRef.current) return;
@@ -37,7 +41,9 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
       const threshold = document.documentElement.scrollHeight - 200;
       if (scrolled >= threshold) {
         autoMarkedRef.current = true;
-        markRead({ bookSlug, chapter });
+        markRead({ bookSlug, chapter }).catch(() => {
+          autoMarkedRef.current = false;
+        });
       }
     };
 
@@ -46,10 +52,14 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
   }, [isAuthenticated, isRead, markRead, bookSlug, chapter]);
 
   const toggleRead = useCallback(async () => {
-    if (isRead) {
-      await markUnread({ bookSlug, chapter });
-    } else {
-      await markRead({ bookSlug, chapter });
+    try {
+      if (isRead) {
+        await markUnread({ bookSlug, chapter });
+      } else {
+        await markRead({ bookSlug, chapter });
+      }
+    } catch {
+      // Auth may not be ready; silently ignore
     }
   }, [isRead, markRead, markUnread, bookSlug, chapter]);
 

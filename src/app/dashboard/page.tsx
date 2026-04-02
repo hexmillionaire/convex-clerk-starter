@@ -40,6 +40,9 @@ import {
   FolderOpen,
   MessageSquare,
   Star,
+  User,
+  Trash2,
+  Heart,
 } from "lucide-react";
 
 // ─── VOTD data ───
@@ -129,6 +132,14 @@ export default function DashboardPage() {
   const [goalInput, setGoalInput] = useState("");
   const [reminderTime, setReminderTime] = useState("");
   const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteInput, setDeleteInput] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   if (!clerkLoaded) {
     return (
@@ -995,7 +1006,7 @@ export default function DashboardPage() {
       )}
 
       {/* Quick links */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
         <Link href="/bookmarks">
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4 text-center">
@@ -1037,6 +1048,230 @@ export default function DashboardPage() {
           </Card>
         </Link>
       </div>
+
+      {/* ═══ Account & Profile Section ═══ */}
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading font-semibold text-sm flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              Account
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                setShowProfile(!showProfile);
+                setFirstName(user?.firstName ?? "");
+                setLastName(user?.lastName ?? "");
+                setEditingName(false);
+                setShowDeleteConfirm(false);
+              }}
+            >
+              {showProfile ? "Close" : "Manage"}
+            </Button>
+          </div>
+
+          {/* Account summary */}
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-heading font-bold text-lg">
+              {user?.firstName?.[0] ?? user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() ?? "?"}
+            </div>
+            <div>
+              <p className="font-medium text-sm">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {user?.primaryEmailAddress?.emailAddress}
+              </p>
+            </div>
+          </div>
+
+          {showProfile && (
+            <div className="mt-6 space-y-6 border-t pt-6">
+              {/* Name editing */}
+              <div>
+                <h3 className="text-sm font-medium mb-3">Display Name</h3>
+                {editingName ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">First Name</label>
+                        <Input
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          className="h-9"
+                          placeholder="First name"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Last Name</label>
+                        <Input
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          className="h-9"
+                          placeholder="Last name"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingName(false)}
+                        disabled={savingName}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        disabled={savingName}
+                        onClick={async () => {
+                          setSavingName(true);
+                          try {
+                            await user?.update({
+                              firstName: firstName.trim(),
+                              lastName: lastName.trim(),
+                            });
+                            setEditingName(false);
+                          } catch {
+                            // silently handle
+                          } finally {
+                            setSavingName(false);
+                          }
+                        }}
+                      >
+                        {savingName ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                        ) : null}
+                        Save Name
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFirstName(user?.firstName ?? "");
+                        setLastName(user?.lastName ?? "");
+                        setEditingName(true);
+                      }}
+                    >
+                      Edit Name
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Account deletion */}
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-medium mb-2 text-red-600 dark:text-red-400">
+                  Danger Zone
+                </h3>
+                {!showDeleteConfirm ? (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Permanently delete your account and all data
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
+                      onClick={() => setShowDeleteConfirm(true)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Delete Account
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 p-4 space-y-3">
+                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">
+                      This action cannot be undone. All your reading progress, bookmarks, highlights, journal entries, and prayer requests will be permanently deleted.
+                    </p>
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">
+                        Type &quot;DELETE&quot; to confirm
+                      </label>
+                      <Input
+                        value={deleteInput}
+                        onChange={(e) => setDeleteInput(e.target.value)}
+                        placeholder="DELETE"
+                        className="h-9 max-w-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteInput("");
+                        }}
+                        disabled={deleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={deleteInput !== "DELETE" || deleting}
+                        onClick={async () => {
+                          setDeleting(true);
+                          try {
+                            await user?.delete();
+                            router.push("/");
+                          } catch {
+                            setDeleting(false);
+                          }
+                        }}
+                      >
+                        {deleting ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        )}
+                        Permanently Delete
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ═══ Donate Section ═══ */}
+      <Card className="mb-8 bg-linear-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200/50 dark:border-amber-800/30">
+        <CardContent className="p-6 text-center">
+          <Heart className="h-6 w-6 text-rose-500 mx-auto mb-3" />
+          <h2 className="font-heading font-semibold text-lg mb-2">
+            Support Divine Word
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+            Divine Word is free to use. If this app has blessed your walk with God,
+            consider supporting its continued development and server costs.
+          </p>
+          <Button
+            className="gap-2"
+            onClick={() => {
+              window.open("https://buymeacoffee.com/divineword", "_blank", "noopener,noreferrer");
+            }}
+          >
+            <Heart className="h-4 w-4" />
+            Buy Me a Coffee
+          </Button>
+          <p className="text-[10px] text-muted-foreground mt-3 italic">
+            &ldquo;Each of you should give what you have decided in your heart to give&rdquo; — 2 Corinthians 9:7
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

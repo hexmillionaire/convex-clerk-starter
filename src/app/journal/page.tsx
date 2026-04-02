@@ -14,7 +14,7 @@ import Link from "next/link";
 
 export default function JournalPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const entries = useQuery(api.journal.list);
+  const entries = useQuery(api.journal.list, isSignedIn ? {} : "skip");
   const createEntry = useMutation(api.journal.create);
   const removeEntry = useMutation(api.journal.remove);
 

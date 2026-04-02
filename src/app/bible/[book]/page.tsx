@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { BookChaptersGrid } from "@/components/book-chapters-grid";
 
 type Props = {
   params: Promise<{ book: string }>;
@@ -140,19 +141,7 @@ export default async function BookOverviewPage({ params }: Props) {
         {/* Chapters grid */}
         <section>
           <h2 className="font-heading font-semibold text-lg mb-4">Chapters</h2>
-          <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
-            {Array.from({ length: book.chapters }, (_, i) => i + 1).map(
-              (ch) => (
-                <Link key={ch} href={`/bible/${bookSlug}/${ch}`}>
-                  <Card className="transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
-                    <CardContent className="p-3 text-center">
-                      <span className="text-sm font-mono">{ch}</span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            )}
-          </div>
+          <BookChaptersGrid bookSlug={bookSlug} totalChapters={book.chapters} />
         </section>
 
         {/* Prev/Next book navigation */}

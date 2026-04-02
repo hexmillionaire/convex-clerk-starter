@@ -44,7 +44,7 @@ function categoryLabel(value: string) {
 
 export default function PrayersPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const prayers = useQuery(api.prayerJournal.list);
+  const prayers = useQuery(api.prayerJournal.list, isSignedIn ? {} : "skip");
   const addPrayer = useMutation(api.prayerJournal.add);
   const markAnswered = useMutation(api.prayerJournal.markAnswered);
   const removePrayer = useMutation(api.prayerJournal.remove);

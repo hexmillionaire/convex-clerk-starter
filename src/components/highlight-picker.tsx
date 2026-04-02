@@ -15,12 +15,15 @@ export function HighlightPicker({ verseId, currentColor, onHighlight }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative" onClick={(e) => e.stopPropagation()}>
       <Button
         variant="ghost"
         size="icon"
         className="h-7 w-7"
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
       >
         <Highlighter
           className="h-3 w-3"
@@ -29,7 +32,10 @@ export function HighlightPicker({ verseId, currentColor, onHighlight }: Props) {
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-8 z-50 flex items-center gap-1 rounded-lg border bg-popover p-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
+        <div
+          className="absolute right-0 top-8 z-50 flex items-center gap-1 rounded-lg border bg-popover p-1.5 shadow-md animate-in fade-in-0 zoom-in-95"
+          onClick={(e) => e.stopPropagation()}
+        >
           {HIGHLIGHT_COLORS.map((c) => (
             <button
               key={c.value}
@@ -42,7 +48,8 @@ export function HighlightPicker({ verseId, currentColor, onHighlight }: Props) {
                     : "transparent",
               }}
               title={c.name}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onHighlight(verseId, c.value);
                 setOpen(false);
               }}
@@ -52,7 +59,8 @@ export function HighlightPicker({ verseId, currentColor, onHighlight }: Props) {
             <button
               className="ml-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted"
               title="Remove highlight"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onHighlight(verseId, null);
                 setOpen(false);
               }}

@@ -27,6 +27,37 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
   const verseIndexRef = useRef(0);
   const playingRef = useRef(false);
   const speakVerseRef = useRef<(index: number) => void | null>(null);
+  const rateRef = useRef(rate);
+  const keepAliveRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Keep rateRef in sync
+  useEffect(() => {
+    rateRef.current = rate;
+  }, [rate]);
+
+  // Chrome workaround: speechSynthesis stops after ~15s without interaction.
+  // Periodically call pause/resume to keep it alive.
+  useEffect(() => {
+    if (playing) {
+      keepAliveRef.current = setInterval(() => {
+        if (speechSynthesis.speaking && !speechSynthesis.paused) {
+          speechSynthesis.pause();
+          speechSynthesis.resume();
+        }
+      }, 10000);
+    } else {
+      if (keepAliveRef.current) {
+        clearInterval(keepAliveRef.current);
+        keepAliveRef.current = null;
+      }
+    }
+    return () => {
+      if (keepAliveRef.current) {
+        clearInterval(keepAliveRef.current);
+        keepAliveRef.current = null;
+      }
+    };
+  }, [playing]);
 
   // Cleanup on unmount or chapter change
   useEffect(() => {
@@ -34,6 +65,15 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
       speechSynthesis.cancel();
       playingRef.current = false;
     };
+  }, [bookName, chapter]);
+
+  // Reset state when book/chapter changes
+  useEffect(() => {
+    setPlaying(false);
+    playingRef.current = false;
+    setCurrentVerse(0);
+    verseIndexRef.current = 0;
+    speechSynthesis.cancel();
   }, [bookName, chapter]);
 
   const speakVerse = useCallback(
@@ -46,19 +86,25 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
         return;
       }
 
+      // Cancel any pending speech before starting new
+      speechSynthesis.cancel();
+
       const v = verses[index];
       const utt = new SpeechSynthesisUtterance(v.text);
-      utt.rate = parseFloat(rate);
+      utt.rate = parseFloat(rateRef.current);
       utt.onend = () => {
         if (playingRef.current) {
           const next = verseIndexRef.current + 1;
           verseIndexRef.current = next;
           setCurrentVerse(next);
           onVerseChange?.(verses[next]?.verse ?? 0);
-          speakVerseRef.current?.(next);
+          // Small delay to let the browser reset between utterances
+          setTimeout(() => speakVerseRef.current?.(next), 100);
         }
       };
-      utt.onerror = () => {
+      utt.onerror = (e) => {
+        // Ignore 'interrupted' errors from cancel() calls
+        if (e.error === "interrupted" || e.error === "canceled") return;
         setPlaying(false);
         playingRef.current = false;
       };
@@ -70,9 +116,10 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
       const el = document.getElementById(`v${v.verse}`);
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
 
-      speechSynthesis.speak(utt);
+      // Small delay after cancel to let browser settle
+      setTimeout(() => speechSynthesis.speak(utt), 50);
     },
-    [verses, rate, onVerseChange]
+    [verses, onVerseChange]
   );
 
   useEffect(() => {

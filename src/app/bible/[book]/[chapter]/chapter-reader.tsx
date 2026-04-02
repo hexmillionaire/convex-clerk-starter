@@ -342,7 +342,7 @@ export function ChapterReader({ book, chapter }: Props) {
                     {v.verse}
                   </span>
                   <p className="verse-text flex-1">{cleanVerseText(v.text)}</p>
-                  <div className={`flex items-start gap-0.5 pt-1 transition-opacity ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                  <div className={`flex items-start gap-0.5 pt-1 transition-opacity ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 sm:group-hover:opacity-100"}`}>
                     <Button
                       variant="ghost"
                       size="icon"
