@@ -11,9 +11,10 @@ type Props = {
   bookSlug: string;
   chapter: number;
   totalChapters: number;
+  onComplete?: () => void;
 };
 
-export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
+export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }: Props) {
   const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
   const progress = useQuery(
@@ -25,6 +26,16 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
 
   const isRead = progress?.[chapter] ?? false;
   const autoMarkedRef = useRef(false);
+  const prevIsReadRef = useRef<boolean | null>(null);
+
+  // Detect when chapter transitions to read — fire celebration
+  useEffect(() => {
+    if (progress === undefined) return; // Still loading
+    if (isRead && prevIsReadRef.current === false) {
+      onComplete?.();
+    }
+    prevIsReadRef.current = isRead;
+  }, [isRead, progress, onComplete]);
 
   // Reset auto-mark flag when chapter changes
   useEffect(() => {

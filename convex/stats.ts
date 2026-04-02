@@ -79,6 +79,16 @@ export const homeStats = query({
       .filter((m) => !m.celebratedAt)
       .slice(0, 3);
 
+    // Days since last read (for streak recovery UI)
+    let daysSinceLastRead = -1;
+    if (readDates.length > 0) {
+      const lastDate = readDates[0]; // Most recent date (sorted desc)
+      const lastRead = new Date(lastDate + "T12:00:00Z");
+      daysSinceLastRead = Math.floor(
+        (today.getTime() - lastRead.getTime()) / (1000 * 60 * 60 * 24)
+      );
+    }
+
     return {
       streak,
       streakAtRisk,
@@ -87,6 +97,7 @@ export const homeStats = query({
       chaptersRead,
       totalBibleChapters,
       uncelebrated,
+      daysSinceLastRead,
     };
   },
 });
@@ -192,6 +203,70 @@ export const get = query({
       totalHighlights: highlights.length,
       totalJournalEntries: journal.length,
       bookProgress,
+    };
+  },
+});
+
+/**
+ * Weekly stats for the homepage recap card.
+ * Returns null if user has no activity this week.
+ */
+export const weeklyRecap = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const userId = identity.tokenIdentifier;
+
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - dayOfWeek);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const lastWeekStart = new Date(weekStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+    const progress = await ctx.db
+      .query("readingProgress")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    let thisWeekChapters = 0;
+    let lastWeekChapters = 0;
+    const thisWeekBooks = new Set<string>();
+    const thisWeekDays = new Set<string>();
+
+    for (const p of progress) {
+      const d = new Date(p._creationTime);
+      if (d >= weekStart) {
+        thisWeekChapters++;
+        thisWeekBooks.add(p.bookSlug);
+        const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        thisWeekDays.add(ds);
+      } else if (d >= lastWeekStart) {
+        lastWeekChapters++;
+      }
+    }
+
+    // Don't show recap if no activity this week
+    if (thisWeekChapters === 0) return null;
+
+    const bookmarks = await ctx.db
+      .query("bookmarks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const thisWeekBookmarks = bookmarks.filter(
+      (b) => new Date(b._creationTime) >= weekStart
+    ).length;
+
+    return {
+      chaptersRead: thisWeekChapters,
+      lastWeekChapters,
+      booksExplored: thisWeekBooks.size,
+      versesBookmarked: thisWeekBookmarks,
+      daysActive: thisWeekDays.size,
     };
   },
 });

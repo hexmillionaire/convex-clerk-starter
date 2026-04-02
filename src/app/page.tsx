@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { getVerseOfTheDay } from "@/lib/daily-verses";
+import { getVerseOfTheDay, getTomorrowVerse } from "@/lib/daily-verses";
 import { VotdCard } from "@/components/votd-card";
 import { ContinueReadingCard } from "@/components/continue-reading-card";
 import { ProgressSummary } from "@/components/progress-summary";
 import { ActivePlanCard } from "@/components/active-plan-card";
 import { RetentionWidgets } from "@/components/retention-widgets";
+import { Greeting } from "@/components/greeting";
+import { TomorrowPreview } from "@/components/tomorrow-preview";
+import { WeeklyRecap } from "@/components/weekly-recap";
 
 export const metadata: Metadata = {
   title: "Divine Word — Free Online Bible (KJV)",
@@ -23,6 +26,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   const votd = getVerseOfTheDay();
+  const tomorrowVerse = getTomorrowVerse();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -48,20 +52,29 @@ export default function HomePage() {
       />
 
       <div className="stagger-children">
-        {/* Verse of the Day — hero */}
+        {/* Personal greeting — emotional hook */}
+        <Greeting />
+
+        {/* Verse of the Day — daily inspiration */}
         <VotdCard verse={votd} />
 
         {/* Retention: streak banner, daily goal, onboarding CTA, milestones */}
         <RetentionWidgets />
 
-        {/* Continue Reading / Where to Start */}
+        {/* Continue Reading / Where to Start — clear action */}
         <ContinueReadingCard />
 
-        {/* Progress Summary (signed-in only) */}
+        {/* Progress Summary (signed-in only) — satisfaction */}
         <ProgressSummary />
+
+        {/* Weekly Recap — reflection */}
+        <WeeklyRecap />
 
         {/* Active Reading Plan */}
         <ActivePlanCard />
+
+        {/* Tomorrow's verse preview — anticipation hook */}
+        <TomorrowPreview verse={tomorrowVerse} />
       </div>
 
       {/* About / SEO Content */}

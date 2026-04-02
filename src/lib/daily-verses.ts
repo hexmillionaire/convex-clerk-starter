@@ -397,3 +397,11 @@ export function getVerseOfTheDay(): DailyVerse {
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   return DAILY_VERSES[dayOfYear % DAILY_VERSES.length];
 }
+
+export function getTomorrowVerse(): DailyVerse {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return DAILY_VERSES[(dayOfYear + 1) % DAILY_VERSES.length];
+}

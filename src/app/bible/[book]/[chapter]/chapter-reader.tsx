@@ -31,6 +31,7 @@ import { HighlightPicker } from "@/components/highlight-picker";
 import { VerseImageShare } from "@/components/verse-image-share";
 import { ReadingProgress } from "@/components/reading-progress";
 import { AudioPlayer } from "@/components/audio-player";
+import { ChapterCompleteCelebration } from "@/components/chapter-complete-celebration";
 
 type Props = {
   book: BookInfo;
@@ -48,6 +49,7 @@ export function ChapterReader({ book, chapter }: Props) {
     { verse: number; text: string }[] | null
   >(null);
   const [loadingApi, setLoadingApi] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Convex queries
   const convexVerses = useQuery(api.bible.getChapter, {
@@ -303,6 +305,7 @@ export function ChapterReader({ book, chapter }: Props) {
           bookSlug={book.slug}
           chapter={chapter}
           totalChapters={book.chapters}
+          onComplete={() => setShowCelebration(true)}
         />
       </div>
 
@@ -443,6 +446,15 @@ export function ChapterReader({ book, chapter }: Props) {
           <div />
         )}
       </div>
+
+      {/* Chapter completion celebration overlay */}
+      {showCelebration && (
+        <ChapterCompleteCelebration
+          bookName={book.name}
+          chapter={chapter}
+          onDismiss={() => setShowCelebration(false)}
+        />
+      )}
     </div>
   );
 }

@@ -32,11 +32,12 @@ export function RetentionWidgets() {
 
   return (
     <>
-      {/* Streak urgency/celebration */}
+      {/* Streak urgency/celebration/recovery */}
       <StreakBanner
         streak={homeStats.streak}
         streakAtRisk={homeStats.streakAtRisk}
         todayChapters={homeStats.todayChapters}
+        daysSinceLastRead={homeStats.daysSinceLastRead}
       />
 
       {/* Daily reading goal ring */}

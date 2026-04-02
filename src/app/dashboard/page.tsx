@@ -258,13 +258,26 @@ export default function DashboardPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 hidden sm:flex"
             onClick={() => void signOut()}
           >
             <LogOut className="h-3.5 w-3.5" />
             Sign Out
           </Button>
         </div>
+      </div>
+
+      {/* Mobile sign-out button — always visible on small screens */}
+      <div className="sm:hidden mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 w-full"
+          onClick={() => void signOut()}
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          Sign Out
+        </Button>
       </div>
 
       {/* ═══ FEATURE 10: Milestone celebrations ═══ */}

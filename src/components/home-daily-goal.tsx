@@ -34,7 +34,7 @@ export function HomeDailyGoal({ current, goal }: Props) {
         <Link href={href} className="group block">
           <div className="flex items-center gap-3.5 rounded-lg border bg-card px-4 py-3 transition-all hover:shadow-sm active:scale-[0.99]">
             {/* Ring */}
-            <div className="relative shrink-0" style={{ width: size, height: size }}>
+            <div className={cn("relative shrink-0", completed && "goal-complete-glow rounded-full")} style={{ width: size, height: size }}>
               <svg width={size} height={size} className="-rotate-90">
                 <circle
                   cx={center}
