@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -120,10 +120,11 @@ function highlightColorName(hex: string) {
 export default function DashboardPage() {
   const { signOut } = useClerk();
   const { user, isLoaded: clerkLoaded, isSignedIn } = useUser();
+  const { isAuthenticated } = useConvexAuth();
   const router = useRouter();
   const dashboard = useQuery(
     api.dashboard.get,
-    isSignedIn ? {} : "skip"
+    isAuthenticated ? {} : "skip"
   );
   const updateSettings = useMutation(api.userSettings.update);
   const celebrateMilestone = useMutation(api.milestones.celebrate);
@@ -208,12 +209,16 @@ export default function DashboardPage() {
 
   const handleSaveSettings = async () => {
     const goal = parseInt(goalInput) || dailyGoal;
-    await updateSettings({
-      dailyGoal: Math.max(1, Math.min(50, goal)),
-      reminderEnabled,
-      reminderTime: reminderTime || undefined,
-    });
-    setShowSettings(false);
+    try {
+      await updateSettings({
+        dailyGoal: Math.max(1, Math.min(50, goal)),
+        reminderEnabled,
+        reminderTime: reminderTime || undefined,
+      });
+      setShowSettings(false);
+    } catch {
+      // Settings save failed silently
+    }
   };
 
   return (
@@ -287,7 +292,7 @@ export default function DashboardPage() {
                   variant="outline"
                   size="sm"
                   className="gap-1"
-                  onClick={() => void celebrateMilestone({ id: m._id })}
+                  onClick={() => { celebrateMilestone({ id: m._id }).catch(() => {}); }}
                 >
                   <Sparkles className="h-3 w-3" />
                   Celebrate

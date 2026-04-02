@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
@@ -22,8 +22,9 @@ import {
 
 export default function BookmarksPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const bookmarks = useQuery(api.bookmarks.list);
-  const collections = useQuery(api.bookmarks.listCollections);
+  const { isAuthenticated } = useConvexAuth();
+  const bookmarks = useQuery(api.bookmarks.list, isAuthenticated ? {} : "skip");
+  const collections = useQuery(api.bookmarks.listCollections, isAuthenticated ? {} : "skip");
   const removeBookmark = useMutation(api.bookmarks.remove);
   const updateCollection = useMutation(api.bookmarks.updateCollection);
 
@@ -68,12 +69,16 @@ export default function BookmarksPage() {
     bookmarkId: string,
     collection: string
   ) => {
-    await updateCollection({
-      id: bookmarkId as Id<"bookmarks">,
-      collection: collection || undefined,
-    });
-    setEditingId(null);
-    setNewCollection("");
+    try {
+      await updateCollection({
+        id: bookmarkId as Id<"bookmarks">,
+        collection: collection || undefined,
+      });
+      setEditingId(null);
+      setNewCollection("");
+    } catch {
+      // Auth may not be ready
+    }
   };
 
   return (
@@ -219,7 +224,7 @@ export default function BookmarksPage() {
                     size="icon"
                     className="h-8 w-8 shrink-0"
                     aria-label="Remove bookmark"
-                    onClick={() => removeBookmark({ id: bm._id })}
+                    onClick={() => { removeBookmark({ id: bm._id }).catch(() => {}); }}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>

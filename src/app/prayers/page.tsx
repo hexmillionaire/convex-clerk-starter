@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +44,8 @@ function categoryLabel(value: string) {
 
 export default function PrayersPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const prayers = useQuery(api.prayerJournal.list, isSignedIn ? {} : "skip");
+  const { isAuthenticated } = useConvexAuth();
+  const prayers = useQuery(api.prayerJournal.list, isAuthenticated ? {} : "skip");
   const addPrayer = useMutation(api.prayerJournal.add);
   const markAnswered = useMutation(api.prayerJournal.markAnswered);
   const removePrayer = useMutation(api.prayerJournal.remove);
@@ -54,15 +55,22 @@ export default function PrayersPage() {
   const [category, setCategory] = useState("personal");
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "answered">("all");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!request.trim()) return;
     setSaving(true);
-    await addPrayer({ request: request.trim(), category });
-    setRequest("");
-    setCategory("personal");
-    setShowForm(false);
-    setSaving(false);
+    setError(null);
+    try {
+      await addPrayer({ request: request.trim(), category });
+      setRequest("");
+      setCategory("personal");
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save prayer. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!clerkLoaded) {
@@ -176,6 +184,9 @@ export default function PrayersPage() {
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Prayer
               </Button>
+              {error && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-2">{error}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -249,7 +260,7 @@ export default function PrayersPage() {
                       variant="outline"
                       size="sm"
                       className="gap-1"
-                      onClick={() => markAnswered({ id: prayer._id })}
+                      onClick={() => { markAnswered({ id: prayer._id }).catch(() => {}); }}
                     >
                       <Check className="h-3 w-3" />
                       Mark Answered
@@ -259,7 +270,7 @@ export default function PrayersPage() {
                     variant="ghost"
                     size="sm"
                     className="gap-1 text-muted-foreground"
-                    onClick={() => removePrayer({ id: prayer._id })}
+                    onClick={() => { removePrayer({ id: prayer._id }).catch(() => {}); }}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

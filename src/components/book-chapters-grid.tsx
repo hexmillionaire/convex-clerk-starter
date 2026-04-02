@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, CheckCircle } from "lucide-react";
@@ -13,8 +12,7 @@ type Props = {
 };
 
 export function BookChaptersGrid({ bookSlug, totalChapters }: Props) {
-  const { isSignedIn } = useUser();
-  const isAuthenticated = !!isSignedIn;
+  const { isAuthenticated } = useConvexAuth();
 
   const bookmarks = useQuery(api.bookmarks.list, isAuthenticated ? {} : "skip");
   const progress = useQuery(

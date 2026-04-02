@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +19,8 @@ import { Button } from "@/components/ui/button";
 
 export default function StatsPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const stats = useQuery(api.stats.get, isSignedIn ? {} : "skip");
+  const { isAuthenticated } = useConvexAuth();
+  const stats = useQuery(api.stats.get, isAuthenticated ? {} : "skip");
 
   if (!clerkLoaded) {
     return (

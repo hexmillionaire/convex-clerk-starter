@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,8 @@ import Link from "next/link";
 
 export default function JournalPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const entries = useQuery(api.journal.list, isSignedIn ? {} : "skip");
+  const { isAuthenticated } = useConvexAuth();
+  const entries = useQuery(api.journal.list, isAuthenticated ? {} : "skip");
   const createEntry = useMutation(api.journal.create);
   const removeEntry = useMutation(api.journal.remove);
 
@@ -23,22 +24,27 @@ export default function JournalPage() {
   const [passage, setPassage] = useState("");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) return;
     setSaving(true);
-
-    await createEntry({
-      title: title.trim(),
-      passage: passage.trim(),
-      content: content.trim(),
-    });
-
-    setTitle("");
-    setPassage("");
-    setContent("");
-    setShowForm(false);
-    setSaving(false);
+    setError(null);
+    try {
+      await createEntry({
+        title: title.trim(),
+        passage: passage.trim(),
+        content: content.trim(),
+      });
+      setTitle("");
+      setPassage("");
+      setContent("");
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save entry. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!clerkLoaded) {
@@ -125,6 +131,9 @@ export default function JournalPage() {
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Entry
               </Button>
+              {error && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-2">{error}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -160,7 +169,7 @@ export default function JournalPage() {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => removeEntry({ id: entry._id })}
+                      onClick={() => { removeEntry({ id: entry._id }).catch(() => {}); }}
                     >
                       <Trash2 className="h-3 w-3 text-muted-foreground" />
                     </Button>

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery, useMutation } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
 
 type Props = {
@@ -14,8 +13,7 @@ type Props = {
 };
 
 export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
-  const { isSignedIn, isLoaded } = useUser();
-  const isAuthenticated = isLoaded && !!isSignedIn;
+  const { isAuthenticated } = useConvexAuth();
   const progress = useQuery(
     api.readingProgress.getForBook,
     isAuthenticated ? { bookSlug } : "skip"

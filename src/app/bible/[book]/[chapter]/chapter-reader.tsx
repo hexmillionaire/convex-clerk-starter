@@ -13,7 +13,7 @@ import {
   List,
   Loader2,
 } from "lucide-react";
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useQuery, useMutation, useAction, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ type Props = {
 
 export function ChapterReader({ book, chapter }: Props) {
   const { isSignedIn } = useUser();
-  const isAuthenticated = !!isSignedIn;
+  const { isAuthenticated } = useConvexAuth();
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [translation, setTranslation] = useState<Translation>("KJV");
@@ -54,11 +54,11 @@ export function ChapterReader({ book, chapter }: Props) {
     chapter,
     translation,
   });
-  const highlights = useQuery(api.highlights.getForChapter, {
+  const highlights = useQuery(api.highlights.getForChapter, isAuthenticated ? {
     bookSlug: book.slug,
     chapter,
-  });
-  const bookmarks = useQuery(api.bookmarks.list);
+  } : "skip");
+  const bookmarks = useQuery(api.bookmarks.list, isAuthenticated ? {} : "skip");
 
   // Convex mutations
   const addBookmark = useMutation(api.bookmarks.add);
@@ -112,19 +112,23 @@ export function ChapterReader({ book, chapter }: Props) {
   const handleHighlight = useCallback(
     async (verseNum: number, color: string | null) => {
       if (!isAuthenticated) return;
-      if (color === null) {
-        await removeHighlight({
-          bookSlug: book.slug,
-          chapter,
-          verseNumber: verseNum,
-        });
-      } else {
-        await setHighlight({
-          bookSlug: book.slug,
-          chapter,
-          verseNumber: verseNum,
-          color,
-        });
+      try {
+        if (color === null) {
+          await removeHighlight({
+            bookSlug: book.slug,
+            chapter,
+            verseNumber: verseNum,
+          });
+        } else {
+          await setHighlight({
+            bookSlug: book.slug,
+            chapter,
+            verseNumber: verseNum,
+            color,
+          });
+        }
+      } catch {
+        // Auth may not be ready yet
       }
     },
     [isAuthenticated, setHighlight, removeHighlight, book.slug, chapter]
@@ -133,24 +137,28 @@ export function ChapterReader({ book, chapter }: Props) {
   const handleBookmark = useCallback(
     async (verseNum: number, text: string) => {
       if (!isAuthenticated) return;
-      const isMarked = bookmarkedVerses.has(verseNum);
+      try {
+        const isMarked = bookmarkedVerses.has(verseNum);
 
-      if (isMarked) {
-        const bm = (bookmarks ?? []).find(
-          (b) =>
-            b.bookSlug === book.slug &&
-            b.chapter === chapter &&
-            b.verseNumber === verseNum
-        );
-        if (bm) await removeBookmark({ id: bm._id });
-      } else {
-        await addBookmark({
-          bookSlug: book.slug,
-          chapter,
-          verseNumber: verseNum,
-          reference: `${book.name} ${chapter}:${verseNum}`,
-          text: cleanVerseText(text),
-        });
+        if (isMarked) {
+          const bm = (bookmarks ?? []).find(
+            (b) =>
+              b.bookSlug === book.slug &&
+              b.chapter === chapter &&
+              b.verseNumber === verseNum
+          );
+          if (bm) await removeBookmark({ id: bm._id });
+        } else {
+          await addBookmark({
+            bookSlug: book.slug,
+            chapter,
+            verseNumber: verseNum,
+            reference: `${book.name} ${chapter}:${verseNum}`,
+            text: cleanVerseText(text),
+          });
+        }
+      } catch {
+        // Auth may not be ready yet
       }
     },
     [

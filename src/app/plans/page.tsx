@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,9 +76,10 @@ const PLANS = [
 
 export default function PlansPage() {
   const { isSignedIn } = useUser();
+  const { isAuthenticated } = useConvexAuth();
   const userPlans = useQuery(
     api.readingPlans.getUserPlans,
-    isSignedIn ? {} : "skip"
+    isAuthenticated ? {} : "skip"
   );
   const startPlan = useMutation(api.readingPlans.startPlan);
   const advanceDay = useMutation(api.readingPlans.advanceDay);
@@ -174,7 +175,7 @@ export default function PlansPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => resetPlan({ planSlug: plan.slug })}
+                      onClick={() => { resetPlan({ planSlug: plan.slug }).catch(() => {}); }}
                     >
                       <RotateCcw className="h-3.5 w-3.5" />
                     </Button>
@@ -207,7 +208,7 @@ export default function PlansPage() {
                             <Button
                               variant="secondary"
                               size="sm"
-                              onClick={() => advanceDay({ planSlug: plan.slug })}
+                              onClick={() => { advanceDay({ planSlug: plan.slug }).catch(() => {}); }}
                             >
                               +1 Day
                             </Button>
@@ -231,11 +232,11 @@ export default function PlansPage() {
                     variant="outline"
                     size="sm"
                     className="gap-2 w-full"
-                    onClick={() =>
+                    onClick={() => {
                       startPlan({
                         planSlug: plan.slug,
-                      })
-                    }
+                      }).catch(() => {});
+                    }}
                   >
                     <BookOpen className="h-3.5 w-3.5" />
                     Start Plan
