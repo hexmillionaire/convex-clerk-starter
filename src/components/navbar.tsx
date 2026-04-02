@@ -96,7 +96,13 @@ export function Navbar() {
 
         {/* Right side controls */}
         <div className="flex items-center gap-1 shrink-0 ml-auto">
-          <div className="hidden lg:flex">
+          {/* Mobile search */}
+          <Link href="/search" className="md:hidden" aria-label="Search">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+              <Search className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div className="hidden sm:flex">
             <FontSizeControl />
           </div>
           <ThemeToggle />

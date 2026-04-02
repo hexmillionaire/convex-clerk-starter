@@ -35,7 +35,7 @@ export function ProgressSummary() {
         </div>
 
         {/* Stat chips */}
-        <div className="flex items-center gap-4 mb-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
           <div className="flex items-center gap-1.5">
             <Flame className="h-4 w-4 text-orange-500" />
             <span className="font-heading font-bold text-lg leading-none">{stats.streak}</span>

@@ -23,7 +23,7 @@ export function WeeklyRecap() {
     <section className="py-3">
       <div className="container max-w-2xl mx-auto px-6">
         <div className="rounded-2xl border bg-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary">
               This Week
             </p>

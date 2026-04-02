@@ -224,18 +224,18 @@ export default function DashboardPage() {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-12">
       {/* Header with user info */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-heading font-semibold mb-1">
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl md:text-3xl font-heading font-semibold mb-1 truncate">
             {user?.firstName
               ? `Welcome back, ${user.firstName}`
               : "Your Dashboard"}
           </h1>
-          <p className="text-muted-foreground text-sm italic">
+          <p className="text-muted-foreground text-sm italic truncate">
             {user?.primaryEmailAddress?.emailAddress}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -994,7 +994,7 @@ export default function DashboardPage() {
             <Trophy className="h-5 w-5 text-yellow-500" />
             Achievements
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {dashboard.milestones.map((m) => (
               <Card
                 key={m._id}
@@ -1024,7 +1024,7 @@ export default function DashboardPage() {
       )}
 
       {/* Quick links */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-8">
         <Link href="/bookmarks">
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4 text-center">
