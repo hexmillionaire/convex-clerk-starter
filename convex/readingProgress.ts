@@ -24,6 +24,7 @@ export const getForBook = query({
 });
 
 export const getAllProgress = query({
+  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
@@ -47,14 +48,13 @@ export const markRead = mutation({
     const userId = identity.tokenIdentifier;
 
     // Check if already marked
-    const existing = await ctx.db
+    const match = await ctx.db
       .query("readingProgress")
-      .withIndex("by_user_book", (q) =>
-        q.eq("userId", userId).eq("bookSlug", args.bookSlug)
+      .withIndex("by_user_book_chapter", (q) =>
+        q.eq("userId", userId).eq("bookSlug", args.bookSlug).eq("chapter", args.chapter)
       )
-      .collect();
+      .first();
 
-    const match = existing.find((p) => p.chapter === args.chapter);
     if (match) return match._id;
 
     return await ctx.db.insert("readingProgress", {
@@ -75,14 +75,13 @@ export const markUnread = mutation({
     if (!identity) throw new Error("Not authenticated");
     const userId = identity.tokenIdentifier;
 
-    const existing = await ctx.db
+    const match = await ctx.db
       .query("readingProgress")
-      .withIndex("by_user_book", (q) =>
-        q.eq("userId", userId).eq("bookSlug", args.bookSlug)
+      .withIndex("by_user_book_chapter", (q) =>
+        q.eq("userId", userId).eq("bookSlug", args.bookSlug).eq("chapter", args.chapter)
       )
-      .collect();
+      .first();
 
-    const match = existing.find((p) => p.chapter === args.chapter);
     if (match) {
       await ctx.db.delete(match._id);
     }

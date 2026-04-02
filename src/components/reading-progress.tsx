@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
+  const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
   const progress = useQuery(
     api.readingProgress.getForBook,
@@ -65,7 +67,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters }: Props) {
   const pct =
     totalChapters > 0 ? Math.round((readCount / totalChapters) * 100) : 0;
 
-  if (!isAuthenticated) return null;
+  if (!isSignedIn) return null;
 
   return (
     <div className="flex items-center gap-3">

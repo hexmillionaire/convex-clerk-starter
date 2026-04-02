@@ -40,6 +40,7 @@ type Props = {
 export function ChapterReader({ book, chapter }: Props) {
   const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
+  const showAuthFeatures = !!isSignedIn;
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [translation, setTranslation] = useState<Translation>("KJV");
@@ -128,7 +129,7 @@ export function ChapterReader({ book, chapter }: Props) {
           });
         }
       } catch {
-        // Auth may not be ready yet
+        // Auth token may not be synced yet
       }
     },
     [isAuthenticated, setHighlight, removeHighlight, book.slug, chapter]
@@ -158,7 +159,7 @@ export function ChapterReader({ book, chapter }: Props) {
           });
         }
       } catch {
-        // Auth may not be ready yet
+        // Auth token may not be synced yet
       }
     },
     [
@@ -363,7 +364,7 @@ export function ChapterReader({ book, chapter }: Props) {
                         <Copy className="h-3 w-3" />
                       )}
                     </Button>
-                    {isAuthenticated && (
+                    {showAuthFeatures && (
                       <>
                         <HighlightPicker
                           verseId={`v${v.verse}`}

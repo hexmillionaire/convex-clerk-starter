@@ -43,17 +43,16 @@ export const set = mutation({
     const userId = identity.tokenIdentifier;
 
     // Find existing highlight for this verse
-    const existing = await ctx.db
+    const match = await ctx.db
       .query("highlights")
-      .withIndex("by_user_chapter", (q) =>
+      .withIndex("by_user_verse", (q) =>
         q
           .eq("userId", userId)
           .eq("bookSlug", args.bookSlug)
           .eq("chapter", args.chapter)
+          .eq("verseNumber", args.verseNumber)
       )
-      .collect();
-
-    const match = existing.find((h) => h.verseNumber === args.verseNumber);
+      .first();
 
     if (match) {
       await ctx.db.patch(match._id, { color: args.color, note: args.note });
@@ -82,17 +81,17 @@ export const remove = mutation({
     if (!identity) throw new Error("Not authenticated");
     const userId = identity.tokenIdentifier;
 
-    const highlights = await ctx.db
+    const match = await ctx.db
       .query("highlights")
-      .withIndex("by_user_chapter", (q) =>
+      .withIndex("by_user_verse", (q) =>
         q
           .eq("userId", userId)
           .eq("bookSlug", args.bookSlug)
           .eq("chapter", args.chapter)
+          .eq("verseNumber", args.verseNumber)
       )
-      .collect();
+      .first();
 
-    const match = highlights.find((h) => h.verseNumber === args.verseNumber);
     if (match) {
       await ctx.db.delete(match._id);
     }
@@ -111,17 +110,17 @@ export const updateNote = mutation({
     if (!identity) throw new Error("Not authenticated");
     const userId = identity.tokenIdentifier;
 
-    const highlights = await ctx.db
+    const match = await ctx.db
       .query("highlights")
-      .withIndex("by_user_chapter", (q) =>
+      .withIndex("by_user_verse", (q) =>
         q
           .eq("userId", userId)
           .eq("bookSlug", args.bookSlug)
           .eq("chapter", args.chapter)
+          .eq("verseNumber", args.verseNumber)
       )
-      .collect();
+      .first();
 
-    const match = highlights.find((h) => h.verseNumber === args.verseNumber);
     if (match) {
       await ctx.db.patch(match._id, { note: args.note });
     }

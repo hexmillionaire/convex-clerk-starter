@@ -39,7 +39,8 @@ export default defineSchema({
     note: v.optional(v.string()), // personal note on highlight
   })
     .index("by_user", ["userId"])
-    .index("by_user_chapter", ["userId", "bookSlug", "chapter"]),
+    .index("by_user_chapter", ["userId", "bookSlug", "chapter"])
+    .index("by_user_verse", ["userId", "bookSlug", "chapter", "verseNumber"]),
 
   // ─── Devotional journal ───
   journal: defineTable({
@@ -56,7 +57,8 @@ export default defineSchema({
     chapter: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_user_book", ["userId", "bookSlug"]),
+    .index("by_user_book", ["userId", "bookSlug"])
+    .index("by_user_book_chapter", ["userId", "bookSlug", "chapter"]),
 
   // ─── Reading plan progress ───
   userReadingPlans: defineTable({
