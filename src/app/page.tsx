@@ -8,6 +8,7 @@ import { RetentionWidgets } from "@/components/retention-widgets";
 import { Greeting } from "@/components/greeting";
 import { TomorrowPreview } from "@/components/tomorrow-preview";
 import { WeeklyRecap } from "@/components/weekly-recap";
+import { SafeSection } from "@/components/safe-section";
 
 export const metadata: Metadata = {
   title: "Divine Word — Free Online Bible (KJV)",
@@ -59,19 +60,19 @@ export default function HomePage() {
         <VotdCard verse={votd} />
 
         {/* Retention: streak banner, daily goal, onboarding CTA, milestones */}
-        <RetentionWidgets />
+        <SafeSection><RetentionWidgets /></SafeSection>
 
         {/* Continue Reading / Where to Start — clear action */}
-        <ContinueReadingCard />
+        <SafeSection><ContinueReadingCard /></SafeSection>
 
         {/* Progress Summary (signed-in only) — satisfaction */}
-        <ProgressSummary />
+        <SafeSection><ProgressSummary /></SafeSection>
 
         {/* Weekly Recap — reflection */}
-        <WeeklyRecap />
+        <SafeSection><WeeklyRecap /></SafeSection>
 
         {/* Active Reading Plan */}
-        <ActivePlanCard />
+        <SafeSection><ActivePlanCard /></SafeSection>
 
         {/* Tomorrow's verse preview — anticipation hook */}
         <TomorrowPreview verse={tomorrowVerse} />
