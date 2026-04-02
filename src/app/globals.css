@@ -55,7 +55,7 @@
 }
 
 :root {
-  --reading-font-size: 18px;
+  --reading-font-size: 19px;
   --gold: #c9972b;
   --gold-light: #e8c96a;
   --sepia-text: #d4a74a;
@@ -67,22 +67,22 @@
   --popover-foreground: oklch(0.16 0.02 60);
   --primary: oklch(0.52 0.12 70);
   --primary-foreground: oklch(0.985 0.002 90);
-  --secondary: oklch(0.96 0.005 80);
+  --secondary: oklch(0.965 0.004 85);
   --secondary-foreground: oklch(0.25 0.02 60);
-  --muted: oklch(0.96 0.005 80);
-  --muted-foreground: oklch(0.5 0.03 60);
-  --accent: oklch(0.96 0.005 80);
+  --muted: oklch(0.965 0.004 85);
+  --muted-foreground: oklch(0.48 0.025 60);
+  --accent: oklch(0.965 0.004 85);
   --accent-foreground: oklch(0.25 0.02 60);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.01 80);
-  --input: oklch(0.9 0.01 80);
+  --border: oklch(0.92 0.008 80);
+  --input: oklch(0.92 0.008 80);
   --ring: oklch(0.6 0.1 70);
   --chart-1: oklch(0.7 0.12 70);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -154,6 +154,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-serif;
@@ -161,11 +163,127 @@
   }
 }
 
+/* Premium typography defaults */
+h1, h2, h3, h4, h5, h6 {
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
+}
+
 /* Reading-specific typography */
 .verse-text {
   font-size: var(--reading-font-size);
-  line-height: 1.8;
-  letter-spacing: 0.01em;
+  line-height: 1.85;
+  letter-spacing: 0.005em;
+  text-rendering: optimizeLegibility;
+}
+
+/* Safe area for bottom tab bar on notch devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Premium transitions — default everything to smooth */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Staggered entrance animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up-gentle {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger children for premium feel */
+.stagger-children > * {
+  animation: slide-up-gentle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 320ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 480ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 560ms; }
+
+/* Premium card hover */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px -8px oklch(0.3 0.02 60 / 0.1);
+}
+.card-hover:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* Streak fire pulse */
+@keyframes pulse-fire {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.8; }
+}
+.animate-pulse-fire {
+  animation: pulse-fire 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Milestone bounce-in */
+@keyframes bounce-in {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.1); }
+  70% { transform: scale(0.97); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Confetti particles for milestone celebration */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+.confetti-particle {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+.confetti-particle:nth-child(even) {
+  width: 6px;
+  height: 10px;
+  border-radius: 50%;
+}
+.confetti-particle:nth-child(3n) {
+  width: 10px;
+  height: 6px;
+  animation-duration: 3.5s;
 }
 
 /* Respect motion preferences */

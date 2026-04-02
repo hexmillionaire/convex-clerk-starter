@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ConvexClientProvider } from "@/components/convex-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ServiceWorkerRegister } from "@/components/sw-register";
 import { Analytics } from "@vercel/analytics/next";
@@ -125,8 +126,9 @@ export default function RootLayout({
           >
             <TooltipProvider>
               <Navbar />
-              <main id="main-content" className="flex-1">{children}</main>
+              <main id="main-content" className="flex-1 pb-20 md:pb-0">{children}</main>
               <Footer />
+              <BottomTabBar />
             </TooltipProvider>
             <ServiceWorkerRegister />
           </ThemeProvider>

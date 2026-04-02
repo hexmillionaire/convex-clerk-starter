@@ -220,21 +220,21 @@ export function ChapterReader({ book, chapter }: Props) {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
+    <div className="container max-w-3xl mx-auto px-6 py-10 md:py-14">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-10">
         <div>
           <Link
             href={`/bible`}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono uppercase tracking-wider"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-300 font-mono uppercase tracking-[0.15em]"
           >
             ← All Books
           </Link>
-          <h1 className="text-2xl md:text-3xl font-heading font-semibold mt-1">
+          <h1 className="text-3xl md:text-4xl font-heading font-semibold mt-2 tracking-tight">
             {book.name}{" "}
             <span className="text-primary">{chapter}</span>
           </h1>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2.5 mt-2">
             <TranslationSwitcher value={translation} onChange={setTranslation} />
             <span className="text-sm text-muted-foreground font-mono">
               · {book.testament === "OLD" ? "Old" : "New"} Testament
@@ -298,7 +298,7 @@ export function ChapterReader({ book, chapter }: Props) {
       </div>
 
       {/* Reading progress */}
-      <div className="mb-6">
+      <div className="mb-8">
         <ReadingProgress
           bookSlug={book.slug}
           chapter={chapter}
@@ -308,7 +308,7 @@ export function ChapterReader({ book, chapter }: Props) {
 
       {/* Audio player */}
       {!isLoading && verses.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-8">
           <AudioPlayer
             verses={verses.map((v) => ({ verse: v.verse, text: cleanVerseText(v.text) }))}
             bookName={book.name}
@@ -319,7 +319,7 @@ export function ChapterReader({ book, chapter }: Props) {
       )}
 
       {/* Verse content */}
-      <article className="mb-12">
+      <article className="mb-16">
         {isLoading ? (
           <div className="text-center py-20">
             <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
@@ -328,7 +328,7 @@ export function ChapterReader({ book, chapter }: Props) {
             </p>
           </div>
         ) : verses.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {verses.map((v) => {
               const highlightData = highlights?.[v.verse];
               const highlightColor = highlightData?.color ?? null;
@@ -339,19 +339,19 @@ export function ChapterReader({ book, chapter }: Props) {
                 <div
                   key={v.verse}
                   id={`v${v.verse}`}
-                  className="group flex gap-3 py-1.5 px-2 -mx-2 rounded-sm hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="group flex gap-4 py-2 px-3 -mx-3 rounded-xl hover:bg-muted/40 transition-colors duration-200 cursor-pointer"
                   style={
                     highlightColor
-                      ? { backgroundColor: highlightColor + "30" }
+                      ? { backgroundColor: highlightColor + "25" }
                       : undefined
                   }
                   onClick={() => setSelectedVerse(isSelected ? null : v.verse)}
                 >
-                  <span className="text-xs text-primary/60 font-mono mt-1.5 min-w-6 text-right select-none">
+                  <span className="text-xs text-primary/50 font-mono mt-2 min-w-7 text-right select-none">
                     {v.verse}
                   </span>
                   <p className="verse-text flex-1">{cleanVerseText(v.text)}</p>
-                  <div className={`flex items-start gap-0.5 pt-1 transition-opacity ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 sm:group-hover:opacity-100"}`}>
+                  <div className={`flex items-start gap-1 pt-1.5 transition-opacity duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 sm:group-hover:opacity-100"}`}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -414,10 +414,10 @@ export function ChapterReader({ book, chapter }: Props) {
       </article>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between border-t pt-6">
+      <div className="flex items-center justify-between border-t pt-8">
         {prevChapterInfo ? (
           <Link href={prevChapterInfo.href}>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2.5 rounded-full px-6">
               <ChevronLeft className="h-4 w-4" />
               <span className="hidden sm:inline">{prevChapterInfo.label}</span>
               <span className="sm:hidden">Previous</span>
@@ -433,7 +433,7 @@ export function ChapterReader({ book, chapter }: Props) {
 
         {nextChapterInfo ? (
           <Link href={nextChapterInfo.href}>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2.5 rounded-full px-6">
               <span className="hidden sm:inline">{nextChapterInfo.label}</span>
               <span className="sm:hidden">Next</span>
               <ChevronRight className="h-4 w-4" />
