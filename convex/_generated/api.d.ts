@@ -10,12 +10,17 @@
 
 import type * as bible from "../bible.js";
 import type * as bookmarks from "../bookmarks.js";
+import type * as cronActions from "../cronActions.js";
+import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as highlights from "../highlights.js";
 import type * as http from "../http.js";
 import type * as journal from "../journal.js";
 import type * as milestones from "../milestones.js";
 import type * as prayerJournal from "../prayerJournal.js";
+import type * as pushNotifications from "../pushNotifications.js";
+import type * as pushSend from "../pushSend.js";
+import type * as pushSubscriptions from "../pushSubscriptions.js";
 import type * as readingPlans from "../readingPlans.js";
 import type * as readingProgress from "../readingProgress.js";
 import type * as seed from "../seed.js";
@@ -31,12 +36,17 @@ import type {
 declare const fullApi: ApiFromModules<{
   bible: typeof bible;
   bookmarks: typeof bookmarks;
+  cronActions: typeof cronActions;
+  crons: typeof crons;
   dashboard: typeof dashboard;
   highlights: typeof highlights;
   http: typeof http;
   journal: typeof journal;
   milestones: typeof milestones;
   prayerJournal: typeof prayerJournal;
+  pushNotifications: typeof pushNotifications;
+  pushSend: typeof pushSend;
+  pushSubscriptions: typeof pushSubscriptions;
   readingPlans: typeof readingPlans;
   readingProgress: typeof readingProgress;
   seed: typeof seed;

@@ -95,3 +95,55 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 });
+
+// ─── Push notifications ───
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let data;
+  try {
+    data = event.data.json();
+  } catch {
+    data = { title: "Divine Word", body: event.data.text() };
+  }
+
+  const options = {
+    body: data.body || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-72.png",
+    tag: data.tag || "divine-word",
+    renotify: true,
+    data: { url: data.url || "/" },
+    actions: [
+      { action: "open", title: "Read Now" },
+      { action: "dismiss", title: "Later" },
+    ],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Divine Word", options)
+  );
+});
+
+// Handle notification click
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  if (event.action === "dismiss") return;
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      // Focus existing tab if open
+      for (const client of clients) {
+        if (client.url.includes("divineword.app") && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      // Open new tab
+      return self.clients.openWindow(url);
+    })
+  );
+});

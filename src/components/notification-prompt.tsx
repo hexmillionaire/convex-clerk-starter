@@ -3,8 +3,20 @@
 import { useState, useEffect } from "react";
 import { Bell, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMutation, useConvexAuth } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 const DISMISSED_KEY = "dw-notif-prompt-dismissed";
+const VAPID_PUBLIC_KEY = "BJzz7W8WIXsVilkUyZmMlo5e1BbnIGNiWaUnH5S2xq-DwQY1A1ZXOfZv43sEKGHkbJWYBQ4fs0oOHFxNmQzhay8";
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; ++i) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
 
 /**
  * Gentle notification opt-in prompt. Appears once per session,
@@ -13,21 +25,20 @@ const DISMISSED_KEY = "dw-notif-prompt-dismissed";
  */
 export function NotificationPrompt() {
   const [show, setShow] = useState(false);
+  const { isAuthenticated } = useConvexAuth();
+  const saveSubscription = useMutation(api.pushSubscriptions.save);
 
   useEffect(() => {
-    // Only run client-side
     if (typeof window === "undefined") return;
     if (!("Notification" in window)) return;
     if (Notification.permission !== "default") return;
 
-    // Check if dismissed recently
     const dismissed = localStorage.getItem(DISMISSED_KEY);
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
       if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000) return;
     }
 
-    // Delay showing by 10 seconds (don't interrupt first load)
     const timer = setTimeout(() => setShow(true), 10000);
     return () => clearTimeout(timer);
   }, []);
@@ -41,14 +52,36 @@ export function NotificationPrompt() {
     try {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
-        // Show a confirmation notification
+        // Subscribe to push notifications via service worker
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+
+        // Save subscription to Convex
+        if (isAuthenticated) {
+          const json = subscription.toJSON();
+          if (json.endpoint && json.keys?.p256dh && json.keys?.auth) {
+            await saveSubscription({
+              endpoint: json.endpoint,
+              keys: {
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+              },
+            });
+          }
+        }
+
+        // Show confirmation
         new Notification("Divine Word", {
-          body: "You'll get gentle reminders to keep your streak alive!",
+          body: "You'll receive daily verses and streak reminders!",
           icon: "/icons/icon-192.png",
         });
       }
-    } catch { /* ignore */ }
-    // Dismiss either way
+    } catch {
+      // Permission denied or service worker unavailable
+    }
     localStorage.setItem(DISMISSED_KEY, String(Date.now()));
     setShow(false);
   }
@@ -67,7 +100,7 @@ export function NotificationPrompt() {
               Never miss a day
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Get gentle reminders to keep your reading streak
+              Get daily verses & streak reminders
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
