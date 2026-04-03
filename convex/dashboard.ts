@@ -25,16 +25,16 @@ export const get = query({
     // For each highlight, look up the verse text
     const highlightsWithText = await Promise.all(
       recentHighlights.map(async (h) => {
-        const verse = await ctx.db
+        const match = await ctx.db
           .query("verses")
-          .withIndex("by_chapter", (q) =>
+          .withIndex("by_chapter_and_verse", (q) =>
             q
               .eq("bookSlug", h.bookSlug)
               .eq("chapter", h.chapter)
               .eq("translation", "KJV")
+              .eq("verseNumber", h.verseNumber)
           )
-          .collect();
-        const match = verse.find((v) => v.verseNumber === h.verseNumber);
+          .first();
         return {
           _id: h._id,
           _creationTime: h._creationTime,
@@ -103,14 +103,12 @@ export const get = query({
     const uncelebrated = milestones.filter((m) => !m.celebratedAt);
 
     // Calculate streak
-    const readDates = allProgress
-      .map((p) => {
-        const d = new Date(p._creationTime);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      })
-      .filter((d, i, arr) => arr.indexOf(d) === i)
-      .sort()
-      .reverse();
+    const readDateSet = new Set<string>();
+    for (const p of allProgress) {
+      const d = new Date(p._creationTime);
+      readDateSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+    }
+    const readDates = [...readDateSet].sort().reverse();
 
     let streak = 0;
     const today = new Date();

@@ -25,14 +25,14 @@ export const homeStats = query({
 
     // Count chapters read today
     let todayChapters = 0;
-    const readDates: string[] = [];
+    const readDateSet = new Set<string>();
     for (const p of progress) {
       const d = new Date(p._creationTime);
       const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       if (ds === todayStr) todayChapters++;
-      if (!readDates.includes(ds)) readDates.push(ds);
+      readDateSet.add(ds);
     }
-    readDates.sort().reverse();
+    const readDates = [...readDateSet].sort().reverse();
 
     // Streak calculation (same logic as get)
     let streak = 0;
@@ -137,14 +137,12 @@ export const get = query({
     const booksRead = new Set(progress.map((p) => p.bookSlug)).size;
 
     // Calculate reading streak from creation times
-    const readDates = progress
-      .map((p) => {
-        const d = new Date(p._creationTime);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      })
-      .filter((d, i, arr) => arr.indexOf(d) === i)
-      .sort()
-      .reverse();
+    const readDateSet = new Set<string>();
+    for (const p of progress) {
+      const d = new Date(p._creationTime);
+      readDateSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+    }
+    const readDates = [...readDateSet].sort().reverse();
 
     let streak = 0;
     const today = new Date();

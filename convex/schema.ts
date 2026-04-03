@@ -13,6 +13,7 @@ export default defineSchema({
     translation: v.string(), // "KJV", "WEB", "ASV"
   })
     .index("by_chapter", ["bookSlug", "chapter", "translation"])
+    .index("by_chapter_and_verse", ["bookSlug", "chapter", "translation", "verseNumber"])
     .index("by_translation", ["translation"])
     .searchIndex("search_text", { searchField: "text" }),
 
