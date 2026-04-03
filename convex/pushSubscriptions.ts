@@ -14,15 +14,15 @@ export const save = mutation({
     if (!identity) throw new Error("Not authenticated");
     const userId = identity.tokenIdentifier;
 
-    // Check if this endpoint already exists for this user
+    // Check if this endpoint already exists
     const existing = await ctx.db
       .query("pushSubscriptions")
       .withIndex("by_endpoint", (q) => q.eq("endpoint", args.endpoint))
       .first();
 
     if (existing) {
-      // Update keys in case they changed
-      await ctx.db.patch(existing._id, { keys: args.keys });
+      // Update keys and reassign to the current user (handles device switching accounts)
+      await ctx.db.patch(existing._id, { userId, keys: args.keys });
       return existing._id;
     }
 

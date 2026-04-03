@@ -30,6 +30,7 @@ export function NotificationPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!isAuthenticated) return;
     if (!("Notification" in window)) return;
     if (Notification.permission !== "default") return;
 
@@ -41,7 +42,7 @@ export function NotificationPrompt() {
 
     const timer = setTimeout(() => setShow(true), 10000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated]);
 
   function handleDismiss() {
     localStorage.setItem(DISMISSED_KEY, String(Date.now()));
