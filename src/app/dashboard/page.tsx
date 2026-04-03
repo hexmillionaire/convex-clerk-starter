@@ -1298,15 +1298,12 @@ export default function DashboardPage() {
             Divine Word is free to use. If this app has blessed your walk with God,
             consider supporting its continued development and server costs.
           </p>
-          <Button
-            className="gap-2"
-            onClick={() => {
-              window.open("https://buymeacoffee.com/divineword", "_blank", "noopener,noreferrer");
-            }}
-          >
-            <Heart className="h-4 w-4" />
-            Buy Me a Coffee
-          </Button>
+          <Link href="/support">
+            <Button className="gap-2">
+              <Heart className="h-4 w-4" />
+              Buy Me a Coffee
+            </Button>
+          </Link>
           <p className="text-[10px] text-muted-foreground mt-3 italic">
             &ldquo;Each of you should give what you have decided in your heart to give&rdquo; — 2 Corinthians 9:7
           </p>
