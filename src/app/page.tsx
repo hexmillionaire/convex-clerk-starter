@@ -10,6 +10,8 @@ import { TomorrowPreview } from "@/components/tomorrow-preview";
 import { WeeklyRecap } from "@/components/weekly-recap";
 import { SafeSection } from "@/components/safe-section";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Divine Word — Free Online Bible (KJV)",
   description:
