@@ -11,6 +11,8 @@ type Props = {
   params: Promise<{ book: string; chapter: string; verse: string }>;
 };
 
+export const revalidate = 604800;
+
 async function fetchChapterVerses(bookSlug: string, chapter: number) {
   const book = BIBLE_BOOKS.find((b) => b.slug === bookSlug);
   if (!book) return [];
@@ -37,19 +39,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not Found" };
   }
 
-  const verses = await fetchChapterVerses(bookSlug, chapter);
-  const found = verses.find((v) => v.verse === verse);
-  const verseText = found?.text || "";
   const ref = `${book.name} ${chapter}:${verse}`;
 
   return {
     title: `${ref} KJV — Divine Word`,
-    description: verseText
-      ? `${verseText.slice(0, 150)} — ${ref} King James Version on Divine Word.`
-      : `Read ${ref} in the King James Version (KJV). Free online Bible.`,
+    description: `Read ${ref} in the King James Version (KJV). Free online Bible.`,
     openGraph: {
       title: `${ref} — Divine Word`,
-      description: verseText ? verseText.slice(0, 200) : `Read ${ref} in the KJV.`,
+      description: `Read ${ref} in the KJV.`,
       type: "article",
     },
     alternates: {

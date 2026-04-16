@@ -13,6 +13,8 @@ type Props = {
   params: Promise<{ book: string }>;
 };
 
+export const revalidate = 604800;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { book: bookSlug } = await params;
   const book = getBookBySlug(bookSlug);

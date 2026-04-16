@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(
       `https://bolls.life/search/KJV/${encodeURIComponent(query)}/`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 86400 } }
     );
 
     if (!res.ok) {
