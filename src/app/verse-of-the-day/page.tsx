@@ -7,7 +7,7 @@ import { VotdShareButton } from "./votd-share-button";
 import { VerseImageShare } from "@/components/verse-image-share";
 import { DAILY_VERSES, getVerseOfTheDay } from "@/lib/daily-verses";
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Verse of the Day — Divine Word",
