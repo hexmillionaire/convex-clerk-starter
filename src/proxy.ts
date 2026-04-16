@@ -7,7 +7,7 @@ const BLOCKED_BOTS =
 
 const clerk = clerkMiddleware();
 
-export async function middleware(request: NextRequest, event: NextFetchEvent) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const ua = request.headers.get("user-agent") || "";
   if (BLOCKED_BOTS.test(ua)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
