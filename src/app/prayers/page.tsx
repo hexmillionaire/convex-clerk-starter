@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -133,6 +134,7 @@ export default function PrayersPage() {
 
   const activePrayers = prayers?.filter((p) => !p.answered).length ?? 0;
   const answeredPrayers = prayers?.filter((p) => p.answered).length ?? 0;
+  const statsLoading = prayers === undefined;
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
@@ -156,19 +158,31 @@ export default function PrayersPage() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Card>
           <CardContent className="p-3 text-center">
-            <p className="text-lg font-heading font-bold">{prayers?.length ?? 0}</p>
+            {statsLoading ? (
+              <Skeleton className="h-6 w-8 mx-auto" />
+            ) : (
+              <p className="text-lg font-heading font-bold">{prayers.length}</p>
+            )}
             <p className="text-xs text-muted-foreground font-mono">Total</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
-            <p className="text-lg font-heading font-bold">{activePrayers}</p>
+            {statsLoading ? (
+              <Skeleton className="h-6 w-8 mx-auto" />
+            ) : (
+              <p className="text-lg font-heading font-bold">{activePrayers}</p>
+            )}
             <p className="text-xs text-muted-foreground font-mono">Active</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
-            <p className="text-lg font-heading font-bold text-green-600">{answeredPrayers}</p>
+            {statsLoading ? (
+              <Skeleton className="h-6 w-8 mx-auto" />
+            ) : (
+              <p className="text-lg font-heading font-bold text-green-600">{answeredPrayers}</p>
+            )}
             <p className="text-xs text-muted-foreground font-mono">Answered</p>
           </CardContent>
         </Card>

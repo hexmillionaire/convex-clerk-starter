@@ -95,7 +95,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
         <CheckCircle
           className={`h-3.5 w-3.5 ${isRead ? "text-green-600" : "text-muted-foreground"}`}
         />
-        {isRead ? "Read ✓" : "Mark as Read"}
+        {isRead ? "Marked Read" : "Mark as Read"}
       </Button>
 
       <div
