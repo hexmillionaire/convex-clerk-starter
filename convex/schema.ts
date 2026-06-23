@@ -38,6 +38,8 @@ export default defineSchema({
     verseNumber: v.number(),
     color: v.string(),
     note: v.optional(v.string()), // personal note on highlight
+    text: v.optional(v.string()), // verse text snapshot (so it can be shown without re-fetching)
+    reference: v.optional(v.string()), // e.g. "John 3:16"
   })
     .index("by_user", ["userId"])
     .index("by_user_chapter", ["userId", "bookSlug", "chapter"])

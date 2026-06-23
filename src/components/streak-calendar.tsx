@@ -10,9 +10,9 @@ type Props = {
 const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
 
 function getIntensity(count: number): string {
-  if (count === 0) return "bg-muted";
-  if (count === 1) return "bg-green-200 dark:bg-green-900";
-  if (count <= 3) return "bg-green-400 dark:bg-green-700";
+  if (count === 0) return "bg-muted border border-border/60";
+  if (count === 1) return "bg-green-300 dark:bg-green-800";
+  if (count <= 3) return "bg-green-400 dark:bg-green-600";
   if (count <= 5) return "bg-green-500 dark:bg-green-500";
   return "bg-green-600 dark:bg-green-400";
 }
@@ -20,14 +20,15 @@ function getIntensity(count: number): string {
 export function StreakCalendar({ calendarData, weeks = 13 }: Props) {
   const grid = useMemo(() => {
     const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const totalDays = weeks * 7;
-    const cells: { date: string; count: number; day: number }[] = [];
+    const cells: { date: string; count: number; day: number; isToday: boolean }[] = [];
 
     for (let i = totalDays - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      cells.push({ date: ds, count: calendarData[ds] ?? 0, day: d.getDay() });
+      cells.push({ date: ds, count: calendarData[ds] ?? 0, day: d.getDay(), isToday: ds === todayStr });
     }
 
     // Group into weeks (columns)
@@ -73,7 +74,7 @@ export function StreakCalendar({ calendarData, weeks = 13 }: Props) {
             className="text-[10px] text-muted-foreground font-mono"
             style={{
               position: "relative",
-              left: `${m.col * 14}px`,
+              left: `${m.col * 16}px`,
               marginRight: "-8px",
             }}
           >
@@ -88,7 +89,7 @@ export function StreakCalendar({ calendarData, weeks = 13 }: Props) {
           {DAY_LABELS.map((label, i) => (
             <div
               key={i}
-              className="h-3 w-6 text-[9px] text-muted-foreground font-mono flex items-center justify-end pr-1"
+              className="h-3.5 w-6 text-[9px] text-muted-foreground font-mono flex items-center justify-end pr-1"
             >
               {label}
             </div>
@@ -101,8 +102,12 @@ export function StreakCalendar({ calendarData, weeks = 13 }: Props) {
             {week.map((cell) => (
               <div
                 key={cell.date}
-                className={`h-3 w-3 rounded-sm ${getIntensity(cell.count)} transition-colors`}
-                title={`${cell.date}: ${cell.count} chapter${cell.count !== 1 ? "s" : ""}`}
+                className={`h-3.5 w-3.5 rounded-sm ${getIntensity(cell.count)} transition-colors ${
+                  cell.isToday
+                    ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                    : ""
+                }`}
+                title={`${cell.date}: ${cell.count} chapter${cell.count !== 1 ? "s" : ""}${cell.isToday ? " (today)" : ""}`}
               />
             ))}
           </div>

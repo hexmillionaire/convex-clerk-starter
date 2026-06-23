@@ -30,10 +30,6 @@ export function TomorrowPreview({ verse }: Props) {
               </p>
             </div>
           </div>
-
-          <p className="text-xs text-muted-foreground/40 mt-3 font-mono">
-            — {verse.ref}
-          </p>
         </div>
       </div>
     </section>

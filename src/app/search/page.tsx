@@ -6,6 +6,14 @@ import { Search as SearchIcon, Loader2, ChevronLeft, ChevronRight } from "lucide
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { BIBLE_BOOKS } from "@/lib/bible-data";
 
 const RESULTS_PER_PAGE = 20;
 
@@ -43,6 +51,8 @@ export default function SearchPage() {
   const [searched, setSearched] = useState(false);
   const [page, setPage] = useState(1);
   const [searchedQuery, setSearchedQuery] = useState("");
+  const [testamentFilter, setTestamentFilter] = useState<"all" | "OLD" | "NEW">("all");
+  const [bookFilter, setBookFilter] = useState<string>("all");
 
   const handleSearch = useCallback(async (overrideQuery?: string) => {
     const trimmed = (overrideQuery ?? query).trim();
@@ -51,6 +61,8 @@ export default function SearchPage() {
     setLoading(true);
     setSearched(true);
     setPage(1);
+    setTestamentFilter("all");
+    setBookFilter("all");
     setSearchedQuery(trimmed);
 
     try {
@@ -70,11 +82,30 @@ export default function SearchPage() {
     }
   }, [query]);
 
-  const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE);
+  const filteredResults = useMemo(() => {
+    if (testamentFilter === "all" && bookFilter === "all") return results;
+    return results.filter((r) => {
+      if (bookFilter !== "all") return r.bookSlug === bookFilter;
+      const book = BIBLE_BOOKS.find((b) => b.slug === r.bookSlug);
+      return book?.testament === testamentFilter;
+    });
+  }, [results, testamentFilter, bookFilter]);
+
+  const totalPages = Math.ceil(filteredResults.length / RESULTS_PER_PAGE);
   const paginatedResults = useMemo(
-    () => results.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE),
-    [results, page]
+    () => filteredResults.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE),
+    [filteredResults, page]
   );
+
+  // Books available in the current result set, narrowed by the testament filter.
+  const booksInResults = useMemo(() => {
+    const slugs = new Set(results.map((r) => r.bookSlug));
+    return BIBLE_BOOKS.filter(
+      (b) =>
+        slugs.has(b.slug) &&
+        (testamentFilter === "all" || b.testament === testamentFilter)
+    );
+  }, [results, testamentFilter]);
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
@@ -131,10 +162,74 @@ export default function SearchPage() {
 
       {!loading && results.length > 0 && (
         <div>
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Select
+              value={testamentFilter}
+              onValueChange={(v) => {
+                if (!v) return;
+                setTestamentFilter(v as "all" | "OLD" | "NEW");
+                setBookFilter("all");
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-40 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Testaments</SelectItem>
+                <SelectItem value="OLD">Old Testament</SelectItem>
+                <SelectItem value="NEW">New Testament</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={bookFilter}
+              onValueChange={(v) => {
+                if (!v) return;
+                setBookFilter(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-48 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Books</SelectItem>
+                {booksInResults.map((b) => (
+                  <SelectItem key={b.slug} value={b.slug}>
+                    {b.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(testamentFilter !== "all" || bookFilter !== "all") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setTestamentFilter("all");
+                  setBookFilter("all");
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
+          </div>
+
           <p className="text-sm text-muted-foreground mb-4 font-mono" aria-live="polite">
-            {results.length} result{results.length !== 1 ? "s" : ""}
+            {filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}
             {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
           </p>
+
+          {filteredResults.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground italic">
+                No results in the selected books.
+              </p>
+            </div>
+          ) : (
+          <>
           <div className="space-y-3">
             {paginatedResults.map((r, i) => (
               <Link
@@ -180,6 +275,8 @@ export default function SearchPage() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
+          )}
+          </>
           )}
         </div>
       )}

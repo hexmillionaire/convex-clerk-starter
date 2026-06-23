@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PenLine, Plus, BookOpen, Lock, Trash2, Loader2 } from "lucide-react";
+import { ConnectingState } from "@/components/connecting-state";
+import { Id } from "@convex/_generated/dataModel";
+import { PenLine, Plus, BookOpen, Lock, Trash2, Loader2, Pencil } from "lucide-react";
 import Link from "next/link";
 
 export default function JournalPage() {
@@ -18,6 +20,7 @@ export default function JournalPage() {
   const entries = useQuery(api.journal.list, isAuthenticated ? {} : "skip");
   const createEntry = useMutation(api.journal.create);
   const removeEntry = useMutation(api.journal.remove);
+  const updateEntry = useMutation(api.journal.update);
 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -25,6 +28,30 @@ export default function JournalPage() {
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [editingId, setEditingId] = useState<Id<"journal"> | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editPassage, setEditPassage] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const handleUpdate = async (id: Id<"journal">) => {
+    if (!editTitle.trim() || !editContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      await updateEntry({
+        id,
+        title: editTitle.trim(),
+        passage: editPassage.trim(),
+        content: editContent.trim(),
+      });
+      setEditingId(null);
+    } catch {
+      // Auth may not be ready; keep the editor open
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) return;
@@ -141,14 +168,7 @@ export default function JournalPage() {
 
       {/* Entries */}
       {entries === undefined ? (
-        <div className="text-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-          {isSignedIn && !isAuthenticated && (
-            <p className="text-xs text-muted-foreground mt-3">
-              Having trouble connecting? Try signing out and back in.
-            </p>
-          )}
-        </div>
+        <ConnectingState authPending={isSignedIn && !isAuthenticated} />
       ) : entries.length === 0 && !showForm ? (
         <div className="text-center py-16">
           <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
@@ -164,30 +184,88 @@ export default function JournalPage() {
           {entries.map((entry) => (
             <Card key={entry._id}>
               <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-heading font-semibold">{entry.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {new Date(entry._creationTime).toLocaleDateString()}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => { removeEntry({ id: entry._id }).catch(() => {}); }}
-                    >
-                      <Trash2 className="h-3 w-3 text-muted-foreground" />
-                    </Button>
+                {editingId === entry._id ? (
+                  <div className="space-y-3">
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="Title"
+                    />
+                    <Input
+                      value={editPassage}
+                      onChange={(e) => setEditPassage(e.target.value)}
+                      placeholder="Passage Reference (optional)"
+                    />
+                    <Textarea
+                      rows={5}
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="Your reflection..."
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingId(null)}
+                        disabled={savingEdit}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => void handleUpdate(entry._id)}
+                        disabled={savingEdit}
+                      >
+                        {savingEdit && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Save Changes
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                {entry.passage && (
-                  <p className="text-xs text-primary font-mono mb-2">
-                    📖 {entry.passage}
-                  </p>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-heading font-semibold">{entry.title}</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {new Date(entry._creationTime).toLocaleDateString()}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label="Edit entry"
+                          onClick={() => {
+                            setEditingId(entry._id);
+                            setEditTitle(entry.title);
+                            setEditPassage(entry.passage);
+                            setEditContent(entry.content);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label="Delete entry"
+                          onClick={() => { removeEntry({ id: entry._id }).catch(() => {}); }}
+                        >
+                          <Trash2 className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                    {entry.passage && (
+                      <p className="text-xs text-primary font-mono mb-2">
+                        📖 {entry.passage}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {entry.content}
+                    </p>
+                  </>
                 )}
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {entry.content}
-                </p>
               </CardContent>
             </Card>
           ))}

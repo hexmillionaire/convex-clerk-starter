@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
+import { getBookBySlug } from "@/lib/bible-data";
 
 type Props = {
   bookSlug: string;
@@ -78,6 +79,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
   const readCount = progress ? Object.keys(progress).length : 0;
   const pct =
     totalChapters > 0 ? Math.round((readCount / totalChapters) * 100) : 0;
+  const bookName = getBookBySlug(bookSlug)?.name ?? bookSlug;
 
   if (!isSignedIn) return null;
 
@@ -88,14 +90,19 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
         size="sm"
         className="gap-2 text-xs"
         onClick={toggleRead}
+        aria-pressed={isRead}
       >
         <CheckCircle
           className={`h-3.5 w-3.5 ${isRead ? "text-green-600" : "text-muted-foreground"}`}
         />
-        {isRead ? "Read" : "Mark as read"}
+        {isRead ? "Read ✓" : "Mark as Read"}
       </Button>
 
-      <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+      <div
+        className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground"
+        title={`${bookName}: ${readCount} of ${totalChapters} chapters read`}
+      >
+        <span className="font-medium text-foreground/70">{bookName}</span>
         <div className="h-1.5 w-20 rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full bg-primary/60 transition-all duration-300"
@@ -103,7 +110,7 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
           />
         </div>
         <span className="font-mono tabular-nums">
-          {readCount}/{totalChapters}
+          {readCount}/{totalChapters} read
         </span>
       </div>
     </div>

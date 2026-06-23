@@ -36,6 +36,8 @@ export const set = mutation({
     verseNumber: v.number(),
     color: v.string(),
     note: v.optional(v.string()),
+    text: v.optional(v.string()),
+    reference: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -55,7 +57,13 @@ export const set = mutation({
       .first();
 
     if (match) {
-      await ctx.db.patch(match._id, { color: args.color, note: args.note });
+      // Preserve existing note unless a new one is provided; backfill text/reference.
+      await ctx.db.patch(match._id, {
+        color: args.color,
+        ...(args.note !== undefined ? { note: args.note } : {}),
+        ...(args.text !== undefined ? { text: args.text } : {}),
+        ...(args.reference !== undefined ? { reference: args.reference } : {}),
+      });
       return match._id;
     }
 
@@ -66,6 +74,8 @@ export const set = mutation({
       verseNumber: args.verseNumber,
       color: args.color,
       note: args.note,
+      text: args.text,
+      reference: args.reference,
     });
   },
 });

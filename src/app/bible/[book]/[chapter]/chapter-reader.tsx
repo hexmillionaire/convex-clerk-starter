@@ -11,12 +11,12 @@ import {
   BookmarkCheck,
   Share2,
   List,
-  Loader2,
 } from "lucide-react";
 import { useQuery, useMutation, useAction, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
   SheetContent,
@@ -68,6 +68,7 @@ export function ChapterReader({ book, chapter }: Props) {
   const removeBookmark = useMutation(api.bookmarks.remove);
   const setHighlight = useMutation(api.highlights.set);
   const removeHighlight = useMutation(api.highlights.remove);
+  const updateHighlightNote = useMutation(api.highlights.updateNote);
 
   // Fetch from external API as fallback
   const fetchFromAPI = useAction(api.bible.fetchChapterFromAPI);
@@ -113,7 +114,7 @@ export function ChapterReader({ book, chapter }: Props) {
   );
 
   const handleHighlight = useCallback(
-    async (verseNum: number, color: string | null) => {
+    async (verseNum: number, color: string | null, text?: string) => {
       if (!isAuthenticated) return;
       try {
         if (color === null) {
@@ -128,13 +129,34 @@ export function ChapterReader({ book, chapter }: Props) {
             chapter,
             verseNumber: verseNum,
             color,
+            // Snapshot text + reference so the highlight is self-contained
+            // (the dashboard/highlights views don't re-fetch scripture).
+            text: text ? cleanVerseText(text) : undefined,
+            reference: `${book.name} ${chapter}:${verseNum}`,
           });
         }
       } catch {
         // Auth token may not be synced yet
       }
     },
-    [isAuthenticated, setHighlight, removeHighlight, book.slug, chapter]
+    [isAuthenticated, setHighlight, removeHighlight, book.slug, book.name, chapter]
+  );
+
+  const handleHighlightNote = useCallback(
+    async (verseNum: number, note: string) => {
+      if (!isAuthenticated) return;
+      try {
+        await updateHighlightNote({
+          bookSlug: book.slug,
+          chapter,
+          verseNumber: verseNum,
+          note: note.trim() || undefined,
+        });
+      } catch {
+        // Auth token may not be synced yet
+      }
+    },
+    [isAuthenticated, updateHighlightNote, book.slug, chapter]
   );
 
   const handleBookmark = useCallback(
@@ -324,11 +346,17 @@ export function ChapterReader({ book, chapter }: Props) {
       {/* Verse content */}
       <article className="mb-16">
         {isLoading ? (
-          <div className="text-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-            <p className="text-sm text-muted-foreground mt-2">
-              Loading scripture...
-            </p>
+          <div className="space-y-5" aria-busy="true" aria-label="Loading scripture">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={i} className="flex gap-4">
+                <Skeleton className="h-4 w-5 mt-1 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-[92%]" />
+                  {i % 3 === 0 && <Skeleton className="h-4 w-[60%]" />}
+                </div>
+              </div>
+            ))}
           </div>
         ) : verses.length > 0 ? (
           <div className="space-y-0.5">
@@ -372,8 +400,12 @@ export function ChapterReader({ book, chapter }: Props) {
                         <HighlightPicker
                           verseId={`v${v.verse}`}
                           currentColor={highlightColor}
+                          currentNote={highlightData?.note}
                           onHighlight={(_id, color) =>
-                            handleHighlight(v.verse, color)
+                            handleHighlight(v.verse, color, v.text)
+                          }
+                          onNote={(_id, note) =>
+                            handleHighlightNote(v.verse, note)
                           }
                         />
                         <Button
@@ -431,7 +463,7 @@ export function ChapterReader({ book, chapter }: Props) {
         )}
 
         <span className="text-sm text-muted-foreground font-mono">
-          {book.abbreviation} {chapter}
+          {book.name} {chapter}
         </span>
 
         {nextChapterInfo ? (

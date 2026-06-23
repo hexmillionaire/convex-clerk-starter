@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { ConnectingState } from "@/components/connecting-state";
 import {
   Bookmark,
   Lock,
@@ -126,14 +127,7 @@ export default function BookmarksPage() {
       )}
 
       {bookmarks === undefined ? (
-        <div className="text-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-          {isSignedIn && !isAuthenticated && (
-            <p className="text-xs text-muted-foreground mt-3">
-              Having trouble connecting? Try signing out and back in.
-            </p>
-          )}
-        </div>
+        <ConnectingState authPending={isSignedIn && !isAuthenticated} />
       ) : bookmarks.length === 0 ? (
         <div className="text-center py-16">
           <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />

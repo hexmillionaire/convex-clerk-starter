@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConnectingState } from "@/components/connecting-state";
+import { Id } from "@convex/_generated/dataModel";
 import {
   HandHeart,
   Plus,
@@ -27,6 +29,7 @@ import {
   Globe,
   Sparkles,
   MoreHorizontal,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,6 +52,7 @@ export default function PrayersPage() {
   const addPrayer = useMutation(api.prayerJournal.add);
   const markAnswered = useMutation(api.prayerJournal.markAnswered);
   const removePrayer = useMutation(api.prayerJournal.remove);
+  const updatePrayer = useMutation(api.prayerJournal.update);
 
   const [showForm, setShowForm] = useState(false);
   const [request, setRequest] = useState("");
@@ -56,6 +60,28 @@ export default function PrayersPage() {
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "answered">("all");
   const [error, setError] = useState<string | null>(null);
+
+  const [editingId, setEditingId] = useState<Id<"prayerJournal"> | null>(null);
+  const [editRequest, setEditRequest] = useState("");
+  const [editCategory, setEditCategory] = useState("personal");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const handleUpdate = async (id: Id<"prayerJournal">) => {
+    if (!editRequest.trim()) return;
+    setSavingEdit(true);
+    try {
+      await updatePrayer({
+        id,
+        request: editRequest.trim(),
+        category: editCategory,
+      });
+      setEditingId(null);
+    } catch {
+      // Auth may not be ready; keep the editor open
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!request.trim()) return;
@@ -209,14 +235,7 @@ export default function PrayersPage() {
 
       {/* Prayers list */}
       {prayers === undefined ? (
-        <div className="text-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-          {isSignedIn && !isAuthenticated && (
-            <p className="text-xs text-muted-foreground mt-3">
-              Having trouble connecting? Try signing out and back in.
-            </p>
-          )}
-        </div>
+        <ConnectingState authPending={isSignedIn && !isAuthenticated} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <HandHeart className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
@@ -236,50 +255,112 @@ export default function PrayersPage() {
               className={prayer.answered ? "opacity-75" : ""}
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {categoryLabel(prayer.category)}
-                    </Badge>
-                    {prayer.answered && (
-                      <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
-                        Answered
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {new Date(prayer._creationTime).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap mb-3">
-                  {prayer.request}
-                </p>
-                {prayer.answeredNote && (
-                  <p className="text-xs text-green-600 dark:text-green-400 italic border-l-2 border-green-500 pl-2 mb-3">
-                    {prayer.answeredNote}
-                  </p>
-                )}
-                <div className="flex gap-2">
-                  {!prayer.answered && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => { markAnswered({ id: prayer._id }).catch(() => {}); }}
+                {editingId === prayer._id ? (
+                  <div className="space-y-3">
+                    <Select
+                      value={editCategory}
+                      onValueChange={(v) => { if (v) setEditCategory(v); }}
                     >
-                      <Check className="h-3 w-3" />
-                      Mark Answered
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 text-muted-foreground"
-                    onClick={() => { removePrayer({ id: prayer._id }).catch(() => {}); }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Textarea
+                      rows={4}
+                      value={editRequest}
+                      onChange={(e) => setEditRequest(e.target.value)}
+                      placeholder="Write your prayer request or praise..."
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingId(null)}
+                        disabled={savingEdit}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => void handleUpdate(prayer._id)}
+                        disabled={savingEdit}
+                      >
+                        {savingEdit && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Save Changes
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {categoryLabel(prayer.category)}
+                        </Badge>
+                        {prayer.answered && (
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
+                            Answered
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {new Date(prayer._creationTime).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap mb-3">
+                      {prayer.request}
+                    </p>
+                    {prayer.answeredNote && (
+                      <p className="text-xs text-green-600 dark:text-green-400 italic border-l-2 border-green-500 pl-2 mb-3">
+                        {prayer.answeredNote}
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      {!prayer.answered && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => { markAnswered({ id: prayer._id }).catch(() => {}); }}
+                        >
+                          <Check className="h-3 w-3" />
+                          Mark Answered
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 text-muted-foreground"
+                        aria-label="Edit prayer"
+                        onClick={() => {
+                          setEditingId(prayer._id);
+                          setEditRequest(prayer.request);
+                          setEditCategory(prayer.category);
+                        }}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 text-muted-foreground"
+                        aria-label="Delete prayer"
+                        onClick={() => { removePrayer({ id: prayer._id }).catch(() => {}); }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           ))}

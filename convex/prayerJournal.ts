@@ -35,6 +35,29 @@ export const add = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    id: v.id("prayerJournal"),
+    request: v.optional(v.string()),
+    category: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.tokenIdentifier;
+
+    const prayer = await ctx.db.get(args.id);
+    if (!prayer || prayer.userId !== userId) {
+      throw new Error("Prayer not found");
+    }
+
+    await ctx.db.patch(args.id, {
+      ...(args.request !== undefined ? { request: args.request } : {}),
+      ...(args.category !== undefined ? { category: args.category } : {}),
+    });
+  },
+});
+
 export const markAnswered = mutation({
   args: {
     id: v.id("prayerJournal"),

@@ -103,8 +103,9 @@ export function cleanVerseText(raw: string): string {
     .replace(/&#39;/g, "'");
   // Remove Strong's concordance number tags: <S>1234</S>
   text = text.replace(/<S>\d+<\/S>/g, "");
-  // Convert <sup>...</sup> footnotes to parenthetical notes
-  text = text.replace(/<sup>(.*?)<\/sup>/g, "($1)");
+  // Drop translators' marginal notes / footnotes entirely (with their content),
+  // so they don't pollute the verse text in the reader, bookmarks, and search.
+  text = text.replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, "");
   // Remove any other HTML tags that may appear
   text = text.replace(/<\/?[^>]+(>|$)/g, "");
   // Strip bare Strong's numbers already baked into text (e.g. "God430" → "God")

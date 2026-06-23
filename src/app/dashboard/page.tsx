@@ -14,6 +14,7 @@ import { BIBLE_BOOKS, HIGHLIGHT_COLORS } from "@/lib/bible-data";
 import { getTodayReading } from "@/lib/plan-schedules";
 import { StreakCalendar } from "@/components/streak-calendar";
 import { DailyGoalRing } from "@/components/daily-goal-ring";
+import { ConnectingState } from "@/components/connecting-state";
 import {
   BookOpen,
   Flame,
@@ -23,7 +24,6 @@ import {
   TrendingUp,
   Calendar,
   ArrowRight,
-  ArrowLeft,
   LogOut,
   Loader2,
   Lock,
@@ -166,34 +166,12 @@ export default function DashboardPage() {
   }
 
   if (dashboard === undefined) {
-    if (isSignedIn && !isAuthenticated) {
-      return (
-        <div className="container max-w-md mx-auto px-4 py-20 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary mb-4" />
-          <p className="text-sm text-muted-foreground">
-            Connecting to your account...
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            If this takes more than a few seconds, try signing out and back in.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            onClick={() => signOut({ redirectUrl: "/login" })}
-          >
-            <LogOut className="h-3.5 w-3.5 mr-2" />
-            Sign Out & Retry
-          </Button>
-        </div>
-      );
-    }
     return (
-      <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-        <p className="text-sm text-muted-foreground mt-2">
-          Loading your dashboard...
-        </p>
+      <div className="container max-w-4xl mx-auto px-4">
+        <ConnectingState
+          authPending={isSignedIn && !isAuthenticated}
+          className="text-center py-20"
+        />
       </div>
     );
   }
@@ -261,13 +239,7 @@ export default function DashboardPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.history.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
+            aria-label="Settings"
             onClick={() => {
               setGoalInput(String(dailyGoal));
               setReminderEnabled(dashboard.settings?.reminderEnabled ?? false);
@@ -932,7 +904,7 @@ export default function DashboardPage() {
                           aria-label={highlightColorName(hl.color)}
                         />
                         <p className="text-xs text-primary font-mono font-semibold">
-                          {hl.bookName} {hl.chapter}:{hl.verseNumber}
+                          {hl.reference}
                         </p>
                       </div>
                       {hl.text && (

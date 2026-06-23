@@ -73,8 +73,9 @@ export async function GET(request: NextRequest) {
     const data: { pk: number; translation: string; book: number; chapter: number; verse: number; text: string }[] =
       await res.json();
 
-    // Map book (1-66) back to our book data
-    const results = data.slice(0, 50).map((item) => {
+    // Map book (1-66) back to our book data. Bolls already returns stemmed
+    // variants (loved/loveth/lovingkindness); cap generously so they aren't lost.
+    const results = data.slice(0, 300).map((item) => {
       const book = BIBLE_BOOKS.find((b) => b.position === item.book);
       return {
         bookName: book?.name || "Unknown",

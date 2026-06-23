@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ConnectingState } from "@/components/connecting-state";
 
 export default function StatsPage() {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
@@ -49,14 +50,11 @@ export default function StatsPage() {
 
   if (stats === undefined) {
     return (
-      <div className="container max-w-4xl mx-auto px-4 py-20 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-        <p className="text-sm text-muted-foreground mt-2">Loading stats...</p>
-        {isSignedIn && !isAuthenticated && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Having trouble connecting? Try signing out and back in.
-          </p>
-        )}
+      <div className="container max-w-4xl mx-auto px-4">
+        <ConnectingState
+          authPending={isSignedIn && !isAuthenticated}
+          className="text-center py-20"
+        />
       </div>
     );
   }

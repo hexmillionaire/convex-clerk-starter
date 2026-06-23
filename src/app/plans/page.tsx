@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
@@ -84,6 +85,8 @@ export default function PlansPage() {
   const startPlan = useMutation(api.readingPlans.startPlan);
   const advanceDay = useMutation(api.readingPlans.advanceDay);
   const resetPlan = useMutation(api.readingPlans.resetPlan);
+
+  const [confirmSlug, setConfirmSlug] = useState<string | null>(null);
 
   const getUserPlan = (slug: string) =>
     userPlans?.find((p) => p.planSlug === slug);
@@ -205,13 +208,38 @@ export default function PlansPage() {
                                 Continue
                               </Button>
                             </Link>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => { advanceDay({ planSlug: plan.slug }).catch(() => {}); }}
-                            >
-                              +1 Day
-                            </Button>
+                            {confirmSlug === plan.slug ? (
+                              <>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  className="gap-1"
+                                  onClick={() => {
+                                    advanceDay({ planSlug: plan.slug }).catch(() => {});
+                                    setConfirmSlug(null);
+                                  }}
+                                >
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                  Confirm
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setConfirmSlug(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                title="Mark today's reading complete"
+                                onClick={() => setConfirmSlug(plan.slug)}
+                              >
+                                +1 Day
+                              </Button>
+                            )}
                           </div>
                         </>
                       );

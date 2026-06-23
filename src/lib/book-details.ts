@@ -9,7 +9,6 @@ export type BookGenre =
   | "Major Prophet"
   | "Minor Prophet"
   | "Gospel"
-  | "Acts"
   | "Epistle"
   | "Apocalyptic";
 
@@ -60,7 +59,7 @@ export const BOOK_DETAILS: Record<
   mark: { genre: "Gospel", description: "The suffering servant — Jesus in action." },
   luke: { genre: "Gospel", description: "Jesus as the Son of Man, full of compassion for all people." },
   john: { genre: "Gospel", description: "Jesus as the Word made flesh — the Son of God." },
-  acts: { genre: "Acts", description: "The birth of the Church and the spread of the gospel." },
+  acts: { genre: "History", description: "The birth of the Church and the spread of the gospel." },
   romans: { genre: "Epistle", description: "The gospel of grace — justification by faith." },
   "1-corinthians": { genre: "Epistle", description: "Addressing divisions, morality, and spiritual gifts." },
   "2-corinthians": { genre: "Epistle", description: "Paul's defense of his ministry and call to generosity." },

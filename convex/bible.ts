@@ -81,6 +81,8 @@ export const fetchChapterFromAPI = action({
       text: v.text
         // Strip Strong's concordance tags <S>1234</S> BEFORE removing other HTML
         .replace(/<S>\d+<\/S>/gi, "")
+        // Drop translators' marginal notes / footnotes (with their content)
+        .replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, "")
         .replace(/<[^>]*>/g, "")
         .replace(/\s{2,}/g, " ")
         .trim(),

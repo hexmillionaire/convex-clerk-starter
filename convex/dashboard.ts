@@ -22,32 +22,19 @@ export const get = query({
       .collect();
     const recentHighlights = allHighlights.slice(0, 10);
 
-    // For each highlight, look up the verse text
-    const highlightsWithText = await Promise.all(
-      recentHighlights.map(async (h) => {
-        const match = await ctx.db
-          .query("verses")
-          .withIndex("by_chapter_and_verse", (q) =>
-            q
-              .eq("bookSlug", h.bookSlug)
-              .eq("chapter", h.chapter)
-              .eq("translation", "KJV")
-              .eq("verseNumber", h.verseNumber)
-          )
-          .first();
-        return {
-          _id: h._id,
-          _creationTime: h._creationTime,
-          bookSlug: h.bookSlug,
-          chapter: h.chapter,
-          verseNumber: h.verseNumber,
-          color: h.color,
-          note: h.note,
-          bookName: match?.bookName ?? h.bookSlug,
-          text: match?.text ?? "",
-        };
-      })
-    );
+    // Highlights store their own text/reference snapshot (the `verses` table is not
+    // populated — scripture is read from the external API), so use those directly.
+    const highlightsWithText = recentHighlights.map((h) => ({
+      _id: h._id,
+      _creationTime: h._creationTime,
+      bookSlug: h.bookSlug,
+      chapter: h.chapter,
+      verseNumber: h.verseNumber,
+      color: h.color,
+      note: h.note,
+      reference: h.reference ?? `${h.bookSlug} ${h.chapter}:${h.verseNumber}`,
+      text: h.text ?? "",
+    }));
 
     // All progress for stats + calendar
     const allProgress = await ctx.db
