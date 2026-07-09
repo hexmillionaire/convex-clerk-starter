@@ -16,6 +16,8 @@ import type * as dashboard from "../dashboard.js";
 import type * as highlights from "../highlights.js";
 import type * as http from "../http.js";
 import type * as journal from "../journal.js";
+import type * as lib_clean from "../lib/clean.js";
+import type * as lib_streak from "../lib/streak.js";
 import type * as milestones from "../milestones.js";
 import type * as prayerJournal from "../prayerJournal.js";
 import type * as pushNotifications from "../pushNotifications.js";
@@ -42,6 +44,8 @@ declare const fullApi: ApiFromModules<{
   highlights: typeof highlights;
   http: typeof http;
   journal: typeof journal;
+  "lib/clean": typeof lib_clean;
+  "lib/streak": typeof lib_streak;
   milestones: typeof milestones;
   prayerJournal: typeof prayerJournal;
   pushNotifications: typeof pushNotifications;
