@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Convex codegen — not our source; its eslint-disable directives are its own.
+    "convex/_generated/**",
   ]),
 ]);
 

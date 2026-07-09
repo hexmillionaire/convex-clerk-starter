@@ -19,7 +19,6 @@ import {
   FolderOpen,
   Tag,
   X,
-  Info,
 } from "lucide-react";
 
 export default function BookmarksPage() {
@@ -33,11 +32,6 @@ export default function BookmarksPage() {
   const [activeCollection, setActiveCollection] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newCollection, setNewCollection] = useState("");
-  const [hintDismissed, setHintDismissed] = useState<boolean>(
-    () =>
-      typeof window !== "undefined" &&
-      localStorage.getItem("dw-bookmark-footnote-hint") === "1"
-  );
 
   if (!clerkLoaded) {
     return (
@@ -129,33 +123,6 @@ export default function BookmarksPage() {
               {col}
             </Button>
           ))}
-        </div>
-      )}
-
-      {bookmarks && bookmarks.length > 0 && !hintDismissed && (
-        <div className="mb-4 flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-          <Info className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
-          <p className="flex-1">
-            Older bookmarks may include translators&apos; footnotes in the verse
-            text. Re-saving a verse from the reader (tap the bookmark to remove
-            it, then bookmark it again) refreshes it with clean text.
-          </p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 shrink-0"
-            aria-label="Dismiss"
-            onClick={() => {
-              setHintDismissed(true);
-              try {
-                localStorage.setItem("dw-bookmark-footnote-hint", "1");
-              } catch {
-                // localStorage unavailable — dismiss for this session only
-              }
-            }}
-          >
-            <X className="h-3 w-3" />
-          </Button>
         </div>
       )}
 
