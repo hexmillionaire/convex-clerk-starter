@@ -1,5 +1,6 @@
 import { query, action } from "./_generated/server";
 import { v } from "convex/values";
+import { cleanVerseText, normalizeTranslation } from "./lib/clean";
 
 // Get all verses for a specific chapter
 export const getChapter = query({
@@ -63,7 +64,7 @@ export const fetchChapterFromAPI = action({
     translation: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
-    const translation = args.translation ?? "KJV";
+    const translation = normalizeTranslation(args.translation);
 
     const res = await fetch(
       `https://bolls.life/get-text/${translation}/${args.bookId}/${args.chapter}/`
@@ -78,14 +79,7 @@ export const fetchChapterFromAPI = action({
 
     return data.map((v) => ({
       verse: v.verse,
-      text: v.text
-        // Strip Strong's concordance tags <S>1234</S> BEFORE removing other HTML
-        .replace(/<S>\d+<\/S>/gi, "")
-        // Drop translators' marginal notes / footnotes (with their content)
-        .replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, "")
-        .replace(/<[^>]*>/g, "")
-        .replace(/\s{2,}/g, " ")
-        .trim(),
+      text: cleanVerseText(v.text),
     }));
   },
 });

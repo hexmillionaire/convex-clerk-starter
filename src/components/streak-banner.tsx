@@ -54,6 +54,9 @@ export function StreakBanner({ streak, streakAtRisk, todayChapters, daysSinceLas
   const hasReadToday = todayChapters > 0;
 
   if (streakAtRisk) {
+    // daysSinceLastRead >= 2 means yesterday was missed and the streak is only
+    // still alive thanks to the 1-day grace period — today is the last chance.
+    const graceUsed = daysSinceLastRead >= 2;
     return (
       <section className="pb-4">
         <div className="container max-w-2xl mx-auto px-6">
@@ -64,10 +67,14 @@ export function StreakBanner({ streak, streakAtRisk, todayChapters, daysSinceLas
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-heading font-semibold text-orange-900 dark:text-orange-200">
-                  Don&apos;t lose your {streak}-day streak!
+                  {graceUsed
+                    ? `Last chance to save your ${streak}-day streak!`
+                    : `Don't lose your ${streak}-day streak!`}
                 </p>
                 <p className="text-xs text-orange-700/60 dark:text-orange-300/50 mt-0.5">
-                  Read a chapter today to keep it alive
+                  {graceUsed
+                    ? "You missed yesterday — read today or it resets"
+                    : "Read a chapter today to keep it alive"}
                 </p>
               </div>
               <span className="text-[10px] font-mono font-bold tracking-wider text-orange-600 dark:text-orange-400 shrink-0">

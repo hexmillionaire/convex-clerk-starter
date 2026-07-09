@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { getBookBySlug, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
 
+const SUPPORTED_TRANSLATIONS = ["KJV", "WEB", "ASV"];
+
+function normalizeTranslation(value: string | null): string {
+  const upper = (value ?? "").toUpperCase();
+  return SUPPORTED_TRANSLATIONS.includes(upper) ? upper : "KJV";
+}
+
 // Map book slugs to Bolls.life book IDs (1-66)
 function getBookId(slug: string): number | null {
   const book = BIBLE_BOOKS.find((b) => b.slug === slug);
@@ -63,6 +70,9 @@ export async function GET(request: Request, { params }: Props) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const translation = normalizeTranslation(searchParams.get("translation"));
+
   // Fetch from Bolls.life free API (no key needed)
   const bookId = getBookId(bookSlug);
   if (!bookId) {
@@ -71,7 +81,7 @@ export async function GET(request: Request, { params }: Props) {
 
   try {
     const res = await fetch(
-      `https://bolls.life/get-text/KJV/${bookId}/${chapter}/`,
+      `https://bolls.life/get-text/${translation}/${bookId}/${chapter}/`,
       { next: { revalidate: 86400 } }
     );
 
@@ -94,7 +104,7 @@ export async function GET(request: Request, { params }: Props) {
         book: book.name,
         bookSlug: book.slug,
         chapter,
-        translation: "KJV",
+        translation,
         verses,
       },
       {

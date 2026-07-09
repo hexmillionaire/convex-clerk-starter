@@ -1,6 +1,7 @@
 import { action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { cleanVerseText } from "./lib/clean";
 
 // Internal mutation to batch-insert verses
 export const insertVerses = internalMutation({
@@ -56,14 +57,7 @@ export const seedBook = action({
         bookSlug: args.bookSlug,
         chapter,
         verseNumber: v.verse,
-        text: v.text
-          // Strip Strong's concordance tags <S>1234</S> BEFORE removing other HTML
-          .replace(/<S>\d+<\/S>/gi, "")
-          // Drop translators' marginal notes / footnotes (with their content)
-          .replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, "")
-          .replace(/<[^>]*>/g, "")
-          .replace(/\s{2,}/g, " ")
-          .trim(),
+        text: cleanVerseText(v.text),
         translation,
       }));
 

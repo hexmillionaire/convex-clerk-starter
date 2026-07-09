@@ -1,4 +1,5 @@
 import { query } from "./_generated/server";
+import { calculateStreak } from "./lib/streak";
 
 /**
  * Lightweight query for homepage retention widgets.
@@ -34,32 +35,10 @@ export const homeStats = query({
     }
     const readDates = [...readDateSet].sort().reverse();
 
-    // Streak calculation (same logic as get)
-    let streak = 0;
-    if (readDates.length > 0) {
-      const checkDate = new Date(today);
-      if (readDates[0] !== todayStr) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        const yesterdayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-        if (readDates[0] === yesterdayStr) {
-          const d = new Date(checkDate);
-          for (const dateStr of readDates) {
-            const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-            if (dateStr === expected) { streak++; d.setDate(d.getDate() - 1); }
-            else if (dateStr < expected) break;
-          }
-        }
-      } else {
-        const d = new Date(today);
-        for (const dateStr of readDates) {
-          const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          if (dateStr === expected) { streak++; d.setDate(d.getDate() - 1); }
-          else if (dateStr < expected) break;
-        }
-      }
-    }
+    // Streak with a 1-day grace period (see convex/lib/streak.ts).
+    const { streak, daysSinceLastRead } = calculateStreak(readDates, today);
 
-    // Is streak at risk? (had streak yesterday but nothing today)
+    // Is streak at risk? (had streak but nothing today)
     const streakAtRisk = streak > 0 && todayChapters === 0;
 
     // Daily goal from settings
@@ -78,16 +57,6 @@ export const homeStats = query({
     const uncelebrated = milestones
       .filter((m) => !m.celebratedAt)
       .slice(0, 3);
-
-    // Days since last read (for streak recovery UI)
-    let daysSinceLastRead = -1;
-    if (readDates.length > 0) {
-      const lastDate = readDates[0]; // Most recent date (sorted desc)
-      const lastRead = new Date(lastDate + "T12:00:00Z");
-      daysSinceLastRead = Math.floor(
-        (today.getTime() - lastRead.getTime()) / (1000 * 60 * 60 * 24)
-      );
-    }
 
     return {
       streak,
@@ -144,46 +113,8 @@ export const get = query({
     }
     const readDates = [...readDateSet].sort().reverse();
 
-    let streak = 0;
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-    // Check if read today or yesterday to start counting
-    if (readDates.length > 0) {
-      const checkDate = new Date(today);
-      // Allow streak to start from today or yesterday
-      if (readDates[0] !== todayStr) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        const yesterdayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-        if (readDates[0] !== yesterdayStr) {
-          streak = 0;
-        } else {
-          // Count from yesterday backwards
-          const d = new Date(checkDate);
-          for (const dateStr of readDates) {
-            const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-            if (dateStr === expected) {
-              streak++;
-              d.setDate(d.getDate() - 1);
-            } else if (dateStr < expected) {
-              break;
-            }
-          }
-        }
-      } else {
-        // Count from today backwards
-        const d = new Date(today);
-        for (const dateStr of readDates) {
-          const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          if (dateStr === expected) {
-            streak++;
-            d.setDate(d.getDate() - 1);
-          } else if (dateStr < expected) {
-            break;
-          }
-        }
-      }
-    }
+    // Streak with a 1-day grace period (see convex/lib/streak.ts).
+    const { streak } = calculateStreak(readDates, new Date());
 
     // Per-book progress
     const bookProgress: Record<string, number> = {};

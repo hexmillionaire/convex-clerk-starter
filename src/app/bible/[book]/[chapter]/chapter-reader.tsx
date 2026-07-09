@@ -11,8 +11,9 @@ import {
   BookmarkCheck,
   Share2,
   List,
+  WifiOff,
 } from "lucide-react";
-import { useQuery, useMutation, useAction, useConvexAuth } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { type BookInfo, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
-import { TranslationSwitcher, type Translation } from "@/components/translation-switcher";
+import { TranslationSwitcher } from "@/components/translation-switcher";
+import { useTranslation } from "@/lib/use-translation";
 import { HighlightPicker } from "@/components/highlight-picker";
 import { VerseImageShare } from "@/components/verse-image-share";
 import { ReadingProgress } from "@/components/reading-progress";
@@ -44,19 +46,52 @@ export function ChapterReader({ book, chapter }: Props) {
   const showAuthFeatures = !!isSignedIn;
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
-  const [translation, setTranslation] = useState<Translation>("KJV");
-  const [apiVerses, setApiVerses] = useState<
-    { verse: number; text: string }[] | null
-  >(null);
-  const [loadingApi, setLoadingApi] = useState(false);
+  const [translation, setTranslation] = useTranslation();
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // Convex queries
-  const convexVerses = useQuery(api.bible.getChapter, {
-    bookSlug: book.slug,
-    chapter,
-    translation,
-  });
+  // Scripture is fetched from the cacheable HTTP route (`/api/bible/...`) rather
+  // than Convex, so the service worker can serve visited chapters offline.
+  // Result is keyed by book/chapter/translation; loading is derived by comparing
+  // the stored key to the current key (avoids synchronous setState-in-effect).
+  const requestKey = `${book.slug}/${chapter}/${translation}`;
+  const [result, setResult] = useState<{
+    key: string;
+    verses: { verse: number; text: string }[];
+    failed: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(
+      `/api/bible/${book.slug}/${chapter}?translation=${translation}`,
+      { signal: controller.signal }
+    )
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("bad response"))))
+      .then((data: { verses?: { verse: number; text: string }[] }) => {
+        setResult({ key: requestKey, verses: data.verses ?? [], failed: false });
+      })
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setResult({ key: requestKey, verses: [], failed: true });
+      });
+    return () => controller.abort();
+  }, [requestKey, book.slug, chapter, translation]);
+
+  // Online/offline indicator. Initialized lazily (client-only tree) so there is
+  // no synchronous setState in the effect below.
+  const [online, setOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine
+  );
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+
   const highlights = useQuery(api.highlights.getForChapter, isAuthenticated ? {
     bookSlug: book.slug,
     chapter,
@@ -70,38 +105,11 @@ export function ChapterReader({ book, chapter }: Props) {
   const removeHighlight = useMutation(api.highlights.remove);
   const updateHighlightNote = useMutation(api.highlights.updateNote);
 
-  // Fetch from external API as fallback
-  const fetchFromAPI = useAction(api.bible.fetchChapterFromAPI);
-
-  useEffect(() => {
-    if (convexVerses && convexVerses.length === 0 && !apiVerses && !loadingApi) {
-      setLoadingApi(true);
-      fetchFromAPI({
-        bookSlug: book.slug,
-        bookId: book.position,
-        chapter,
-        translation,
-      })
-        .then((data) => setApiVerses(data))
-        .catch(() => setApiVerses([]))
-        .finally(() => setLoadingApi(false));
-    }
-  }, [convexVerses, apiVerses, loadingApi, fetchFromAPI, book.slug, book.position, chapter, translation]);
-
-  // Reset API verses when navigating or changing translation
-  useEffect(() => {
-    setApiVerses(null);
-    setLoadingApi(false);
-  }, [book.slug, chapter, translation]);
-
-  // Determine which verses to display
-  const verses =
-    convexVerses && convexVerses.length > 0
-      ? convexVerses.map((v) => ({ verse: v.verseNumber, text: v.text }))
-      : apiVerses ?? [];
-
-  const isLoading =
-    convexVerses === undefined || (convexVerses.length === 0 && loadingApi);
+  // Only trust the result once it matches the current request key.
+  const current = result?.key === requestKey ? result : null;
+  const verses = current?.verses ?? [];
+  const isLoading = current === null;
+  const loadFailed = current?.failed ?? false;
 
   // Build a set of bookmarked verse numbers for this chapter
   const bookmarkedVerses = useMemo(
@@ -321,6 +329,16 @@ export function ChapterReader({ book, chapter }: Props) {
         </div>
       </div>
 
+      {/* Offline indicator */}
+      {!online && (
+        <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-amber-300/40 bg-amber-50/70 dark:bg-amber-950/15 dark:border-amber-500/15 px-4 py-2.5">
+          <WifiOff className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-800 dark:text-amber-300">
+            You&apos;re offline — showing saved chapters. Highlights and bookmarks will sync when you reconnect.
+          </p>
+        </div>
+      )}
+
       {/* Reading progress */}
       <div className="mb-8">
         <ReadingProgress
@@ -441,9 +459,15 @@ export function ChapterReader({ book, chapter }: Props) {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-muted-foreground italic">
-              Unable to load scripture text. Please try again later.
-            </p>
+            {loadFailed && !online ? (
+              <p className="text-muted-foreground italic">
+                This chapter isn&apos;t saved for offline reading yet. Reconnect to load it.
+              </p>
+            ) : (
+              <p className="text-muted-foreground italic">
+                Unable to load scripture text. Please try again later.
+              </p>
+            )}
           </div>
         )}
       </article>

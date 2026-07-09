@@ -1,4 +1,7 @@
-const CACHE_NAME = "divine-word-v2";
+// v3: reader now fetches scripture from the cacheable `/api/bible/` route
+// (previously Convex/WebSocket, which the SW could not cache), so visited
+// chapters are available offline. Bumping the name purges stale v2 caches.
+const CACHE_NAME = "divine-word-v3";
 
 const PRECACHE_URLS = [
   "/",

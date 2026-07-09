@@ -1,4 +1,5 @@
 import { query } from "./_generated/server";
+import { calculateStreak } from "./lib/streak";
 
 export const get = query({
   args: {},
@@ -97,40 +98,11 @@ export const get = query({
     }
     const readDates = [...readDateSet].sort().reverse();
 
-    let streak = 0;
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    if (readDates.length > 0) {
-      const checkDate = new Date(today);
-      if (readDates[0] !== todayStr) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        const yesterdayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-        if (readDates[0] === yesterdayStr) {
-          const d = new Date(checkDate);
-          for (const dateStr of readDates) {
-            const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-            if (dateStr === expected) {
-              streak++;
-              d.setDate(d.getDate() - 1);
-            } else if (dateStr < expected) {
-              break;
-            }
-          }
-        }
-      } else {
-        const d = new Date(today);
-        for (const dateStr of readDates) {
-          const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          if (dateStr === expected) {
-            streak++;
-            d.setDate(d.getDate() - 1);
-          } else if (dateStr < expected) {
-            break;
-          }
-        }
-      }
-    }
+    // Streak with a 1-day grace period (see convex/lib/streak.ts).
+    const { streak } = calculateStreak(readDates, today);
 
     // Today's chapters read (for daily goal tracking)
     const todayChapters = allProgress.filter((p) => {

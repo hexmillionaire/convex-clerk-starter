@@ -23,6 +23,7 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
   const [currentVerse, setCurrentVerse] = useState(0);
   const [rate, setRate] = useState("1");
   const [expanded, setExpanded] = useState(false);
+  const [prevChapterKey, setPrevChapterKey] = useState(`${bookName}/${chapter}`);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const verseIndexRef = useRef(0);
   const playingRef = useRef(false);
@@ -59,22 +60,25 @@ export function AudioPlayer({ verses, bookName, chapter, onVerseChange }: AudioP
     };
   }, [playing]);
 
-  // Cleanup on unmount or chapter change
+  // Cleanup on unmount or chapter change: stop speech and reset the playback
+  // refs (refs must be mutated in effects, not during render).
   useEffect(() => {
     return () => {
       speechSynthesis.cancel();
       playingRef.current = false;
+      verseIndexRef.current = 0;
     };
   }, [bookName, chapter]);
 
-  // Reset state when book/chapter changes
-  useEffect(() => {
+  // Reset render state when book/chapter changes, using React's "adjust state
+  // during render" pattern instead of a setState-in-effect. Speech + refs are
+  // reset by the cleanup effect above (deps [bookName, chapter]).
+  const chapterKey = `${bookName}/${chapter}`;
+  if (chapterKey !== prevChapterKey) {
+    setPrevChapterKey(chapterKey);
     setPlaying(false);
-    playingRef.current = false;
     setCurrentVerse(0);
-    verseIndexRef.current = 0;
-    speechSynthesis.cancel();
-  }, [bookName, chapter]);
+  }
 
   const speakVerse = useCallback(
     (index: number) => {

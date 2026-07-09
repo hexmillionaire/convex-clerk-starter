@@ -8,30 +8,29 @@ const FONT_SIZES = [14, 16, 18, 20, 22, 24];
 const DEFAULT_INDEX = 2; // 18px
 const STORAGE_KEY = "dw-font-size-index";
 
-export function FontSizeControl() {
-  const [sizeIndex, setSizeIndex] = useState(DEFAULT_INDEX);
+function readStoredIndex(): number {
+  if (typeof window === "undefined") return DEFAULT_INDEX;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const idx = saved !== null ? parseInt(saved, 10) : NaN;
+  return idx >= 0 && idx < FONT_SIZES.length ? idx : DEFAULT_INDEX;
+}
 
+export function FontSizeControl() {
+  // Lazy init from localStorage (client-only tree, so no hydration mismatch).
+  const [sizeIndex, setSizeIndex] = useState(readStoredIndex);
+
+  // Apply the reading font size CSS variable whenever it changes (and on mount).
+  // No setState here, so this is not a set-state-in-effect.
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) {
-      const idx = parseInt(saved, 10);
-      if (idx >= 0 && idx < FONT_SIZES.length) {
-        setSizeIndex(idx);
-        document.documentElement.style.setProperty(
-          "--reading-font-size",
-          `${FONT_SIZES[idx]}px`
-        );
-      }
-    }
-  }, []);
+    document.documentElement.style.setProperty(
+      "--reading-font-size",
+      `${FONT_SIZES[sizeIndex]}px`
+    );
+  }, [sizeIndex]);
 
   const applySize = (newIndex: number) => {
     setSizeIndex(newIndex);
     localStorage.setItem(STORAGE_KEY, String(newIndex));
-    document.documentElement.style.setProperty(
-      "--reading-font-size",
-      `${FONT_SIZES[newIndex]}px`
-    );
   };
 
   const decrease = () => {
