@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { StreakBanner } from "@/components/streak-banner";
 import { HomeDailyGoal } from "@/components/home-daily-goal";

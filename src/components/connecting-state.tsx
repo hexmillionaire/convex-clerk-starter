@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useClerk } from "@clerk/nextjs";
+import { useClerk } from "@/lib/auth";
 
 type Props = {
   /**

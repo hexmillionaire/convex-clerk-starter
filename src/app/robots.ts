@@ -17,7 +17,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         disallow: ["/api/", "/login", "/auth/", "/dashboard", "/prayers"],
-        crawlDelay: 10,
+        // No crawl-delay: Googlebot and Bingbot have their own exempt rules
+        // above, so it only ever throttled the other crawlers — including the
+        // social and AI ones that would surface the scripture.
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

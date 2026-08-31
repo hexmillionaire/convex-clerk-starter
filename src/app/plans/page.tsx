@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

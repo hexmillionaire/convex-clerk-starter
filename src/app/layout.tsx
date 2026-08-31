@@ -34,10 +34,10 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Divine Word — Free Online Bible",
-    template: "%s | Divine Word",
-  },
+  // No `template`: page titles already carry the brand, and appending it
+  // again produced "Psalms 56 KJV — Divine Word | Divine Word".
+  title: "Divine Word — Free Online Bible",
+  metadataBase: new URL("https://www.divineword.app"),
   description:
     "A free, beautiful, distraction-free Bible website. Read scripture in KJV, WEB, and ASV with study tools, bookmarks, and reading plans.",
   keywords: [
@@ -72,12 +72,13 @@ export const metadata: Metadata = {
       "Read the Bible in a beautiful, distraction-free experience. KJV, WEB, ASV translations.",
     type: "website",
     locale: "en_US",
+    siteName: "Divine Word",
     images: [
       {
-        url: "https://www.divineword.app/icons/icon-512.png",
-        width: 512,
-        height: 512,
-        alt: "Divine Word",
+        url: "https://www.divineword.app/og",
+        width: 1200,
+        height: 630,
+        alt: "Divine Word — Free Online Bible",
       },
     ],
   },
@@ -86,6 +87,7 @@ export const metadata: Metadata = {
     title: "Divine Word — Free Online Bible",
     description:
       "Read the Bible in a beautiful, distraction-free experience.",
+    images: ["https://www.divineword.app/og"],
   },
 };
 

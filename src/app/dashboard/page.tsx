@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { BookOpen, Bookmark, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 

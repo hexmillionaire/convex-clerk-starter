@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getBookBySlug, BIBLE_BOOKS } from "@/lib/bible-data";
 import { BOOK_DETAILS } from "@/lib/book-details";
+import { socialMetadata } from "@/lib/metadata";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
@@ -31,23 +32,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!book) return { title: "Not Found" };
 
   const details = BOOK_DETAILS[bookSlug];
-  const title = `${book.name} — King James Version | Divine Word`;
-  const description = details
-    ? `${details.description} Read all ${book.chapters} chapters of ${book.name} (KJV) online free.`
-    : `Read the Book of ${book.name} in the King James Version. ${book.chapters} chapters available online free.`;
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title: `${book.name} KJV — Divine Word`,
-      description,
-      type: "article",
-    },
-    alternates: {
-      canonical: `https://www.divineword.app/bible/${bookSlug}`,
-    },
-  };
+  return socialMetadata({
+    // Previously "Genesis — King James Version | Divine Word", which the
+    // layout template then made "... | Divine Word | Divine Word".
+    title: `${book.name} KJV — Divine Word`,
+    description: details
+      ? `${details.description} Read all ${book.chapters} chapters of ${book.name} (KJV) online free.`
+      : `Read the Book of ${book.name} in the King James Version. ${book.chapters} chapters available online free.`,
+    canonical: `/bible/${bookSlug}`,
+    ogImage: `/og?book=${bookSlug}&chapter=1`,
+    type: "article",
+  });
 }
 
 export default async function BookOverviewPage({ params }: Props) {

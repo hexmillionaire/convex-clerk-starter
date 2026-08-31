@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Book, Search, User, LogOut, Home, Bookmark, PenLine, LayoutDashboard, HandHeart, BarChart3, BookMarked } from "lucide-react";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {

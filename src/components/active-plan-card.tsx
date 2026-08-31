@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

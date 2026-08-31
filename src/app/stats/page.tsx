@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useConvexAuth } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { BIBLE_BOOKS } from "@/lib/bible-data";

@@ -2,7 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getBookBySlug } from "@/lib/bible-data";
-import { getChapter } from "@/lib/kjv";
+import { getChapter, getVerse } from "@/lib/kjv";
+import { socialMetadata } from "@/lib/metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,19 +28,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const ref = `${book.name} ${chapter}:${verse}`;
+  const text = await getVerse(bookSlug, chapter, verse);
 
-  return {
+  return socialMetadata({
     title: `${ref} KJV — Divine Word`,
-    description: `Read ${ref} in the King James Version (KJV). Free online Bible.`,
-    openGraph: {
-      title: `${ref} — Divine Word`,
-      description: `Read ${ref} in the KJV.`,
-      type: "article",
-    },
-    alternates: {
-      canonical: `https://www.divineword.app/bible/${bookSlug}/${chapter}/${verse}`,
-    },
-  };
+    description: text
+      ? `“${text}” — ${ref}, King James Version. Read it in context free at Divine Word.`
+      : `Read ${ref} in the King James Version (KJV). Free online Bible.`,
+    // Verse pages point at their chapter: the chapter is the page worth
+    // ranking, and 30,856 near-duplicate one-line pages would only compete
+    // with it for crawl budget.
+    canonical: `/bible/${bookSlug}/${chapter}`,
+    ogImage: `/og?book=${bookSlug}&chapter=${chapter}&verse=${verse}`,
+    type: "article",
+  });
 }
 
 export default async function VersePage({ params }: Props) {

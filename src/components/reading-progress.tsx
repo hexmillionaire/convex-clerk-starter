@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { getBookBySlug } from "@/lib/bible-data";
 

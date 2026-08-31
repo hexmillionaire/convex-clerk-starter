@@ -14,7 +14,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

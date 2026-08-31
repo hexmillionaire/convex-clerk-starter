@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 
 const MOTIVATIONAL_LINES: Record<string, string> = {
   earlyMorning: "Quiet moments with God's Word.",

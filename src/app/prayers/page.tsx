@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { api } from "@convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

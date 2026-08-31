@@ -9,23 +9,16 @@ import { Greeting } from "@/components/greeting";
 import { TomorrowPreview } from "@/components/tomorrow-preview";
 import { WeeklyRecap } from "@/components/weekly-recap";
 import { SafeSection } from "@/components/safe-section";
+import { socialMetadata } from "@/lib/metadata";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Divine Word — Free Online Bible (KJV)",
   description:
     "Free, beautiful, distraction-free Bible. Read the King James Version online. Verse of the Day, reading plans, and scripture search.",
-  openGraph: {
-    title: "Divine Word — Free Online Bible (KJV)",
-    description:
-      "Read the King James Version online for free. Beautiful, distraction-free Bible with reading plans, search, and study tools.",
-    type: "website",
-  },
-  alternates: {
-    canonical: "https://www.divineword.app",
-  },
-};
+  canonical: "/",
+});
 
 export default function HomePage() {
   const votd = getVerseOfTheDay();
@@ -57,6 +50,15 @@ export default function HomePage() {
       <div className="stagger-children">
         {/* Personal greeting — emotional hook */}
         <Greeting />
+
+        {/* The page's actual heading. Visually quiet so it doesn't compete
+            with the greeting for returning readers, but it gives the page a
+            real <h1> and tells a first-time visitor what this is. */}
+        <section className="container max-w-2xl mx-auto px-6 pb-1">
+          <h1 className="sr-only">
+            Divine Word — read the King James Version Bible online, free
+          </h1>
+        </section>
 
         {/* Verse of the Day — daily inspiration */}
         <VotdCard verse={votd} />

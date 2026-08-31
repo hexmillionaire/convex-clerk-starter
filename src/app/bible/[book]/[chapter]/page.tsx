@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBookBySlug, BIBLE_BOOKS } from "@/lib/bible-data";
 import { getChapter } from "@/lib/kjv";
+import { socialMetadata } from "@/lib/metadata";
 import { ChapterReader } from "./chapter-reader";
 
 type Props = {
@@ -38,21 +39,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not Found" };
   }
 
-  const title = `${book.name} ${chapter} KJV — Divine Word`;
-  const description = `Read ${book.name} Chapter ${chapter} in the King James Version. Free online Bible at Divine Word.`;
+  const verses = await getChapter(book.slug, chapter);
+  const opening = verses?.[0]?.text ?? "";
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title: `${book.name} ${chapter} — Divine Word`,
-      description,
-      type: "article",
-    },
-    alternates: {
-      canonical: `https://www.divineword.app/bible/${bookSlug}/${chapter}`,
-    },
-  };
+  return socialMetadata({
+    // The layout template no longer appends the brand, so the page owns its
+    // full title.
+    title: `${book.name} ${chapter} KJV — Divine Word`,
+    description: opening
+      ? `${book.name} ${chapter} (KJV): “${opening.slice(0, 150)}${opening.length > 150 ? "…" : ""}” Read the full chapter free at Divine Word.`
+      : `Read ${book.name} Chapter ${chapter} in the King James Version. Free online Bible at Divine Word.`,
+    canonical: `/bible/${bookSlug}/${chapter}`,
+    ogImage: `/og?book=${bookSlug}&chapter=${chapter}`,
+    type: "article",
+  });
 }
 
 export default async function ChapterPage({ params }: Props) {
