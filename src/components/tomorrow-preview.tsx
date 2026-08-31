@@ -1,14 +1,8 @@
-import { type DailyVerse } from "@/lib/daily-verses";
-
-type Props = {
-  verse: DailyVerse;
-};
-
 /**
- * Blurred preview of tomorrow's verse to create anticipation.
+ * Teases that there is a verse tomorrow, without shipping it.
  * Placed at the bottom of the homepage to drive return visits.
  */
-export function TomorrowPreview({ verse }: Props) {
+export function TomorrowPreview() {
   return (
     <section className="py-4">
       <div className="container max-w-2xl mx-auto px-6">
@@ -18,14 +12,22 @@ export function TomorrowPreview({ verse }: Props) {
           </p>
 
           <div className="relative">
-            {/* Blurred verse text — creates curiosity */}
-            <p className="text-lg font-serif text-muted-foreground/60 blur-[6px] select-none leading-relaxed line-clamp-2 pointer-events-none">
-              {verse.text}
+            {/*
+              Decorative only. The verse used to be real text behind a CSS
+              blur, which meant screen readers announced tomorrow's verse in
+              full and anyone could read it from the DOM. This is a blurred
+              stand-in with the same shape, hidden from assistive tech; the
+              message below is what actually gets announced.
+            */}
+            <p
+              aria-hidden="true"
+              className="pointer-events-none font-serif text-lg leading-relaxed text-muted-foreground/60 blur-[6px] select-none"
+            >
+              {"\u2014".repeat(38)}
             </p>
 
-            {/* Overlay message */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-sm font-heading font-semibold text-foreground/70 tracking-wide">
+              <p className="font-heading text-sm font-semibold tracking-wide text-foreground/70">
                 Come back tomorrow to reveal ✦
               </p>
             </div>

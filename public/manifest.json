@@ -1,12 +1,11 @@
 {
-  "name": "Divine Word — Free Online Bible",
+  "name": "Divine Word \u2014 Free Online Bible",
   "short_name": "Divine Word",
   "description": "A free, beautiful, distraction-free Bible for everyone.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf6ee",
   "theme_color": "#c9972b",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/favicon_pack/android-chrome-192x192.png",
@@ -58,5 +57,18 @@
       "purpose": "any"
     }
   ],
-  "categories": ["books", "education", "lifestyle"]
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
+  ],
+  "screenshots": [
+    {
+      "src": "/og",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Reading John 3 in Divine Word"
+    }
+  ]
 }

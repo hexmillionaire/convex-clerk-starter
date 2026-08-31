@@ -1,7 +1,8 @@
-// v3: reader now fetches scripture from the cacheable `/api/bible/` route
-// (previously Convex/WebSocket, which the SW could not cache), so visited
-// chapters are available offline. Bumping the name purges stale v2 caches.
-const CACHE_NAME = "divine-word-v3";
+// v4: the KJV now ships with the app and can be downloaded in full for offline
+// reading. Scripture lives in its own cache so clearing the app shell on an
+// upgrade doesn't throw away a Bible the reader deliberately downloaded.
+const CACHE_NAME = "divine-word-v4";
+const BIBLE_CACHE = "divine-word-bible-v1";
 
 const PRECACHE_URLS = [
   "/",
@@ -63,21 +64,26 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Bible API routes — network-first with cache fallback
+  // Scripture — cache-first, because it never changes. A downloaded Bible is
+  // served straight from disk; anything else is fetched and kept.
   if (url.pathname.startsWith("/api/bible/")) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
+      caches.open(BIBLE_CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          if (cached) return cached;
+          return fetch(request)
+            .then((response) => {
+              if (response.ok) cache.put(request, response.clone());
+              return response;
+            })
+            .catch(() =>
+              new Response('{"error":"offline"}', {
+                status: 503,
+                headers: { "Content-Type": "application/json" },
+              })
+            );
         })
-        .catch(() => caches.match(request).then((cached) => cached || new Response('{"error":"offline"}', {
-          status: 503,
-          headers: { "Content-Type": "application/json" },
-        })))
+      )
     );
     return;
   }
@@ -113,7 +119,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: data.body || "",
     icon: "/icons/icon-192.png",
-    badge: "/icons/icon-72.png",
+    badge: "/icons/icon-192.png",
     tag: data.tag || "divine-word",
     renotify: true,
     data: { url: data.url || "/" },

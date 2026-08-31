@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -246,6 +247,24 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
     }
     return null;
   })();
+
+  // ← / → move between chapters. Ignored while typing, holding a modifier, or
+  // with a sheet open, so it can't fight a note or the chapter picker.
+  const router = useRouter();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (sheetVerse !== null) return;
+      const el = e.target as HTMLElement | null;
+      if (el?.isContentEditable) return;
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+
+      if (e.key === "ArrowLeft" && prevChapterInfo) router.push(prevChapterInfo.href);
+      else if (e.key === "ArrowRight" && nextChapterInfo) router.push(nextChapterInfo.href);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router, prevChapterInfo, nextChapterInfo, sheetVerse]);
 
   const openVerseActions = (verseNum: number) => {
     if (isCompact) {

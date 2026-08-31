@@ -390,18 +390,27 @@ export const DAILY_VERSES: DailyVerse[] = [
   { ref: "Psalm 96:3", text: "Declare his glory among the heathen, his wonders among all people.", book: "psalms", chapter: 96, verse: 3 },
 ];
 
-export function getVerseOfTheDay(): DailyVerse {
+/**
+ * Day index in UTC.
+ *
+ * The homepage and the dashboard used to compute this separately — one on the
+ * server under `revalidate = 86400`, one in the browser's local timezone — so
+ * the same day could show two different verses in the two places. Everything
+ * now goes through here, and UTC means every reader sees the same verse as
+ * everyone else on the same date.
+ */
+function dayIndex(offset = 0): number {
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - start.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return DAILY_VERSES[dayOfYear % DAILY_VERSES.length];
+  const startOfYear = Date.UTC(now.getUTCFullYear(), 0, 0);
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const dayOfYear = Math.floor((today - startOfYear) / 86_400_000);
+  return (dayOfYear + offset) % DAILY_VERSES.length;
+}
+
+export function getVerseOfTheDay(): DailyVerse {
+  return DAILY_VERSES[dayIndex()];
 }
 
 export function getTomorrowVerse(): DailyVerse {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - start.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return DAILY_VERSES[(dayOfYear + 1) % DAILY_VERSES.length];
+  return DAILY_VERSES[dayIndex(1)];
 }

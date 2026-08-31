@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getVerseOfTheDay, getTomorrowVerse } from "@/lib/daily-verses";
+import { getVerseOfTheDay } from "@/lib/daily-verses";
 import { VotdCard } from "@/components/votd-card";
 import { ContinueReadingCard } from "@/components/continue-reading-card";
 import { ProgressSummary } from "@/components/progress-summary";
@@ -9,6 +9,8 @@ import { Greeting } from "@/components/greeting";
 import { TomorrowPreview } from "@/components/tomorrow-preview";
 import { WeeklyRecap } from "@/components/weekly-recap";
 import { SafeSection } from "@/components/safe-section";
+import { AboutSummary } from "@/components/about-summary";
+import { OfflineDownload } from "@/components/offline-download";
 import { socialMetadata } from "@/lib/metadata";
 
 export const revalidate = 86400;
@@ -22,7 +24,6 @@ export const metadata: Metadata = socialMetadata({
 
 export default function HomePage() {
   const votd = getVerseOfTheDay();
-  const tomorrowVerse = getTomorrowVerse();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -79,40 +80,16 @@ export default function HomePage() {
         <SafeSection><ActivePlanCard /></SafeSection>
 
         {/* Tomorrow's verse preview — anticipation hook */}
-        <TomorrowPreview verse={tomorrowVerse} />
+        <TomorrowPreview />
       </div>
 
-      {/* About / SEO Content */}
-      <section className="py-16 md:py-24">
-        <div className="container max-w-2xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-4xl font-heading font-semibold tracking-tight">
-              About Divine Word
-            </h2>
-          </div>
-          <div className="prose prose-neutral dark:prose-invert mx-auto text-base leading-[1.8] space-y-6 text-muted-foreground">
-            <p>
-              Divine Word is a free online Bible designed for focused, distraction-free
-              scripture reading. Read the complete King James Version (KJV) — all 66 books,
-              1,189 chapters, and 31,102 verses — in a clean, beautiful interface that puts
-              God&apos;s Word first.
-            </p>
-            <p>
-              Whether you&apos;re looking up a specific verse, studying a chapter in depth,
-              or following a structured reading plan, Divine Word makes it easy to engage with
-              scripture every day. Features include full-text search across the entire Bible,
-              verse bookmarking, text highlighting, a personal journal, and guided reading
-              plans from 30-day devotionals to reading the Bible in a year.
-            </p>
-            <p>
-              The King James Version is in the public domain and remains one of the most
-              widely read English translations of the Bible. Divine Word is built with love
-              for the glory of God and is free for everyone — no ads, no distractions, just
-              the Word.
-            </p>
-          </div>
-        </div>
+      <AboutSummary />
+
+      {/* Offline is the reason to keep this on a home screen */}
+      <section className="container max-w-2xl mx-auto px-6 pb-16">
+        <OfflineDownload />
       </section>
+
     </div>
   );
 }

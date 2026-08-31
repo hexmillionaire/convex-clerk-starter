@@ -25,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/search`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/plans`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/verse-of-the-day`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/about`, lastModified: staticDate, changeFrequency: "yearly", priority: 0.5 },
   ];
 
   const bookPages: MetadataRoute.Sitemap = BIBLE_BOOKS.map((book) => ({

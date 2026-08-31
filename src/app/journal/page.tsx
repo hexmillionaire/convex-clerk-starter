@@ -27,6 +27,8 @@ export default function JournalPage() {
   const [passage, setPassage] = useState("");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  // Which entry is awaiting a delete confirmation, if any.
+  const [confirmDelete, setConfirmDelete] = useState<Id<"journal"> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<Id<"journal"> | null>(null);
@@ -245,15 +247,32 @@ export default function JournalPage() {
                         >
                           <Pencil className="h-3 w-3 text-muted-foreground" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          aria-label="Delete entry"
-                          onClick={() => { removeEntry({ id: entry._id }).catch(() => {}); }}
-                        >
-                          <Trash2 className="h-3 w-3 text-muted-foreground" />
-                        </Button>
+                        {/* Two-step: a single tap at a card's edge used to
+                            delete a written reflection outright, with no undo. */}
+                        {confirmDelete === entry._id ? (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="h-7 text-xs"
+                            aria-label={`Confirm deleting the entry from ${new Date(entry._creationTime).toLocaleDateString()}`}
+                            onClick={() => {
+                              setConfirmDelete(null);
+                              removeEntry({ id: entry._id }).catch(() => {});
+                            }}
+                          >
+                            Delete?
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            aria-label="Delete entry"
+                            onClick={() => setConfirmDelete(entry._id)}
+                          >
+                            <Trash2 className="h-3 w-3 text-muted-foreground" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     {entry.passage && (
