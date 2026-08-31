@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ImageDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -99,10 +99,16 @@ export function VerseImageShare({
   reference,
   text,
   variant = "icon",
+  autoOpen = false,
+  onClosed,
 }: {
   reference: string;
   text: string;
-  variant?: "icon" | "button";
+  /** "none" renders no trigger — for opening from the touch actions sheet. */
+  variant?: "icon" | "button" | "none";
+  /** Generate and open immediately on mount, with no trigger press. */
+  autoOpen?: boolean;
+  onClosed?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -153,13 +159,23 @@ export function VerseImageShare({
   const handleClose = useCallback(() => {
     setOpen(false);
     setImageUrl(null);
-  }, []);
+    onClosed?.();
+  }, [onClosed]);
+
+  // Opened from the touch actions sheet: there is no trigger to press, so the
+  // image is generated as soon as this mounts.
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (!autoOpen || autoOpened.current) return;
+    autoOpened.current = true;
+    generate();
+  }, [autoOpen, generate]);
 
   if (!text) return null;
 
   return (
     <>
-      {variant === "icon" ? (
+      {variant === "icon" && (
         <Button
           variant="ghost"
           size="icon"
@@ -168,11 +184,12 @@ export function VerseImageShare({
             e.stopPropagation();
             generate();
           }}
-          title="Share as image"
+          aria-label={`Share ${reference} as an image`}
         >
           <ImageDown className="h-3 w-3" />
         </Button>
-      ) : (
+      )}
+      {variant === "button" && (
         <Button variant="outline" className="gap-2" onClick={generate}>
           <ImageDown className="h-4 w-4" />
           Image

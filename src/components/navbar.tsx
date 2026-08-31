@@ -7,7 +7,6 @@ import { Book, Search, User, LogOut, Home, Bookmark, PenLine, LayoutDashboard, H
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { FontSizeControl } from "@/components/font-size-control";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,9 +101,6 @@ export function Navbar() {
               <Search className="h-4 w-4" />
             </Button>
           </Link>
-          <div className="hidden sm:flex">
-            <FontSizeControl />
-          </div>
           <ThemeToggle />
           {isAuthenticated ? (
             <DropdownMenu>

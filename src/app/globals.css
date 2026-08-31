@@ -182,6 +182,13 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Clearance under `main` for the fixed mobile tab bar. The bar is 4rem tall
+   plus whatever the device reserves below it, so a flat padding leaves the
+   last lines of a chapter underneath it on a notched phone. */
+:root {
+  --tabbar-clearance: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
 /* Premium transitions — default everything to smooth */
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

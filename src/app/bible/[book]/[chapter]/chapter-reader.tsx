@@ -27,13 +27,15 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { type BookInfo, BIBLE_BOOKS } from "@/lib/bible-data";
-import { TranslationSwitcher } from "@/components/translation-switcher";
+import { ReadingSettings } from "@/components/reading-settings";
 import { useTranslation } from "@/lib/use-reading-prefs";
 import { HighlightPicker } from "@/components/highlight-picker";
 import { VerseImageShare } from "@/components/verse-image-share";
 import { ReadingProgress } from "@/components/reading-progress";
 import { AudioPlayer } from "@/components/audio-player";
 import { ChapterCompleteCelebration } from "@/components/chapter-complete-celebration";
+import { VerseActionsSheet } from "@/components/verse-actions-sheet";
+import { useIsCompact } from "@/lib/use-media-query";
 
 type Verse = { verse: number; text: string };
 
@@ -50,8 +52,15 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
   const showAuthFeatures = !!isSignedIn;
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
-  const [translation, setTranslation] = useTranslation();
+  const [translation] = useTranslation();
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // Touch has no hover, so below `md` the per-verse actions open as a sheet.
+  const isCompact = useIsCompact();
+  const [sheetVerse, setSheetVerse] = useState<number | null>(null);
+  // Set when "Share as image" is chosen from the sheet; mounts the generator
+  // headlessly since there is no icon button to press on touch.
+  const [imageShareVerse, setImageShareVerse] = useState<number | null>(null);
 
   // KJV arrives server-rendered in `initialVerses`, so it is in the HTML and
   // needs no fetch. Only WEB and ASV go over the network, through the cacheable
@@ -238,6 +247,14 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
     return null;
   })();
 
+  const openVerseActions = (verseNum: number) => {
+    if (isCompact) {
+      setSheetVerse(verseNum);
+    } else {
+      setSelectedVerse((current) => (current === verseNum ? null : verseNum));
+    }
+  };
+
   const copyVerse = async (verseNum: number, text: string) => {
     const citation = `${book.name} ${chapter}:${verseNum} (${translation})\n"${text}"`;
     await navigator.clipboard.writeText(citation);
@@ -275,14 +292,15 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
             <span className="text-primary">{chapter}</span>
           </h1>
           <div className="flex items-center gap-2.5 mt-2">
-            <TranslationSwitcher value={translation} onChange={setTranslation} />
             <span className="text-sm text-muted-foreground font-mono">
-              · {book.testament === "OLD" ? "Old" : "New"} Testament
+              {translation} · {book.testament === "OLD" ? "Old" : "New"} Testament
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          <ReadingSettings />
+
           {/* Chapter picker sheet */}
           <Sheet>
             <SheetTrigger
@@ -353,6 +371,7 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
           bookSlug={book.slug}
           chapter={chapter}
           totalChapters={book.chapters}
+          verseCount={verses.length}
           onComplete={() => setShowCelebration(true)}
         />
       </div>
@@ -396,23 +415,36 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
                 <div
                   key={v.verse}
                   id={`v${v.verse}`}
-                  className="group flex gap-4 py-2 px-3 -mx-3 rounded-xl hover:bg-muted/40 transition-colors duration-200 cursor-pointer"
+                  className="group relative flex gap-4 py-2 px-3 -mx-3 rounded-xl hover:bg-muted/40 transition-colors duration-200 cursor-pointer"
                   style={
                     highlightColor
                       ? { backgroundColor: highlightColor + "25" }
                       : undefined
                   }
-                  onClick={() => setSelectedVerse(isSelected ? null : v.verse)}
+                  onClick={() => openVerseActions(v.verse)}
                 >
-                  <span className="text-xs text-primary/50 font-mono mt-2 min-w-7 text-right select-none">
+                  <span className="text-xs text-primary/80 font-mono mt-2 min-w-7 text-right select-none tabular-nums">
                     {v.verse}
                   </span>
                   <p className="verse-text flex-1">{v.text}</p>
-                  <div className={`flex items-start gap-1 pt-1.5 transition-opacity duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                  {/*
+                    Absolutely positioned, and hidden outright below `md`.
+                    While this sat in the layout flow it reserved 156px on every
+                    verse — 5 icon buttons at 28px plus gaps — which on a 390px
+                    phone left the scripture around 126px wide. Touch gets the
+                    actions sheet instead; it has no hover to reveal this with.
+                  */}
+                  <div
+                    className={`absolute right-1 top-1 z-10 hidden items-start gap-1 rounded-lg border border-border/60 bg-background/95 px-1 py-0.5 shadow-sm backdrop-blur-sm transition-opacity duration-200 md:flex ${
+                      isSelected
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                    }`}>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
+                      aria-label={`Copy ${book.name} ${chapter}:${v.verse}`}
                       onClick={(e) => { e.stopPropagation(); copyVerse(v.verse, v.text); }}
                     >
                       {copiedVerse === v.verse ? (
@@ -438,6 +470,8 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
+                          aria-label={isMarked ? `Remove bookmark on ${book.name} ${chapter}:${v.verse}` : `Bookmark ${book.name} ${chapter}:${v.verse}`}
+                          aria-pressed={isMarked}
                           onClick={(e) => { e.stopPropagation(); handleBookmark(v.verse, v.text); }}
                         >
                           {isMarked ? (
@@ -452,6 +486,7 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
+                      aria-label={`Share ${book.name} ${chapter}:${v.verse}`}
                       onClick={(e) => { e.stopPropagation(); shareVerse(v.verse, v.text); }}
                     >
                       <Share2 className="h-3 w-3" />
@@ -511,11 +546,61 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
         )}
       </div>
 
+      {/* Verse actions for touch — the desktop toolbar is hover-only */}
+      {sheetVerse !== null && (() => {
+        const v = verses.find((x) => x.verse === sheetVerse);
+        if (!v) return null;
+        const highlightData = highlights?.[v.verse];
+        return (
+          <VerseActionsSheet
+            open
+            onOpenChange={(next) => !next && setSheetVerse(null)}
+            reference={`${book.name} ${chapter}:${v.verse}`}
+            text={v.text}
+            showAuthActions={showAuthFeatures}
+            highlightColor={highlightData?.color ?? null}
+            note={highlightData?.note ?? null}
+            isBookmarked={bookmarkedVerses.has(v.verse)}
+            copied={copiedVerse === v.verse}
+            onCopy={() => copyVerse(v.verse, v.text)}
+            onShare={() => {
+              setSheetVerse(null);
+              shareVerse(v.verse, v.text);
+            }}
+            onShareImage={() => {
+              setSheetVerse(null);
+              setImageShareVerse(v.verse);
+            }}
+            onHighlight={(color) => handleHighlight(v.verse, color, v.text)}
+            onNote={(note) => handleHighlightNote(v.verse, note)}
+            onBookmark={() => handleBookmark(v.verse, v.text)}
+          />
+        );
+      })()}
+
+      {/* Image generator opened from the sheet, which has no icon to press */}
+      {imageShareVerse !== null && (() => {
+        const v = verses.find((x) => x.verse === imageShareVerse);
+        if (!v) return null;
+        return (
+          <VerseImageShare
+            key={`image-${v.verse}`}
+            variant="none"
+            autoOpen
+            reference={`${book.name} ${chapter}:${v.verse}`}
+            text={v.text}
+            onClosed={() => setImageShareVerse(null)}
+          />
+        );
+      })()}
+
       {/* Chapter completion celebration overlay */}
       {showCelebration && (
         <ChapterCompleteCelebration
           bookName={book.name}
           chapter={chapter}
+          nextHref={nextChapterInfo?.href}
+          nextLabel={nextChapterInfo?.label}
           onDismiss={() => setShowCelebration(false)}
         />
       )}

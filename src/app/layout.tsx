@@ -130,7 +130,7 @@ export default function RootLayout({
           >
             <TooltipProvider>
               <Navbar />
-              <main id="main-content" className="flex-1 pb-20 md:pb-0">{children}</main>
+              <main id="main-content" className="flex-1 pb-(--tabbar-clearance) md:pb-0">{children}</main>
               <Footer />
               <BottomTabBar />
             </TooltipProvider>

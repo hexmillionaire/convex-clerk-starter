@@ -12,10 +12,18 @@ type Props = {
   bookSlug: string;
   chapter: number;
   totalChapters: number;
+  /** Used to scale how long "read" should plausibly have taken. */
+  verseCount: number;
   onComplete?: () => void;
 };
 
-export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }: Props) {
+export function ReadingProgress({
+  bookSlug,
+  chapter,
+  totalChapters,
+  verseCount,
+  onComplete,
+}: Props) {
   const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
   const progress = useQuery(
@@ -43,25 +51,52 @@ export function ReadingProgress({ bookSlug, chapter, totalChapters, onComplete }
     autoMarkedRef.current = false;
   }, [bookSlug, chapter]);
 
-  // Auto-mark as read when user scrolls to bottom
+  // Auto-mark as read once the reader reaches the end of the chapter.
+  //
+  // Reaching the bottom alone isn't evidence of reading — flicking to the end
+  // of a chapter used to mark it read and fire the completion celebration. Two
+  // extra conditions: the reader has to still be at the bottom a moment later
+  // (a fast scroll that overshoots and bounces back doesn't count), and enough
+  // time has to have passed for the chapter to plausibly have been read.
   useEffect(() => {
     if (!isAuthenticated || isRead) return;
 
+    const openedAt = Date.now();
+    const minimumDwellMs = Math.min(20_000, 4_000 + verseCount * 400);
+    let settle: ReturnType<typeof setTimeout> | undefined;
+
+    const atBottom = () =>
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 200;
+
     const handleScroll = () => {
       if (autoMarkedRef.current) return;
-      const scrolled = window.innerHeight + window.scrollY;
-      const threshold = document.documentElement.scrollHeight - 200;
-      if (scrolled >= threshold) {
+
+      if (!atBottom()) {
+        clearTimeout(settle);
+        settle = undefined;
+        return;
+      }
+      if (settle) return;
+
+      settle = setTimeout(() => {
+        settle = undefined;
+        if (autoMarkedRef.current || !atBottom()) return;
+        if (Date.now() - openedAt < minimumDwellMs) return;
+
         autoMarkedRef.current = true;
         markRead({ bookSlug, chapter }).catch(() => {
           autoMarkedRef.current = false;
         });
-      }
+      }, 1_500);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isAuthenticated, isRead, markRead, bookSlug, chapter]);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(settle);
+    };
+  }, [isAuthenticated, isRead, markRead, bookSlug, chapter, verseCount]);
 
   const toggleRead = useCallback(async () => {
     if (!isAuthenticated) return;
