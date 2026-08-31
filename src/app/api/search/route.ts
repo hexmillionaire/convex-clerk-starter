@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
+import { searchScripture } from "@/lib/search";
 
-// Simple in-memory rate limiter: max 30 requests per IP per 60 seconds
+/**
+ * Scripture search, served from the vendored KJV rather than bolls.life.
+ * See src/lib/search.ts for why that mattered.
+ */
+
+// Simple in-memory rate limiter: max 60 requests per IP per 60 seconds.
+// Higher than before now that a search is a local scan, not a proxied call.
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function isRateLimited(ip: string): boolean {
@@ -14,7 +20,7 @@ function isRateLimited(ip: string): boolean {
   }
 
   entry.count++;
-  return entry.count > 30;
+  return entry.count > 60;
 }
 
 // Periodically clean up stale entries to avoid unbounded growth
@@ -29,7 +35,6 @@ if (typeof globalThis !== "undefined") {
       if (now > entry.resetAt) rateLimitMap.delete(key);
     }
   };
-  // Attach to the map's set to piggyback cleanup on writes
   const originalSet = rateLimitMap.set.bind(rateLimitMap);
   rateLimitMap.set = (key, value) => {
     cleanup();
@@ -56,41 +61,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Use Bolls.life search API
-  try {
-    const res = await fetch(
-      `https://bolls.life/search/KJV/${encodeURIComponent(query)}/`,
-      { next: { revalidate: 86400 } }
-    );
+  const testamentParam = searchParams.get("testament");
+  const testament =
+    testamentParam === "OLD" || testamentParam === "NEW" ? testamentParam : undefined;
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Search service unavailable" },
-        { status: 502 }
-      );
+  const { results, total, truncated } = await searchScripture(query, {
+    bookSlug: searchParams.get("book") || undefined,
+    testament,
+  });
+
+  return NextResponse.json(
+    { results, total, truncated },
+    {
+      headers: {
+        // The KJV never changes, so a given query always has the same answer.
+        "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800",
+      },
     }
-
-    const data: { pk: number; translation: string; book: number; chapter: number; verse: number; text: string }[] =
-      await res.json();
-
-    // Map book (1-66) back to our book data. Bolls already returns stemmed
-    // variants (loved/loveth/lovingkindness); cap generously so they aren't lost.
-    const results = data.slice(0, 300).map((item) => {
-      const book = BIBLE_BOOKS.find((b) => b.position === item.book);
-      return {
-        bookName: book?.name || "Unknown",
-        bookSlug: book?.slug || "",
-        chapter: item.chapter,
-        verse: item.verse,
-        text: cleanVerseText(item.text),
-      };
-    });
-
-    return NextResponse.json({ results, total: data.length });
-  } catch {
-    return NextResponse.json(
-      { error: "Search failed" },
-      { status: 500 }
-    );
-  }
+  );
 }

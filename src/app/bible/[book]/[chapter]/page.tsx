@@ -9,6 +9,11 @@ type Props = {
 };
 
 export const revalidate = 604800;
+// The 1,189 chapters below are the complete set, so anything outside it is
+// invalid by definition. Without this, an unknown param renders on demand and
+// `notFound()` streams a shell whose body arrives empty; with it, Next serves
+// the prerendered 404 directly.
+export const dynamicParams = false;
 
 /**
  * Prerender all 1,189 chapters. The KJV ships with the app, so this is a build

@@ -13,6 +13,11 @@ type Props = {
 };
 
 export const revalidate = 604800;
+// The 1,189 chapters below are the complete set, so anything outside it is
+// invalid by definition. Without this, an unknown param renders on demand and
+// `notFound()` streams a shell whose body arrives empty; with it, Next serves
+// the prerendered 404 directly.
+export const dynamicParams = false;
 
 /** All 66 book overview pages are static — they're derived from local data. */
 export function generateStaticParams() {

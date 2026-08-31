@@ -36,7 +36,11 @@ const VALID_SLUGS = new Set(BIBLE_BOOKS.map((b) => b.slug));
 // is ~4MB resident, which is cheaper than re-parsing on every render.
 const bookCache = new Map<string, string[][]>();
 
-async function loadBook(slug: string): Promise<string[][] | null> {
+/**
+ * Every chapter of a book, as arrays of verse strings (verse N at index N-1).
+ * Returns null for an unknown slug.
+ */
+export async function getBook(slug: string): Promise<string[][] | null> {
   if (!VALID_SLUGS.has(slug)) return null;
 
   const cached = bookCache.get(slug);
@@ -54,7 +58,7 @@ async function loadBook(slug: string): Promise<string[][] | null> {
  * or an out-of-range chapter, so callers can `notFound()` on it.
  */
 export async function getChapter(slug: string, chapter: number): Promise<Verse[] | null> {
-  const book = await loadBook(slug);
+  const book = await getBook(slug);
   if (!book) return null;
   if (!Number.isInteger(chapter) || chapter < 1 || chapter > book.length) return null;
 
@@ -67,7 +71,7 @@ export async function getVerse(
   chapter: number,
   verse: number
 ): Promise<string | null> {
-  const book = await loadBook(slug);
+  const book = await getBook(slug);
   if (!book) return null;
   if (!Number.isInteger(chapter) || chapter < 1 || chapter > book.length) return null;
 
@@ -78,7 +82,7 @@ export async function getVerse(
 
 /** Number of verses in a chapter, or 0 if it doesn't exist. */
 export async function getVerseCount(slug: string, chapter: number): Promise<number> {
-  const book = await loadBook(slug);
+  const book = await getBook(slug);
   if (!book || chapter < 1 || chapter > book.length) return 0;
   return book[chapter - 1].length;
 }

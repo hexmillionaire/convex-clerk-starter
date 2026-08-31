@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getBookBySlug } from "@/lib/bible-data";
@@ -53,13 +53,15 @@ export default async function VersePage({ params }: Props) {
   }
 
   const verses = (await getChapter(bookSlug, chapter)) ?? [];
-  const currentVerse = verses.find((v) => v.verse === verseNum);
-  const verseText = currentVerse?.text || "";
-  const reference = `${book.name} ${chapter}:${verseNum}`;
+  if (verses.length === 0) notFound();
 
-  if (verses.length > 0 && !currentVerse) {
-    notFound();
-  }
+  const currentVerse = verses.find((v) => v.verse === verseNum);
+  // The chapter exists but this verse doesn't — the reader was after this
+  // passage, so send them to it rather than to a dead end.
+  if (!currentVerse) redirect(`/bible/${bookSlug}/${chapter}`);
+
+  const verseText = currentVerse.text;
+  const reference = `${book.name} ${chapter}:${verseNum}`;
 
   // Surrounding context (3 verses before/after)
   const contextVerses = verses.filter(
