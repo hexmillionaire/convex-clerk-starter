@@ -14,6 +14,11 @@ type Props = {
 
 export const revalidate = 604800;
 
+/** All 66 book overview pages are static — they're derived from local data. */
+export function generateStaticParams() {
+  return BIBLE_BOOKS.map((book) => ({ book: book.slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { book: bookSlug } = await params;
   const book = getBookBySlug(bookSlug);

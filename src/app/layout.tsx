@@ -8,6 +8,7 @@ import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ServiceWorkerRegister } from "@/components/sw-register";
 import { Analytics } from "@vercel/analytics/next";
+import { readingPrefsScript } from "@/lib/reading-prefs";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -100,6 +101,9 @@ export default function RootLayout({
       className={`${cormorant.variable} ${dmMono.variable} ${cinzel.variable} h-full antialiased`}
     >
       <head>
+        {/* Applies the reader's stored text size before first paint, so
+            scripture never renders at the default size and then resizes. */}
+        <script dangerouslySetInnerHTML={{ __html: readingPrefsScript }} />
         <meta name="theme-color" content="#c9972b" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

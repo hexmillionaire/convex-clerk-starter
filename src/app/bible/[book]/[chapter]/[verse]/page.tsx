@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getBookBySlug, cleanVerseText, BIBLE_BOOKS } from "@/lib/bible-data";
+import { getBookBySlug } from "@/lib/bible-data";
+import { getChapter } from "@/lib/kjv";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -13,21 +14,7 @@ type Props = {
 
 export const revalidate = 604800;
 
-async function fetchChapterVerses(bookSlug: string, chapter: number) {
-  const book = BIBLE_BOOKS.find((b) => b.slug === bookSlug);
-  if (!book) return [];
-  try {
-    const res = await fetch(
-      `https://bolls.life/get-text/KJV/${book.position}/${chapter}/`,
-      { next: { revalidate: 86400 } }
-    );
-    if (!res.ok) return [];
-    const data: { verse: number; text: string }[] = await res.json();
-    return data.map((v) => ({ verse: v.verse, text: cleanVerseText(v.text) }));
-  } catch {
-    return [];
-  }
-}
+
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { book: bookSlug, chapter: chapterStr, verse: verseStr } = await params;
@@ -65,7 +52,7 @@ export default async function VersePage({ params }: Props) {
     notFound();
   }
 
-  const verses = await fetchChapterVerses(bookSlug, chapter);
+  const verses = (await getChapter(bookSlug, chapter)) ?? [];
   const currentVerse = verses.find((v) => v.verse === verseNum);
   const verseText = currentVerse?.text || "";
   const reference = `${book.name} ${chapter}:${verseNum}`;

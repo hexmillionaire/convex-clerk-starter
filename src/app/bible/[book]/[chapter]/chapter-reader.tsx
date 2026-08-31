@@ -26,21 +26,25 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { type BookInfo, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
+import { type BookInfo, BIBLE_BOOKS } from "@/lib/bible-data";
 import { TranslationSwitcher } from "@/components/translation-switcher";
-import { useTranslation } from "@/lib/use-translation";
+import { useTranslation } from "@/lib/use-reading-prefs";
 import { HighlightPicker } from "@/components/highlight-picker";
 import { VerseImageShare } from "@/components/verse-image-share";
 import { ReadingProgress } from "@/components/reading-progress";
 import { AudioPlayer } from "@/components/audio-player";
 import { ChapterCompleteCelebration } from "@/components/chapter-complete-celebration";
 
+type Verse = { verse: number; text: string };
+
 type Props = {
   book: BookInfo;
   chapter: number;
+  /** KJV text, rendered on the server so it is in the HTML for crawlers. */
+  initialVerses: Verse[];
 };
 
-export function ChapterReader({ book, chapter }: Props) {
+export function ChapterReader({ book, chapter, initialVerses }: Props) {
   const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
   const showAuthFeatures = !!isSignedIn;
@@ -49,25 +53,28 @@ export function ChapterReader({ book, chapter }: Props) {
   const [translation, setTranslation] = useTranslation();
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // Scripture is fetched from the cacheable HTTP route (`/api/bible/...`) rather
-  // than Convex, so the service worker can serve visited chapters offline.
-  // Result is keyed by book/chapter/translation; loading is derived by comparing
-  // the stored key to the current key (avoids synchronous setState-in-effect).
+  // KJV arrives server-rendered in `initialVerses`, so it is in the HTML and
+  // needs no fetch. Only WEB and ASV go over the network, through the cacheable
+  // `/api/bible/` route the service worker can store for offline reading.
+  // Results are keyed by book/chapter/translation so a stale response for a
+  // chapter the reader has already navigated away from is ignored.
   const requestKey = `${book.slug}/${chapter}/${translation}`;
   const [result, setResult] = useState<{
     key: string;
-    verses: { verse: number; text: string }[];
+    verses: Verse[];
     failed: boolean;
   } | null>(null);
 
   useEffect(() => {
+    if (translation === "KJV") return;
+
     const controller = new AbortController();
     fetch(
       `/api/bible/${book.slug}/${chapter}?translation=${translation}`,
       { signal: controller.signal }
     )
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("bad response"))))
-      .then((data: { verses?: { verse: number; text: string }[] }) => {
+      .then((data: { verses?: Verse[] }) => {
         setResult({ key: requestKey, verses: data.verses ?? [], failed: false });
       })
       .catch((err: unknown) => {
@@ -105,10 +112,13 @@ export function ChapterReader({ book, chapter }: Props) {
   const removeHighlight = useMutation(api.highlights.remove);
   const updateHighlightNote = useMutation(api.highlights.updateNote);
 
-  // Only trust the result once it matches the current request key.
+  // KJV is always ready. For other translations, only trust a result once it
+  // matches the current request key; until then keep showing the KJV text
+  // rather than blanking the page.
   const current = result?.key === requestKey ? result : null;
-  const verses = current?.verses ?? [];
-  const isLoading = current === null;
+  const isKjv = translation === "KJV";
+  const verses = isKjv ? initialVerses : current?.verses ?? initialVerses;
+  const isLoading = !isKjv && current === null;
   const loadFailed = current?.failed ?? false;
 
   // Build a set of bookmarked verse numbers for this chapter
@@ -139,7 +149,7 @@ export function ChapterReader({ book, chapter }: Props) {
             color,
             // Snapshot text + reference so the highlight is self-contained
             // (the dashboard/highlights views don't re-fetch scripture).
-            text: text ? cleanVerseText(text) : undefined,
+            text,
             reference: `${book.name} ${chapter}:${verseNum}`,
           });
         }
@@ -187,7 +197,7 @@ export function ChapterReader({ book, chapter }: Props) {
             chapter,
             verseNumber: verseNum,
             reference: `${book.name} ${chapter}:${verseNum}`,
-            text: cleanVerseText(text),
+            text,
           });
         }
       } catch {
@@ -229,18 +239,16 @@ export function ChapterReader({ book, chapter }: Props) {
   })();
 
   const copyVerse = async (verseNum: number, text: string) => {
-    const clean = cleanVerseText(text);
-    const citation = `${book.name} ${chapter}:${verseNum} (${translation})\n"${clean}"`;
+    const citation = `${book.name} ${chapter}:${verseNum} (${translation})\n"${text}"`;
     await navigator.clipboard.writeText(citation);
     setCopiedVerse(verseNum);
     setTimeout(() => setCopiedVerse(null), 2000);
   };
 
   const shareVerse = async (verseNum: number, text: string) => {
-    const clean = cleanVerseText(text);
     const shareData = {
       title: `${book.name} ${chapter}:${verseNum}`,
-      text: `"${clean}" — ${book.name} ${chapter}:${verseNum} (${translation})`,
+      text: `"${text}" — ${book.name} ${chapter}:${verseNum} (${translation})`,
     };
     if (navigator.share) {
       await navigator.share(shareData);
@@ -353,7 +361,7 @@ export function ChapterReader({ book, chapter }: Props) {
       {!isLoading && verses.length > 0 && (
         <div className="mb-8">
           <AudioPlayer
-            verses={verses.map((v) => ({ verse: v.verse, text: cleanVerseText(v.text) }))}
+            verses={verses}
             bookName={book.name}
             chapter={chapter}
             onVerseChange={(verse) => setSelectedVerse(verse || null)}
@@ -399,7 +407,7 @@ export function ChapterReader({ book, chapter }: Props) {
                   <span className="text-xs text-primary/50 font-mono mt-2 min-w-7 text-right select-none">
                     {v.verse}
                   </span>
-                  <p className="verse-text flex-1">{cleanVerseText(v.text)}</p>
+                  <p className="verse-text flex-1">{v.text}</p>
                   <div className={`flex items-start gap-1 pt-1.5 transition-opacity duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                     <Button
                       variant="ghost"
@@ -450,7 +458,7 @@ export function ChapterReader({ book, chapter }: Props) {
                     </Button>
                     <VerseImageShare
                       reference={`${book.name} ${chapter}:${v.verse}`}
-                      text={cleanVerseText(v.text)}
+                      text={v.text}
                     />
                   </div>
                 </div>

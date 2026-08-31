@@ -8,13 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const TRANSLATIONS = [
-  { value: "KJV", label: "KJV" },
-  { value: "WEB", label: "WEB" },
-  { value: "ASV", label: "ASV" },
-] as const;
+import { TRANSLATIONS, type Translation } from "@/lib/bible-data";
 
-export type Translation = (typeof TRANSLATIONS)[number]["value"];
+export type { Translation };
 
 export function TranslationSwitcher({
   value = "KJV",
@@ -30,8 +26,8 @@ export function TranslationSwitcher({
       </SelectTrigger>
       <SelectContent align="end">
         {TRANSLATIONS.map((t) => (
-          <SelectItem key={t.value} value={t.value}>
-            {t.label}
+          <SelectItem key={t} value={t}>
+            {t}
           </SelectItem>
         ))}
       </SelectContent>

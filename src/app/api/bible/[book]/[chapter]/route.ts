@@ -1,18 +1,16 @@
 import { NextResponse } from "next/server";
-import { getBookBySlug, BIBLE_BOOKS, cleanVerseText } from "@/lib/bible-data";
+import { getBookBySlug } from "@/lib/bible-data";
+import { getChapterInTranslation, normalizeTranslation } from "@/lib/kjv";
 
-const SUPPORTED_TRANSLATIONS = ["KJV", "WEB", "ASV"];
-
-function normalizeTranslation(value: string | null): string {
-  const upper = (value ?? "").toUpperCase();
-  return SUPPORTED_TRANSLATIONS.includes(upper) ? upper : "KJV";
-}
-
-// Map book slugs to Bolls.life book IDs (1-66)
-function getBookId(slug: string): number | null {
-  const book = BIBLE_BOOKS.find((b) => b.slug === slug);
-  return book ? book.position : null;
-}
+/**
+ * Chapter text for the reader.
+ *
+ * KJV now comes from the vendored scripture in `src/data/kjv/` and never
+ * touches the network; the reader gets it server-rendered and only calls this
+ * route for WEB and ASV, or when the service worker replays a cached response
+ * offline. The route stays for the service worker's sake and for anyone who has
+ * a chapter URL cached from an earlier version.
+ */
 
 // Simple in-memory rate limiter: max 100 requests per IP per 60 seconds
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -73,50 +71,29 @@ export async function GET(request: Request, { params }: Props) {
   const { searchParams } = new URL(request.url);
   const translation = normalizeTranslation(searchParams.get("translation"));
 
-  // Fetch from Bolls.life free API (no key needed)
-  const bookId = getBookId(bookSlug);
-  if (!bookId) {
-    return NextResponse.json({ error: "Book not found" }, { status: 404 });
-  }
+  const verses = await getChapterInTranslation(book, chapter, translation);
 
-  try {
-    const res = await fetch(
-      `https://bolls.life/get-text/${translation}/${bookId}/${chapter}/`,
-      { next: { revalidate: 86400 } }
-    );
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch verses" },
-        { status: 502 }
-      );
-    }
-
-    const data: { pk: number; verse: number; text: string }[] = await res.json();
-
-    const verses = data.map((v) => ({
-      verse: v.verse,
-      text: cleanVerseText(v.text),
-    }));
-
+  if (verses.length === 0) {
+    // KJV is local, so an empty result here can only mean the upstream
+    // translation is unavailable.
     return NextResponse.json(
-      {
-        book: book.name,
-        bookSlug: book.slug,
-        chapter,
-        translation,
-        verses,
-      },
-      {
-        headers: {
-          "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
-        },
-      }
-    );
-  } catch {
-    return NextResponse.json(
-      { error: "External API unavailable" },
+      { error: "Translation unavailable" },
       { status: 502 }
     );
   }
+
+  return NextResponse.json(
+    {
+      book: book.name,
+      bookSlug: book.slug,
+      chapter,
+      translation,
+      verses,
+    },
+    {
+      headers: {
+        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+      },
+    }
+  );
 }

@@ -81,6 +81,14 @@ export const BIBLE_BOOKS: BookInfo[] = [
 export const OLD_TESTAMENT = BIBLE_BOOKS.filter((b) => b.testament === "OLD");
 export const NEW_TESTAMENT = BIBLE_BOOKS.filter((b) => b.testament === "NEW");
 
+/**
+ * Translations the reader offers. KJV ships with the app (src/data/kjv/); the
+ * other two are fetched from bolls.life on demand.
+ */
+export const TRANSLATIONS = ["KJV", "WEB", "ASV"] as const;
+export type Translation = (typeof TRANSLATIONS)[number];
+export const DEFAULT_TRANSLATION: Translation = "KJV";
+
 export function getBookBySlug(slug: string): BookInfo | undefined {
   return BIBLE_BOOKS.find((b) => b.slug === slug);
 }
