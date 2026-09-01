@@ -28,6 +28,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { type BookInfo, BIBLE_BOOKS } from "@/lib/bible-data";
+import { cn } from "@/lib/utils";
 import { ReadingSettings } from "@/components/reading-settings";
 import { useTranslation } from "@/lib/use-reading-prefs";
 import { HighlightPicker } from "@/components/highlight-picker";
@@ -52,7 +53,13 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
   const { isAuthenticated } = useConvexAuth();
   const showAuthFeatures = !!isSignedIn;
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
-  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  // Two separate things that were previously one piece of state, which meant
+  // the hover toolbar pinned itself to whatever verse the audio player was
+  // reading and followed it down the page.
+  //   pinnedVerse — desktop: keep the toolbar open after a click
+  //   spokenVerse — audio player: which verse is being read aloud
+  const [pinnedVerse, setPinnedVerse] = useState<number | null>(null);
+  const [spokenVerse, setSpokenVerse] = useState<number | null>(null);
   const [translation] = useTranslation();
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -270,7 +277,7 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
     if (isCompact) {
       setSheetVerse(verseNum);
     } else {
-      setSelectedVerse((current) => (current === verseNum ? null : verseNum));
+      setPinnedVerse((current) => (current === verseNum ? null : verseNum));
     }
   };
 
@@ -402,7 +409,7 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
             verses={verses}
             bookName={book.name}
             chapter={chapter}
-            onVerseChange={(verse) => setSelectedVerse(verse || null)}
+            onVerseChange={(verse) => setSpokenVerse(verse || null)}
           />
         </div>
       )}
@@ -428,13 +435,18 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
               const highlightData = highlights?.[v.verse];
               const highlightColor = highlightData?.color ?? null;
               const isMarked = bookmarkedVerses.has(v.verse);
-              const isSelected = selectedVerse === v.verse;
+              const isPinned = pinnedVerse === v.verse;
+              const isSpoken = spokenVerse === v.verse;
 
               return (
                 <div
                   key={v.verse}
                   id={`v${v.verse}`}
-                  className="group relative flex gap-4 py-2 px-3 -mx-3 rounded-xl hover:bg-muted/40 transition-colors duration-200 cursor-pointer"
+                  className={cn(
+                    "group relative flex gap-4 py-2 px-3 -mx-3 rounded-xl transition-colors duration-200 cursor-pointer hover:bg-muted/40",
+                    isSpoken && "bg-primary/5 ring-1 ring-primary/25"
+                  )}
+                  onMouseLeave={() => isPinned && setPinnedVerse(null)}
                   style={
                     highlightColor
                       ? { backgroundColor: highlightColor + "25" }
@@ -453,12 +465,30 @@ export function ChapterReader({ book, chapter, initialVerses }: Props) {
                     phone left the scripture around 126px wide. Touch gets the
                     actions sheet instead; it has no hover to reveal this with.
                   */}
+                  {/*
+                    From `xl` up the actions sit in the page margin, beside the
+                    column rather than on top of the words.
+
+                    The threshold is about clearance, not fit. The toolbar is
+                    166px (5 x 28px buttons, 4px gaps, px-1, 1px border) plus
+                    12px of ml-3 = 178px. Free margin to the right of the row —
+                    the container is 768px centered, and the row overhangs it by
+                    12px from -mx-3 — comes to 178px at 1100px wide and 268px at
+                    1280px. So it technically fits from ~1100, but flush against
+                    the viewport edge with nothing to spare; xl leaves 90px.
+
+                    Below that it overlays the text, which is why it carries a
+                    backdrop and border there and drops both at xl.
+                  */}
                   <div
-                    className={`absolute right-1 top-1 z-10 hidden items-start gap-1 rounded-lg border border-border/60 bg-background/95 px-1 py-0.5 shadow-sm backdrop-blur-sm transition-opacity duration-200 md:flex ${
-                      isSelected
+                    className={cn(
+                      "absolute top-1 z-10 hidden items-start gap-1 rounded-lg px-1 py-0.5 transition-opacity duration-200 md:flex",
+                      "right-1 border border-border/60 bg-background/95 shadow-sm backdrop-blur-sm",
+                      "xl:right-auto xl:left-full xl:ml-3 xl:border-transparent xl:bg-transparent xl:shadow-none xl:backdrop-blur-none",
+                      isPinned
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
-                    }`}>
+                    )}>
                     <Button
                       variant="ghost"
                       size="icon"
