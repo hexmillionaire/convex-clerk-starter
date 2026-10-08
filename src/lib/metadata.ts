@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-
-export const SITE_URL = "https://www.divineword.app";
-export const SITE_NAME = "Divine Word";
+import { SITE_NAME, SITE_URL } from "./site";
 
 /**
  * Builds the social block for a page.
  *
- * Every page that set its own `openGraph` was replacing the parent's object
- * rather than merging into it, which silently dropped the inherited `images`
- * — so subpages declared `summary_large_image` and shipped no image, and every
- * shared link rendered as a blank card. Going through here means a page can't
+ * Next.js metadata does not deep-merge: a page that sets its own `openGraph`
+ * replaces the parent's object and silently drops the inherited `images`. So
+ * a subpage can declare `summary_large_image` and ship no image, and every
+ * shared link renders as a blank card. Going through here means a page can't
  * define `openGraph` without also getting an image.
  */
 export function socialMetadata({
@@ -18,14 +16,17 @@ export function socialMetadata({
   canonical,
   ogImage,
   type = "website",
+  noIndex = false,
 }: {
   title: string;
   description: string;
-  /** Path, e.g. "/bible/john/3". */
+  /** Path, e.g. "/about". */
   canonical: string;
-  /** Path with query, e.g. "/og?book=john&chapter=3". Defaults to the site card. */
+  /** Path with query, e.g. "/og?title=Hello". Defaults to the site card. */
   ogImage?: string;
   type?: "website" | "article";
+  /** For signed-in-only pages that shouldn't be in search results. */
+  noIndex?: boolean;
 }): Metadata {
   const imageUrl = `${SITE_URL}${ogImage ?? "/og"}`;
 
@@ -33,6 +34,7 @@ export function socialMetadata({
     title,
     description,
     alternates: { canonical: `${SITE_URL}${canonical}` },
+    robots: noIndex ? { index: false, follow: true } : undefined,
     openGraph: {
       title,
       description,

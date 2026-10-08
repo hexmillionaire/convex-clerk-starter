@@ -1,95 +1,124 @@
 import type { Metadata } from "next";
-import { getVerseOfTheDay } from "@/lib/daily-verses";
-import { VotdCard } from "@/components/votd-card";
-import { ContinueReadingCard } from "@/components/continue-reading-card";
-import { ProgressSummary } from "@/components/progress-summary";
-import { ActivePlanCard } from "@/components/active-plan-card";
-import { RetentionWidgets } from "@/components/retention-widgets";
-import { Greeting } from "@/components/greeting";
-import { TomorrowPreview } from "@/components/tomorrow-preview";
-import { WeeklyRecap } from "@/components/weekly-recap";
-import { SafeSection } from "@/components/safe-section";
-import { AboutSummary } from "@/components/about-summary";
-import { OfflineDownload } from "@/components/offline-download";
+import Link from "next/link";
+import { ArrowRight, Github, Lock, Zap, Moon, Rocket, Bot, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { socialMetadata } from "@/lib/metadata";
-
-export const revalidate = 86400;
+import { REPO_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = socialMetadata({
-  title: "Divine Word — Free Online Bible (KJV)",
-  description:
-    "Free, beautiful, distraction-free Bible. Read the King James Version online. Verse of the Day, reading plans, and scripture search.",
+  title: `${SITE_NAME} — Next.js + Convex + Clerk starter`,
+  description: SITE_DESCRIPTION,
   canonical: "/",
 });
 
+const FEATURES = [
+  {
+    icon: Lock,
+    title: "Auth that costs nothing on public pages",
+    body: "Clerk mounts only on routes that need it or when a session cookie exists. Visitors never download the sign-in bundle.",
+  },
+  {
+    icon: Zap,
+    title: "Realtime per-user data",
+    body: "Two Convex tables show the only two shapes you need: many rows per user, and one settings row per user.",
+  },
+  {
+    icon: Moon,
+    title: "UI shell done",
+    body: "shadcn/ui, Tailwind v4, light/dark/system theme, navbar, mobile tab bar, loading and error states.",
+  },
+  {
+    icon: Smartphone,
+    title: "Mobile-first",
+    body: "Responsive layout, bottom tab bar with safe-area padding, installable PWA manifest and service worker.",
+  },
+  {
+    icon: Rocket,
+    title: "Deploy path",
+    body: "Vercel-ready with security headers, sitemap, robots, dynamic OG images and analytics already wired.",
+  },
+  {
+    icon: Bot,
+    title: "Built for AI-assisted dev",
+    body: "CLAUDE.md explains the architecture to your agent. Skills cover the common tasks. The workflow doc shows how it was actually built.",
+  },
+];
+
+const STEPS = [
+  { n: "01", title: "Clone", code: "git clone " + REPO_URL },
+  { n: "02", title: "Setup", code: "npm install && npm run setup" },
+  { n: "03", title: "Run", code: "npm run dev" },
+];
+
 export default function HomePage() {
-  const votd = getVerseOfTheDay();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Divine Word",
-    url: "https://www.divineword.app",
-    description: "Free, beautiful, distraction-free Bible. Read the King James Version online.",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://www.divineword.app/search?q={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
-
   return (
-    <div className="min-h-[80vh]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
-      />
-
-      <div className="stagger-children">
-        {/* Personal greeting — emotional hook */}
-        <Greeting />
-
-        {/* The page's actual heading. Visually quiet so it doesn't compete
-            with the greeting for returning readers, but it gives the page a
-            real <h1> and tells a first-time visitor what this is. */}
-        <section className="container max-w-2xl mx-auto px-6 pb-1">
-          <h1 className="sr-only">
-            Divine Word — read the King James Version Bible online, free
-          </h1>
-        </section>
-
-        {/* Verse of the Day — daily inspiration */}
-        <VotdCard verse={votd} />
-
-        {/* Retention: streak banner, daily goal, onboarding CTA, milestones */}
-        <SafeSection><RetentionWidgets /></SafeSection>
-
-        {/* Continue Reading / Where to Start — clear action */}
-        <SafeSection><ContinueReadingCard /></SafeSection>
-
-        {/* Progress Summary (signed-in only) — satisfaction */}
-        <SafeSection><ProgressSummary /></SafeSection>
-
-        {/* Weekly Recap — reflection */}
-        <SafeSection><WeeklyRecap /></SafeSection>
-
-        {/* Active Reading Plan */}
-        <SafeSection><ActivePlanCard /></SafeSection>
-
-        {/* Tomorrow's verse preview — anticipation hook */}
-        <TomorrowPreview />
-      </div>
-
-      <AboutSummary />
-
-      {/* Offline is the reason to keep this on a home screen */}
-      <section className="container max-w-2xl mx-auto px-6 pb-16">
-        <OfflineDownload />
+    <div className="container mx-auto max-w-5xl px-6">
+      <section className="pt-20 pb-16 md:pt-28 md:pb-20 text-center">
+        <p className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-6">
+          Next.js 16 · Convex · Clerk · Tailwind v4
+        </p>
+        <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-balance">
+          Skip the first week.
+          <br />
+          <span className="text-primary">Start on the idea.</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed text-pretty">
+          {SITE_DESCRIPTION}
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/dashboard">
+            <Button size="lg" className="h-11 gap-2 px-6">
+              Try the demo
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <a href={REPO_URL} target="_blank" rel="noreferrer">
+            <Button size="lg" variant="outline" className="h-11 gap-2 px-6">
+              <Github className="h-4 w-4" />
+              View source
+            </Button>
+          </a>
+        </div>
       </section>
 
+      <section className="pb-16 md:pb-20">
+        <div className="grid gap-4 md:grid-cols-3">
+          {STEPS.map((s) => (
+            <Card key={s.n} className="card-hover">
+              <CardContent className="p-5">
+                <p className="font-mono text-xs text-primary mb-2">{s.n}</p>
+                <p className="font-semibold mb-3">{s.title}</p>
+                <code className="block rounded-md bg-muted px-3 py-2 font-mono text-xs break-all">
+                  {s.code}
+                </code>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="pb-20 md:pb-28">
+        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-center mb-10">
+          What&apos;s already wired
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
+            return (
+              <Card key={f.title} className="card-hover">
+                <CardContent className="p-5">
+                  <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="font-semibold mb-1.5">{f.title}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

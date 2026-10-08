@@ -3,9 +3,10 @@
 /**
  * Auth access that works with or without Clerk loaded.
  *
- * A stranger arriving from Google on /bible/john/3 was downloading Clerk's
- * entire sign-in interface — around 759KB, roughly a third of the JavaScript
- * on the page — before reading a word, on a page that needs no account.
+ * In the app this was extracted from, a stranger arriving from Google on a
+ * public page was downloading Clerk's entire sign-in interface — around 759KB,
+ * roughly a third of the JavaScript on the page — before reading a word, on a
+ * page that needs no account.
  *
  * So Clerk is now mounted only when it can matter: on auth-dependent routes,
  * or when Clerk's own client cookie says a session may exist. Everywhere else
@@ -74,16 +75,10 @@ export function useClerk(): Pick<AuthState, "signOut"> {
  * Routes that always mount Clerk, whether or not a cookie is present — either
  * they require an account, or they're where someone signs in.
  */
-const AUTH_ROUTES = [
-  "/login",
-  "/dashboard",
-  "/journal",
-  "/bookmarks",
-  "/prayers",
-  "/plans",
-  "/stats",
-  "/support",
-];
+// Add every route that requires a signed-in user here. A route left off this
+// list still works for returning users (the cookie check mounts Clerk) but a
+// first-time visitor would see the signed-out tree.
+const AUTH_ROUTES = ["/login", "/dashboard"];
 
 export function routeNeedsAuth(pathname: string): boolean {
   return AUTH_ROUTES.some(

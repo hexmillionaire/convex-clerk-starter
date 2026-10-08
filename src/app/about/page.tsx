@@ -1,67 +1,63 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Github, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Search } from "lucide-react";
 import { socialMetadata } from "@/lib/metadata";
+import { REPO_URL, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = socialMetadata({
-  title: "About Divine Word — Free Online KJV Bible",
-  description:
-    "Divine Word is a free, ad-free online Bible: the complete King James Version with search, bookmarks, highlights, a journal, reading plans and offline reading.",
+  title: `About — ${SITE_NAME}`,
+  description: `Why ${SITE_NAME} exists, what it includes, and how to make it yours.`,
   canonical: "/about",
 });
 
 export default function AboutPage() {
   return (
     <div className="container mx-auto max-w-2xl px-6 py-16 md:py-20">
-      <div className="mb-10 text-center">
-        <p className="mb-2 text-xl text-primary">✦</p>
-        <h1 className="font-heading text-3xl font-semibold tracking-tight md:text-4xl">
-          About Divine Word
+      <div className="mb-10">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-2">
+          About
+        </p>
+        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          A starter from someone who ships without hand-writing code.
         </h1>
       </div>
 
       <div className="space-y-6 text-base leading-[1.8] text-muted-foreground">
         <p>
-          Divine Word is a free online Bible designed for focused, distraction-free
-          scripture reading. Read the complete King James Version — all 66 books, 1,189
-          chapters, and 31,102 verses — in a clean, quiet interface that puts
-          God&apos;s Word first.
+          This project is the skeleton under a production app, extracted after the
+          app was live. Everything in it was built by directing an AI coding agent
+          rather than typing the code by hand, and every pattern here survived
+          real users: the conditional auth mount, the server-rendered provider,
+          the per-user ownership checks in every mutation.
         </p>
         <p>
-          Whether you&apos;re looking up a specific verse, studying a chapter in depth,
-          or following a structured reading plan, Divine Word makes it easy to engage
-          with scripture every day. Full-text search covers the entire Bible. Verses can
-          be bookmarked, highlighted in six colours, and annotated with private notes.
-          A personal journal keeps your reflections alongside the passages that prompted
-          them, and guided plans run from 30-day devotionals to reading the Bible in a
-          year.
+          It is deliberately small. Two Convex tables, four pages, one
+          dashboard. The point is not features; it is that the parts that are
+          tedious and easy to get wrong are already right, so the first prompt
+          you write is about your idea.
         </p>
         <p>
-          The whole King James Version ships with the site, so it can be downloaded for
-          reading with no connection at all — on a plane, in a basement, or anywhere the
-          signal goes. Three themes, including sepia, and adjustable text size make long
-          reading comfortable.
-        </p>
-        <p>
-          The King James Version is in the public domain and remains one of the most
-          widely read English translations of the Bible. Divine Word is built with love
-          for the glory of God and is free for everyone — no ads, no distractions, just
-          the Word.
+          The <code className="font-mono text-sm text-foreground">CLAUDE.md</code> at the root
+          is written for your agent, not for you. It explains the two invariants
+          that will break the app if touched, where new per-user features go,
+          and how to add a table without hand-editing generated files. Read{" "}
+          <code className="font-mono text-sm text-foreground">docs/WORKFLOW.md</code> for the
+          plan-then-execute loop the original was built with.
         </p>
       </div>
 
-      <div className="mt-12 flex flex-wrap justify-center gap-3 border-t pt-10">
-        <Link href="/bible">
+      <div className="mt-10 flex flex-wrap gap-3">
+        <a href={REPO_URL} target="_blank" rel="noreferrer">
           <Button className="h-11 gap-2 px-5">
-            <BookOpen className="h-4 w-4" />
-            Start reading
+            <Github className="h-4 w-4" />
+            Read the source
           </Button>
-        </Link>
-        <Link href="/search">
+        </a>
+        <Link href="/dashboard">
           <Button variant="outline" className="h-11 gap-2 px-5">
-            <Search className="h-4 w-4" />
-            Search scripture
+            Try the demo
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
       </div>

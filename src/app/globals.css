@@ -3,15 +3,12 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant sepia (&:is(.sepia *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-serif);
-  --font-mono: var(--font-mono);
-  --font-heading: var(--font-heading);
-  --font-serif: var(--font-serif);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,40 +45,32 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  /* Bible-specific colors */
-  --color-gold: var(--gold);
-  --color-gold-light: var(--gold-light);
-  --color-sepia-text: var(--sepia-text);
 }
 
 :root {
-  --reading-font-size: 19px;
-  --gold: #c9972b;
-  --gold-light: #e8c96a;
-  --sepia-text: #d4a74a;
-  --background: oklch(0.985 0.002 90);
-  --foreground: oklch(0.16 0.02 60);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.02 60);
+  --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.02 60);
-  --primary: oklch(0.52 0.12 70);
-  --primary-foreground: oklch(0.985 0.002 90);
-  --secondary: oklch(0.965 0.004 85);
-  --secondary-foreground: oklch(0.25 0.02 60);
-  --muted: oklch(0.965 0.004 85);
-  --muted-foreground: oklch(0.48 0.025 60);
-  --accent: oklch(0.965 0.004 85);
-  --accent-foreground: oklch(0.25 0.02 60);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.008 80);
-  --input: oklch(0.92 0.008 80);
-  --ring: oklch(0.6 0.1 70);
-  --chart-1: oklch(0.7 0.12 70);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -94,59 +83,39 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.01 60);
-  --foreground: oklch(0.93 0.01 80);
-  --card: oklch(0.2 0.01 60);
-  --card-foreground: oklch(0.93 0.01 80);
-  --popover: oklch(0.2 0.01 60);
-  --popover-foreground: oklch(0.93 0.01 80);
-  --primary: oklch(0.72 0.1 70);
-  --primary-foreground: oklch(0.16 0.01 60);
-  --secondary: oklch(0.25 0.01 60);
-  --secondary-foreground: oklch(0.9 0.01 80);
-  --muted: oklch(0.25 0.01 60);
-  --muted-foreground: oklch(0.65 0.02 70);
-  --accent: oklch(0.25 0.015 65);
-  --accent-foreground: oklch(0.9 0.01 80);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.3 0.01 65);
-  --input: oklch(0.3 0.01 65);
-  --ring: oklch(0.6 0.1 70);
-  --chart-1: oklch(0.72 0.1 70);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.18 0.01 60);
-  --sidebar-foreground: oklch(0.93 0.01 80);
-  --sidebar-primary: oklch(0.72 0.1 70);
-  --sidebar-primary-foreground: oklch(0.16 0.01 60);
-  --sidebar-accent: oklch(0.25 0.01 60);
-  --sidebar-accent-foreground: oklch(0.9 0.01 80);
-  --sidebar-border: oklch(0.3 0.01 65);
-  --sidebar-ring: oklch(0.6 0.1 70);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
-.sepia {
-  --background: oklch(0.26 0.035 55);
-  --foreground: oklch(0.87 0.04 70);
-  --card: oklch(0.30 0.035 55);
-  --card-foreground: oklch(0.87 0.04 70);
-  --popover: oklch(0.30 0.035 55);
-  --popover-foreground: oklch(0.87 0.04 70);
-  --primary: oklch(0.70 0.12 65);
-  --primary-foreground: oklch(0.20 0.03 55);
-  --secondary: oklch(0.33 0.03 55);
-  --secondary-foreground: oklch(0.85 0.04 70);
-  --muted: oklch(0.33 0.03 55);
-  --muted-foreground: oklch(0.62 0.05 65);
-  --accent: oklch(0.33 0.035 55);
-  --accent-foreground: oklch(0.85 0.04 70);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.38 0.035 55);
-  --input: oklch(0.38 0.035 55);
-  --ring: oklch(0.60 0.12 65);
-}
 
 @layer base {
   * {
@@ -158,23 +127,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
   html {
-    @apply font-serif;
+    @apply font-sans;
     scroll-behavior: smooth;
   }
 }
 
-/* Premium typography defaults */
+/* Typography defaults */
 h1, h2, h3, h4, h5, h6 {
   text-rendering: optimizeLegibility;
   letter-spacing: -0.01em;
-}
-
-/* Reading-specific typography */
-.verse-text {
-  font-size: var(--reading-font-size);
-  line-height: 1.85;
-  letter-spacing: 0.005em;
-  text-rendering: optimizeLegibility;
 }
 
 /* Safe area for bottom tab bar on notch devices */
@@ -182,14 +143,14 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Clearance under `main` for the fixed mobile tab bar. The bar is 4rem tall
-   plus whatever the device reserves below it, so a flat padding leaves the
-   last lines of a chapter underneath it on a notched phone. */
+/* Clearance under `main` for the fixed mobile tab bar: 4rem plus whatever
+   the device reserves below it, so content never ends under the bar on a
+   notched phone. */
 :root {
   --tabbar-clearance: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* Premium transitions — default everything to smooth */
+/* Default every transition to the same easing */
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -223,7 +184,7 @@ h1, h2, h3, h4, h5, h6 {
   animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Stagger children for premium feel */
+/* Stagger direct children on mount (used on the landing page grid) */
 .stagger-children > * {
   animation: slide-up-gentle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -238,91 +199,16 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-children > *:nth-child(9) { animation-delay: 640ms; }
 .stagger-children > *:nth-child(10) { animation-delay: 720ms; }
 
-/* Premium card hover */
+/* Lift on hover */
 .card-hover {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px -8px oklch(0.3 0.02 60 / 0.1);
+  box-shadow: 0 8px 30px -8px oklch(0 0 0 / 0.12);
 }
 .card-hover:active {
   transform: translateY(0) scale(0.995);
-}
-
-/* Streak fire pulse */
-@keyframes pulse-fire {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.18); opacity: 0.8; }
-}
-.animate-pulse-fire {
-  animation: pulse-fire 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-/* Milestone bounce-in */
-@keyframes bounce-in {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.1); }
-  70% { transform: scale(0.97); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-bounce-in {
-  animation: bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Confetti particles for milestone celebration */
-@keyframes confetti-fall {
-  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-  80% { opacity: 1; }
-  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-}
-.confetti-particle {
-  position: absolute;
-  top: -10px;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  animation: confetti-fall 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-.confetti-particle:nth-child(even) {
-  width: 6px;
-  height: 10px;
-  border-radius: 50%;
-}
-.confetti-particle:nth-child(3n) {
-  width: 10px;
-  height: 6px;
-  animation-duration: 3.5s;
-}
-
-/* Chapter completion — checkmark draw animation */
-@keyframes checkmark-draw {
-  0% { stroke-dashoffset: 30; }
-  100% { stroke-dashoffset: 0; }
-}
-.checkmark-draw {
-  stroke-dasharray: 30;
-  stroke-dashoffset: 30;
-  animation: checkmark-draw 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
-}
-
-/* Chapter completion — ring glow */
-@keyframes ring-glow {
-  0% { box-shadow: 0 0 0 0 oklch(0.65 0.2 145 / 0.4); }
-  70% { box-shadow: 0 0 0 14px oklch(0.65 0.2 145 / 0); }
-  100% { box-shadow: 0 0 0 0 oklch(0.65 0.2 145 / 0); }
-}
-.chapter-complete-ring {
-  animation: ring-glow 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
-}
-
-/* Goal completion glow pulse */
-@keyframes goal-glow {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.65 0.2 145 / 0); }
-  50% { box-shadow: 0 0 12px 4px oklch(0.65 0.2 145 / 0.2); }
-}
-.goal-complete-glow {
-  animation: goal-glow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Respect motion preferences */
@@ -361,8 +247,4 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: underline;
   }
 
-  .verse-text {
-    font-size: 12pt;
-    line-height: 1.6;
-  }
 }

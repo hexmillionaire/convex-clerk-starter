@@ -1,33 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect } from "react";
+import { Logo } from "@/components/logo";
 
+/**
+ * `/login` is in AUTH_ROUTES, so Clerk is always mounted here and the
+ * `SignInButton` / `SignUpButton` components are safe to use directly. The
+ * `useUser` hook still comes from `@/lib/auth` so this file matches every
+ * other one in the app.
+ */
 export default function LoginPage() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (isSignedIn) {
-      router.replace("/dashboard");
-    }
-  }, [isSignedIn, router]);
+    if (isLoaded && isSignedIn) router.replace("/dashboard");
+  }, [isLoaded, isSignedIn, router]);
 
-  if (isSignedIn) {
-    return null;
-  }
+  if (!isLoaded || isSignedIn) return null;
 
   return (
     <div className="container max-w-md mx-auto px-4 py-16">
       <div className="text-center mb-8">
-        <p className="text-primary text-lg mb-2">&#10022;</p>
-        <h1 className="text-2xl font-heading font-semibold mb-1">Welcome</h1>
-        <p className="text-sm text-muted-foreground italic">
-          Sign in to save bookmarks, highlights, and notes
+        <Logo className="h-10 w-10 mx-auto mb-4" />
+        <h1 className="text-2xl font-semibold mb-1">Welcome back</h1>
+        <p className="text-sm text-muted-foreground">
+          Sign in to see your dashboard and saved items.
         </p>
       </div>
 
@@ -35,7 +39,7 @@ export default function LoginPage() {
         <CardContent className="p-6 flex flex-col gap-4">
           <SignInButton mode="redirect" forceRedirectUrl="/dashboard">
             <Button className="w-full" size="lg">
-              Sign In
+              Sign in
             </Button>
           </SignInButton>
 
@@ -50,19 +54,16 @@ export default function LoginPage() {
 
           <SignUpButton mode="redirect" forceRedirectUrl="/dashboard">
             <Button variant="outline" className="w-full" size="lg">
-              Create Account
+              Create account
             </Button>
           </SignUpButton>
         </CardContent>
       </Card>
 
       <p className="text-center text-xs text-muted-foreground mt-6">
-        You can read the Bible without an account.{" "}
-        <Link
-          href="/bible"
-          className="text-primary hover:underline"
-        >
-          Start reading &rarr;
+        Just looking?{" "}
+        <Link href="/" className="text-primary hover:underline">
+          Back to the homepage &rarr;
         </Link>
       </p>
     </div>

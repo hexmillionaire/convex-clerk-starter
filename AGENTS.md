@@ -1,13 +1,13 @@
-<!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This project is on Next.js 16. APIs, conventions and file structure differ from
+most training data: `middleware.ts` is `proxy.ts`, Turbopack is the default,
+React 19 is in use. Read the relevant guide in `node_modules/next/dist/docs/`
+before writing framework code and heed deprecation notices.
 
-<!-- convex-ai-start -->
-This project uses [Convex](https://convex.dev) as its backend.
+The project uses [Convex](https://convex.dev) as its backend. Read
+`convex/_generated/ai/guidelines.md` before writing Convex code; it overrides
+training data.
 
-When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
-
-Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
-<!-- convex-ai-end -->
+Architecture notes, invariants and where-things-go live in `CLAUDE.md`. Read
+that too; it is short and tool-agnostic despite the name.

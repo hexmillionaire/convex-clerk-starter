@@ -16,17 +16,15 @@ export default function Error({
 
   return (
     <div className="container max-w-md mx-auto px-4 py-20 text-center">
-      <p className="text-4xl mb-4">⚠️</p>
-      <h2 className="text-xl font-heading font-semibold mb-2">
-        Something went wrong
-      </h2>
+      <p className="font-mono text-xs tracking-[0.2em] text-destructive mb-4">ERROR</p>
+      <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        An unexpected error occurred. Please try again.
+        An unexpected error occurred. Try again, or head home.
       </p>
       <div className="flex gap-3 justify-center">
-        <Button onClick={reset}>Try Again</Button>
+        <Button onClick={reset}>Try again</Button>
         <Button variant="outline" onClick={() => (window.location.href = "/")}>
-          Go Home
+          Go home
         </Button>
       </div>
     </div>

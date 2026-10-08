@@ -1,187 +1,112 @@
-# Divine Word
+# Vibe Stack
 
-A free, beautiful, distraction-free Bible web app. Read scripture the way it was meant to be read.
+**A Next.js + Convex + Clerk starter for people who build with AI.**
 
-**Live:** [divineword.app](https://www.divineword.app)
+Auth, realtime per-user data, dark mode, mobile nav, SEO, PWA and a deploy path — already wired, already tested in production. Clone it, run two commands, open Claude Code (or Cursor, or whatever you drive) and start on the idea instead of the plumbing.
 
-## Tech Stack
+> Built by someone who has shipped 10+ production apps since late 2024 without hand-writing code. This is the skeleton under one of them, extracted after it was live. The patterns in here survived real users.
 
-- **Framework:** Next.js 16 (App Router, Turbopack)
-- **Database:** [Convex](https://convex.dev)
-- **Auth:** [Clerk](https://clerk.com)
-- **UI:** Tailwind CSS, shadcn/ui, Lucide icons
-- **Fonts:** Cormorant Garamond (reading), Cinzel (headings), DM Mono (UI)
-- **Hosting:** Vercel
-- **Bible Data:** [Bolls.life API](https://bolls.life) (KJV, WEB, ASV)
-- **PWA:** Service worker + manifest for installable app
+---
 
-## Features
-
-### Core
-
-- Full KJV Bible — all 66 books, 1,189 chapters
-- Chapter reader with verse numbers and clean typography
-- Scripture search (full-text, 50+ results)
-- Verse of the Day on homepage
-- Book listing with OT/NT categorization
-- Single verse pages with shareable URLs
-- Light, Dark, and Sepia themes
-- Adjustable font size (14–24px)
-- Mobile-responsive with bottom sheet navigation
-
-### Auth-Gated (Clerk)
-
-- Bookmark verses across devices with collection/folder organization
-- Highlight verses with 6 colors (Gold, Rose, Sage, Sky, Lavender, Peach) + personal notes
-- Devotional journal — create, edit, delete entries
-- Prayer journal — add requests, categorize (Personal, Family, Community, Praise), mark answered
-- Reading progress tracking per chapter
-- 6 reading plans (30-Day Psalms, Gospels, NT in 90, Bible in a Year, etc.)
-
-### Personal Dashboard
-
-- Reading streak tracker with GitHub-style heatmap calendar
-- Daily reading goal ring (configurable chapters/day)
-- Verse of the Day embed with deep link to passage
-- Per-book progress cards with completion percentage
-- Recent reading history (last 8 chapters)
-- Recent journal & prayer entries at a glance
-- Bookmark collection summary with counts
-- Highlight notes preview
-- Milestone achievements (chapters read, streak, books completed, etc.)
-- Share progress — copy-to-clipboard summary text
-- Reading reminder banner when daily goal not met
-- Dashboard settings panel (daily goal, reminder time, toggle)
-
-### Infrastructure
-
-- Convex real-time database with full-text search index
-- Fallback data strategy: Convex DB → Bolls.life API
-- PWA installable on mobile/desktop
-- Vercel Analytics
-- SEO: sitemap, robots.txt, Open Graph, Twitter cards
-
-## Project Structure
-
-```
-src/
-  app/
-    page.tsx              # Homepage (VOTD, quick nav)
-    bible/
-      page.tsx            # All books listing
-      [book]/[chapter]/   # Chapter reader
-        [verse]/          # Single verse page
-    bookmarks/            # Saved verses with collection filtering
-    dashboard/            # Personal reading dashboard (12 features)
-    journal/              # Devotional entries
-    prayers/              # Prayer journal (CRUD, categories, filters)
-    plans/                # Reading plans
-    search/               # Scripture search
-    stats/                # Reading statistics
-    login/                # Clerk sign-in/sign-up
-    api/                  # Bible & search API routes
-  components/
-    navbar.tsx            # Navigation bar
-    footer.tsx            # Site footer
-    streak-calendar.tsx   # GitHub-style reading heatmap
-    daily-goal-ring.tsx   # SVG circular progress ring
-    highlight-picker.tsx  # Color picker with note support
-    ui/                   # shadcn/ui primitives
-  lib/                    # Bible data, utilities
-convex/
-  schema.ts               # Database schema (10 tables)
-  bible.ts                # Verse queries & search
-  bookmarks.ts            # Bookmark CRUD + collections
-  highlights.ts           # Highlight CRUD + notes
-  journal.ts              # Journal CRUD
-  dashboard.ts            # Aggregated dashboard query
-  prayerJournal.ts        # Prayer request CRUD
-  milestones.ts           # Achievement tracking
-  userSettings.ts         # User preferences (goals, reminders)
-  readingPlans.ts         # Plan tracking
-  readingProgress.ts      # Chapter progress
-  seed.ts                 # Bible data seeder
-  auth.config.ts          # Clerk JWT validation
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- A [Convex](https://convex.dev) account
-- A [Clerk](https://clerk.com) account with the Convex integration enabled
-
-### Setup
+## Quick start
 
 ```bash
-# Install dependencies
+git clone https://github.com/hexmillionaire/convex-clerk-starter my-app
+cd my-app
 npm install
-
-# Set up environment variables
-cp .env.local.example .env.local
-# Fill in your keys (see below)
-
-# Start Convex dev server
-npx convex dev
-
-# Start Next.js dev server
-npm run dev
+npm run setup        # asks for your Clerk keys, writes .env.local
+npx convex dev       # creates your Convex project, pushes the schema — leave running
+npm run dev          # http://localhost:3000
 ```
 
-### Environment Variables
+You need a free [Clerk](https://clerk.com) account. Convex creates itself from the CLI. Both free tiers are more than enough to launch on.
 
-```env
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
-
-# Convex
-NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
-CONVEX_DEPLOYMENT=dev:your-deployment
-```
-
-Set on Convex dashboard (or via CLI):
-
-```
-CLERK_JWT_ISSUER_DOMAIN=https://your-clerk-frontend-api-url
-```
-
-## Deployment
+One Clerk step the setup script walks you through: create a **JWT template named `convex`** (Clerk Dashboard → JWT Templates → New → pick Convex) and set its issuer on your Convex deployment:
 
 ```bash
-# Deploy Convex functions to production
-npx convex deploy
-
-# Deploy to Vercel (auto-deploys from GitHub)
-vercel --prod
+npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-app.clerk.accounts.dev
 ```
 
-Vercel env vars needed: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CONVEX_URL`
+Then sign in on `/dashboard`, add an item, open a second tab and watch it appear.
 
-## Roadmap
+---
 
-- [x] Reading statistics dashboard (streaks, completion %)
-- [x] Bookmark collections / folder organization
-- [x] Highlight notes
-- [x] Prayer journal
-- [x] Daily reading goal tracking
-- [x] Reading streak calendar (heatmap)
-- [x] Milestone achievements system
-- [x] Share progress functionality
-- [x] Reading reminders
-- [ ] Fix single verse Copy/Share buttons
-- [ ] Persist font size preference to localStorage
-- [ ] Enable WEB/ASV translation switching
-- [ ] Fix footer testament filter links
-- [ ] Reading plan chapter-by-chapter mappings
-- [ ] Verse cross-references
-- [ ] Export bookmarks/journal/prayers as PDF
-- [ ] Full offline support with cached verse data
-- [ ] Audio Bible playback
-- [ ] Accountability partners (social sharing)
-- [ ] Dynamic OG images for social sharing
+## What you get
+
+| Area | What's wired | Where |
+|---|---|---|
+| **Auth** | Clerk, mounted only on routes that need it or when a session cookie exists. Public pages ship **zero** Clerk JS (~750KB saved). | `src/lib/auth.tsx`, `src/components/convex-provider.tsx` |
+| **Data** | Convex with two tables showing the two shapes you'll ever need: many rows per user (`items`) and one row per user (`userSettings`). Every mutation checks ownership. | `convex/schema.ts`, `convex/items.ts`, `convex/userSettings.ts` |
+| **Auth gate** | The 3-state loading → signed-out → connecting pattern every protected page uses. | `src/app/dashboard/page.tsx` |
+| **UI** | shadcn/ui (15 components), Tailwind v4, light/dark/system, navbar + mobile tab bar sharing one nav config, skeleton/empty/error states. | `src/components/` |
+| **SEO** | Metadata helper that can't drop OG images, dynamic OG route, sitemap, robots, canonical URLs. | `src/lib/metadata.ts`, `src/app/og/route.tsx` |
+| **PWA** | Manifest + service worker (production only, so it never hides your dev edits). | `public/`, `src/components/sw-register.tsx` |
+| **Security** | Headers (HSTS, nosniff, frame-deny, referrer policy), SEO-bot blocklist in middleware. | `next.config.ts`, `src/proxy.ts` |
+| **Deploy** | Vercel-ready. Analytics included. | `vercel.json`-free: just connect the repo |
+| **AI layer** | `CLAUDE.md` written for your agent, Convex's official skills, a workflow doc, and reusable task prompts. | `CLAUDE.md`, `.claude/skills/`, `docs/` |
+
+---
+
+## Stack
+
+- [Next.js 16](https://nextjs.org) — App Router, Turbopack, React 19
+- [Convex](https://convex.dev) — realtime database + serverless functions, typed end-to-end
+- [Clerk](https://clerk.com) — auth, sessions, user management
+- [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) (Base UI primitives)
+- [Vercel](https://vercel.com) — hosting + analytics
+- TypeScript throughout, ESLint
+
+---
+
+## Make it yours
+
+1. **Rename.** `NEXT_PUBLIC_SITE_NAME` and `NEXT_PUBLIC_SITE_URL` in `.env.local`; `REPO_URL` in `src/lib/site.ts`; `public/manifest.json`.
+2. **Logo.** Edit the SVG path in `src/components/logo.tsx` and regenerate `public/icons/*` (any 512px PNG + a 192px copy).
+3. **Colors.** Tokens live in `src/app/globals.css` (`:root` and `.dark`). Paste a shadcn theme in and you're done.
+4. **Your first feature.** Copy `convex/items.ts` → `convex/<thing>.ts`, add the table to `convex/schema.ts`, write a component like `items-panel.tsx`. If the route needs sign-in, add it to `AUTH_ROUTES` in `src/lib/auth.tsx`. Or just tell your agent: *"Add a `notes` table using the items pattern"* — `CLAUDE.md` tells it how.
+
+### Deploy to Vercel
+
+1. Push to GitHub, import the repo in Vercel.
+2. Add env vars: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_SITE_URL` (your real domain), and `NEXT_PUBLIC_CONVEX_URL` (from `npx convex deploy`).
+3. Set the build command to `npx convex deploy --cmd 'npm run build'` so Convex functions ship with each deploy.
+4. In Clerk, switch to a production instance and update the JWT issuer on Convex prod: `npx convex env set CLERK_JWT_ISSUER_DOMAIN <prod issuer> --prod`.
+
+---
+
+## Working with an AI agent
+
+This repo assumes you'll build with Claude Code, Cursor, Codex or similar. Three things make that go well:
+
+- **`CLAUDE.md`** explains the architecture and the two invariants that break the app if touched. Agents read it automatically. (`AGENTS.md` carries the same for other tools.)
+- **`.claude/skills/`** has Convex's official skills for auth, migrations, components and performance, plus this repo's own: adding a per-user feature, running a QA pass, shipping a release.
+- **`docs/WORKFLOW.md`** is the actual loop the original app was built with: plan in chat, execute in the agent, QA in the browser. Short, no theory.
+
+---
+
+## Scripts
+
+| Command | Does |
+|---|---|
+| `npm run dev` | Next dev server |
+| `npm run dev:all` | Next + Convex dev together |
+| `npm run setup` | Interactive `.env.local` writer |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
+| `npm run build` | Production build |
+
+---
+
+## Why these choices
+
+**Why Convex over Supabase/Prisma?** No ORM, no migrations for additive changes, realtime by default, and the type of every query flows into React with zero codegen steps you run yourself. For a solo builder directing an agent it removes an entire category of bugs.
+
+**Why Clerk over NextAuth?** Hosted UI, hosted user management, works in one afternoon. The conditional-mount trick in `src/lib/auth.tsx` removes its one real cost (bundle size on public pages).
+
+**Why so small?** Every extra feature is one more thing your agent has to understand before it can help you. Two tables and four pages is enough to show every pattern; the rest is yours.
+
+---
 
 ## License
 
-Scripture text is in the public domain (KJV). Built with love for the glory of God.
+MIT. Use it for anything. A link back is appreciated, not required.
