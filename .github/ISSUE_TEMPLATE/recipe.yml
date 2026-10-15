@@ -1,0 +1,16 @@
+name: Recipe request
+description: A feature you'd like as a drop-in recipe
+labels: [recipe]
+body:
+  - type: input
+    id: what
+    attributes:
+      label: Feature
+      placeholder: "e.g. file uploads with Convex storage"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What makes it hard to get right by hand?
+      description: Recipes exist for the fiddly parts — webhooks, auth edge cases, storage URLs.

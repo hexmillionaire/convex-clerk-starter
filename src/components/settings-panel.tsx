@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,11 @@ export function SettingsPanel() {
   const settings = useQuery(api.userSettings.get);
   const update = useMutation(api.userSettings.update);
 
-  const [nickname, setNickname] = useState("");
+  // `draft` is null until the user types, so the input shows the server value
+  // (live, from any tab) and only switches to local state once edited. No
+  // effect copying server state into local state, so typing is never clobbered.
+  const [draft, setDraft] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
-  // Seed the input once the server value arrives; don't clobber typing after.
-  useEffect(() => {
-    if (settings !== undefined) setNickname(settings?.nickname ?? "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings === undefined]);
 
   if (settings === undefined) {
     return (
@@ -43,12 +40,15 @@ export function SettingsPanel() {
   }
 
   const showCompleted = settings?.showCompleted ?? true;
-  const dirty = (settings?.nickname ?? "") !== nickname.trim();
+  const saved = settings?.nickname ?? "";
+  const nickname = draft ?? saved;
+  const dirty = draft !== null && draft.trim() !== saved;
 
   async function saveNickname() {
     setSaving(true);
     try {
       await update({ nickname: nickname.trim() });
+      setDraft(null);
     } finally {
       setSaving(false);
     }
@@ -68,7 +68,7 @@ export function SettingsPanel() {
             <Input
               id="nickname"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              onChange={(e) => setDraft(e.target.value)}
               placeholder="What should we call you?"
               maxLength={40}
               className="h-9"

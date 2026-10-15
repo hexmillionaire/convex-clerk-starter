@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security issue
+    url: https://github.com/hexmillionaire/convex-clerk-starter/security/advisories/new
+    about: Report privately, not as a public issue.

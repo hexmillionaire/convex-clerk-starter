@@ -1,0 +1,27 @@
+name: Bug
+description: Something in the starter or a recipe is broken
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: From a fresh clone if you can. Include which recipes you applied.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Errors from the browser console, `npm run dev` or `npx convex dev`
+      description: Redact keys and URLs of your deployments.
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: OS, Node version, commit or date cloned

@@ -25,6 +25,18 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    // Deliberately partial: these three directives can't break Clerk, Convex
+    // or Vercel Analytics. A full script-src/connect-src policy depends on
+    // your Clerk instance domain — see SECURITY.md before adding one.
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    // Not "same-origin": Clerk's OAuth popups need to talk back to the opener.
+    value: "same-origin-allow-popups",
+  },
 ];
 
 const nextConfig: NextConfig = {

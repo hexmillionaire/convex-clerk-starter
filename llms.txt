@@ -1,0 +1,25 @@
+# convex-clerk-starter (Vibe Stack)
+
+> Minimal Next.js 16 + Convex + Clerk + Tailwind v4 + shadcn/ui starter for people who build with AI coding agents. Auth, realtime per-user data, dark mode, mobile nav, SEO, PWA and Vercel deploy already wired; drop-in recipes for features like Stripe billing.
+
+Start: `git clone https://github.com/hexmillionaire/convex-clerk-starter my-app && cd my-app && npm install && npm run setup && npx convex dev` then `npm run dev`. Needs a free Clerk account; Convex is created by its CLI.
+
+Agents working in a clone must read CLAUDE.md first. The two rules that break the app silently: (1) `ConvexClientProvider` in `src/app/layout.tsx` must render on the server — never wrap it in `dynamic(..., { ssr: false })`; (2) import `useUser`/`useClerk` from `@/lib/auth`, never from `@clerk/nextjs`, and add every signed-in route to `AUTH_ROUTES` in `src/lib/auth.tsx`.
+
+## Patterns
+
+- Many rows per user: `convex/items.ts` (identity from `ctx.auth`, `by_user` index, ownership check on every write)
+- One row per user: `convex/userSettings.ts` (upsert)
+- Protected page gate: `src/app/dashboard/page.tsx`
+- Page metadata: `socialMetadata()` in `src/lib/metadata.ts`
+
+## Recipes
+
+- [Stripe billing](https://github.com/hexmillionaire/convex-clerk-starter/tree/main/recipes/stripe-billing): `node recipes/stripe-billing/apply.mjs` — Checkout, Customer Portal, Convex webhook, `useSubscription()`, `<Paywall>`, `/billing`
+
+## Docs
+
+- [README](https://github.com/hexmillionaire/convex-clerk-starter#readme)
+- [CLAUDE.md](https://github.com/hexmillionaire/convex-clerk-starter/blob/main/CLAUDE.md): architecture, invariants, where things go
+- [Workflow](https://github.com/hexmillionaire/convex-clerk-starter/blob/main/docs/WORKFLOW.md): plan in chat, execute in the agent, QA in the browser
+- [Agent skills](https://github.com/hexmillionaire/convex-clerk-starter/tree/main/.claude/skills): add-per-user-feature, qa-pass, ship, plus Convex's official skills

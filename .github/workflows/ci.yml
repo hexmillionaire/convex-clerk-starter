@@ -1,0 +1,69 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Placeholders: enough for `next build` to compile and prerender. Nothing
+# talks to Clerk or Convex during a build.
+env:
+  NEXT_PUBLIC_CONVEX_URL: https://ci-placeholder-123.convex.cloud
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktcGxhY2Vob2xkZXIuY2xlcmsuYWNjb3VudHMuZGV2JA
+  CLERK_SECRET_KEY: sk_test_ci_placeholder
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  starter:
+    name: Starter — typecheck, lint, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Generated Convex API types match convex/
+        run: |
+          node .github/scripts/convex-api-types.mjs
+          git diff --exit-code convex/_generated/api.d.ts
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      - name: Production dependencies have no known vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+
+  recipe:
+    name: Recipe — ${{ matrix.recipe }} applies and builds
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: [stripe-billing]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node recipes/${{ matrix.recipe }}/apply.mjs
+      - name: Re-applying is a no-op
+        run: |
+          git add -A
+          node recipes/${{ matrix.recipe }}/apply.mjs --no-install
+          git diff --exit-code
+      - run: node .github/scripts/convex-api-types.mjs
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
