@@ -74,6 +74,18 @@ Then sign in on `/dashboard`, add an item, open a second tab and watch it appear
 
 ---
 
+## Recipes
+
+Drop-in features that are too opinionated to ship on by default. Each one is a folder under `recipes/` with an `apply.mjs` that copies files in, patches the few anchor points, and prints what's left to do.
+
+| Recipe | Adds | Apply |
+|---|---|---|
+| [**Stripe billing**](recipes/stripe-billing/) | Checkout, Customer Portal, webhook as a Convex HTTP action, `subscriptions` table, `useSubscription()`, `<Paywall>`, `/billing` page | `node recipes/stripe-billing/apply.mjs` |
+
+Each apply script is idempotent and tells you by hand what to do if an anchor has moved. Recipes are verified by applying them to a clean copy and running the full build.
+
+---
+
 ## Working with an AI agent
 
 This repo assumes you'll build with Claude Code, Cursor, Codex or similar. Three things make that go well:
@@ -106,6 +118,10 @@ This repo assumes you'll build with Claude Code, Cursor, Codex or similar. Three
 **Why so small?** Every extra feature is one more thing your agent has to understand before it can help you. Two tables and four pages is enough to show every pattern; the rest is yours.
 
 ---
+
+## Related
+
+- [claude-md-generator](https://github.com/hexmillionaire/claude-md-generator) — `npx claude-md-generator` drafts a `CLAUDE.md` like this repo's for any project.
 
 ## License
 

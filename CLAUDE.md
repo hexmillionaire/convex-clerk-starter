@@ -39,6 +39,8 @@ first-time visitor to that route sees the signed-out tree.
 | Site name / URL / repo link | `.env.local` (`NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_SITE_URL`) and `src/lib/site.ts`. Nothing else hardcodes them. |
 | Colors | `:root` and `.dark` in `src/app/globals.css`. shadcn token names. |
 | A UI primitive | `npx shadcn@latest add <name>`. Style is `base-nova` (Base UI, not Radix) — components use `render={...}` instead of `asChild`. |
+| Billing / paywalls | `node recipes/stripe-billing/apply.mjs`, then its README. Don't hand-roll Stripe; the recipe has the webhook and raw-body handling right. |
+| A new recipe | `recipes/<name>/files/` mirroring repo paths + `apply.mjs` (copy `recipes/stripe-billing/apply.mjs`, it's generic) + README. `recipes/` is excluded from tsconfig and eslint; verify by applying to a copy and building. |
 
 ## Convex rules
 
