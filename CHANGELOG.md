@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Security:** `items.add`/`items.update` and `userSettings.update` enforce the form limits server-side (title 200, note 2000, nickname 40 characters). The client `maxLength` alone was bypassable by calling the mutations directly.
+- **Security:** the proxy matcher is Clerk's recommended form and now includes `/(api|trpc)(.*)`, so the first `/api` route a fork adds runs through `clerkMiddleware` instead of having `auth()` throw or run unauthenticated.
+- **Recipe:** Stripe billing — `createCheckoutSession` rejects a user whose subscription is already `active` or `trialing`, so a repeated Upgrade click cannot create a second subscription; changes go through the Customer Portal.
 - **Security:** `/og` share-card route hard-caps `title`/`subtitle` at the intended length and rejects query values over 500 characters with a 400. Previously a space-free value of any length skipped truncation and was rasterised in full on every request.
 
 ## 2026-10-15

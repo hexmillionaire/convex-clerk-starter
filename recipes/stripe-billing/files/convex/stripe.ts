@@ -151,6 +151,11 @@ export const createCheckoutSession = action({
       row = await ctx.runQuery(internal.stripe.getByUser, { userId });
     }
     if (!row) throw new Error("Could not create customer");
+    // A second Checkout for an already-paying customer would create a second
+    // subscription. Changes go through the Customer Portal instead.
+    if (row.status === "active" || row.status === "trialing") {
+      throw new Error("Already subscribed. Use the billing portal to change your plan.");
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

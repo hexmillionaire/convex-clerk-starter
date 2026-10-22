@@ -16,5 +16,11 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/((?!api/|_next/static|_next/image|favicon\\.ico|icons/|manifest\\.json|sw\\.js).*)"],
+  // Clerk's recommended matcher: skip Next.js internals and static files,
+  // and always run for API routes so `auth()` works in the first `/api`
+  // handler a fork adds instead of throwing or running unauthenticated.
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };
