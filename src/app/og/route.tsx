@@ -14,15 +14,34 @@ import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
 
+/** Longest query value we will even look at. Anything bigger is abuse, not a title. */
+const MAX_PARAM_LENGTH = 500;
+
+/**
+ * Hard-cap at `max` characters first, then back off to a word boundary if one
+ * exists in the second half. The previous version searched for a space before
+ * cutting, so a space-free string of any length passed through untouched and
+ * went straight to the rasteriser.
+ */
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
-  return text.slice(0, text.lastIndexOf(" ", max)).trimEnd() + "…";
+  const cut = text.slice(0, max);
+  const space = cut.lastIndexOf(" ");
+  return (space > max / 2 ? cut.slice(0, space) : cut).trimEnd() + "…";
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = truncate(searchParams.get("title") ?? SITE_NAME, 90);
-  const subtitle = truncate(searchParams.get("subtitle") ?? SITE_DESCRIPTION, 160);
+  const rawTitle = searchParams.get("title");
+  const rawSubtitle = searchParams.get("subtitle");
+  if ((rawTitle?.length ?? 0) > MAX_PARAM_LENGTH || (rawSubtitle?.length ?? 0) > MAX_PARAM_LENGTH) {
+    return new Response("title and subtitle must be at most 500 characters", {
+      status: 400,
+      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
+  const title = truncate(rawTitle ?? SITE_NAME, 90);
+  const subtitle = truncate(rawSubtitle ?? SITE_DESCRIPTION, 160);
   const titleSize = title.length < 30 ? 76 : title.length < 60 ? 60 : 48;
 
   return new ImageResponse(

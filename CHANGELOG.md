@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Security:** `/og` share-card route hard-caps `title`/`subtitle` at the intended length and rejects query values over 500 characters with a 400. Previously a space-free value of any length skipped truncation and was rasterised in full on every request.
+
 ## 2026-10-15
 
 - **Security:** upgraded Next.js 16.2.1 → 16.4.1, Clerk 7.0 → 7.9, Convex 1.34 → 1.46 and patched transitive packages: production dependencies went from 35 known advisories (4 critical) to 0. `shadcn` moved to devDependencies (it's a CLI; its remaining advisories have no upstream fix and never reach the browser).
