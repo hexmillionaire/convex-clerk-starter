@@ -11,6 +11,18 @@ import { v } from "convex/values";
  *   3. Writes to an existing row check ownership first.
  */
 
+/**
+ * Server-side length limits. The form's `maxLength` is a courtesy; any
+ * client can call these mutations directly, so the handler is the real gate.
+ */
+export const TITLE_MAX = 200;
+export const NOTE_MAX = 2000;
+
+function limit(value: string, max: number, label: string): string {
+  if (value.length > max) throw new Error(`${label} must be ${max} characters or fewer`);
+  return value;
+}
+
 /** Resolves the caller's user id, or null when signed out. */
 async function currentUserId(ctx: QueryCtx | MutationCtx): Promise<string | null> {
   const identity = await ctx.auth.getUserIdentity();
@@ -47,13 +59,14 @@ export const add = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
-    const title = args.title.trim();
+    const title = limit(args.title.trim(), TITLE_MAX, "Title");
     if (!title) throw new Error("Title is required");
+    const note = args.note === undefined ? undefined : limit(args.note.trim(), NOTE_MAX, "Note") || undefined;
 
     return await ctx.db.insert("items", {
       userId,
       title,
-      note: args.note?.trim() || undefined,
+      note,
       completed: false,
     });
   },
@@ -83,11 +96,11 @@ export const update = mutation({
 
     const patch: { title?: string; note?: string } = {};
     if (args.title !== undefined) {
-      const title = args.title.trim();
+      const title = limit(args.title.trim(), TITLE_MAX, "Title");
       if (!title) throw new Error("Title is required");
       patch.title = title;
     }
-    if (args.note !== undefined) patch.note = args.note.trim() || undefined;
+    if (args.note !== undefined) patch.note = limit(args.note.trim(), NOTE_MAX, "Note") || undefined;
 
     await ctx.db.patch(args.id, patch);
   },

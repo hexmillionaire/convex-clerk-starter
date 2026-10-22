@@ -9,6 +9,9 @@ import { v } from "convex/values";
  * Only fields the caller passed are written, so partial updates are safe.
  */
 
+/** Server-side limit; the form's `maxLength` alone is bypassable. */
+export const NICKNAME_MAX = 40;
+
 export const DEFAULT_SETTINGS = {
   nickname: undefined as string | undefined,
   showCompleted: true,
@@ -43,6 +46,9 @@ export const update = mutation({
       .unique();
 
     const nickname = args.nickname === undefined ? undefined : args.nickname.trim() || undefined;
+    if (nickname !== undefined && nickname.length > NICKNAME_MAX) {
+      throw new Error(`Nickname must be ${NICKNAME_MAX} characters or fewer`);
+    }
 
     if (existing) {
       const patch: { nickname?: string; showCompleted?: boolean } = {};
